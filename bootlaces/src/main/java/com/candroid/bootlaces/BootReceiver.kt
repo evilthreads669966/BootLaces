@@ -12,6 +12,7 @@ class BootReceiver : BroadcastReceiver() {
         val SERVICE_CLASS_NAME_KEY = "SERVICE_CLASS_NAME_KEY"
     }
     override fun onReceive(context: Context?, intent: Intent?) {
+        /*TODO BUG service not starting on boot on alcatel prepaid 8.1 phone. This is working on a Pixel 2 emulator running 9.0*/
         if(intent?.action.equals(Intent.ACTION_BOOT_COMPLETED)){
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             val serviceClassName = preferences.getString(SERVICE_CLASS_NAME_KEY, "null")
