@@ -7,7 +7,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.preference.PreferenceManager
 
-class BootReceiver : BroadcastReceiver() {
+internal class BootReceiver : BroadcastReceiver() {
     companion object{
         val SERVICE_CLASS_NAME_KEY = "SERVICE_CLASS_NAME_KEY"
     }

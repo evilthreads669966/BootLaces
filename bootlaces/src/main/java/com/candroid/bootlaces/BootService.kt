@@ -34,7 +34,7 @@ abstract class BootService : Service() {
         isRunning = false
     }
 
-    fun createNotification(context : Context): Notification {
+    private fun createNotification(context : Context): Notification {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val notificationChannel = NotificationChannel(getString(R.string.channel_id), getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
