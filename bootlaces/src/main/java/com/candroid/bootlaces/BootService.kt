@@ -17,15 +17,12 @@ abstract class BootService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            createNotification(this)
-        }
         isRunning = true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(666,createNotification(this))
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY;
     }
 
     override fun onBind(intent: Intent?): IBinder? {
