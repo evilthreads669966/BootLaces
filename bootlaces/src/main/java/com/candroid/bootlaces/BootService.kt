@@ -16,6 +16,7 @@ abstract class BootService : Service() {
         var isRunning = false
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
         val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
+        val KEY_NOTIFICATION_ICON = "KEY_NOTIFICATION_ICON"
     }
 
     override fun onCreate() {
@@ -46,10 +47,12 @@ abstract class BootService : Service() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
         val title = preferences.getString(KEY_NOTIFICATION_TITLE, "candroid")
         val content = preferences.getString(KEY_NOTIFICATION_CONTENT, "boot laces")
+        var icon = preferences.getInt(KEY_NOTIFICATION_ICON, -1)
+        if(icon == -1) icon = android.R.drawable.sym_def_app_icon
         val builder = NotificationCompat.Builder(context)
         builder.setContentTitle(title)
             .setContentText(content)
-            .setSmallIcon(android.R.drawable.sym_def_app_icon)
+            .setSmallIcon(icon)
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 builder.setChannelId(getString(R.string.channel_id))
             return builder.build()
