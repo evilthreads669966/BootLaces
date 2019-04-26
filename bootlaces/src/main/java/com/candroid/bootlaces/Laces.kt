@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.preference.PreferenceManager
-import android.support.v4.app.ActivityCompat
 
 class Laces{
     companion object{
@@ -13,10 +12,6 @@ class Laces{
             val serviceClassName = preferences.getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
             if(serviceClassName.equals("null")){
                 val editor = preferences.edit()
-                preferences.getString(BootService.KEY_NOTIFICATION_TITLE, "candroid")
-                preferences.getString(BootService.KEY_NOTIFICATION_CONTENT, "boot laces")
-                preferences.getInt(BootService.KEY_NOTIFICATION_ICON, -1)
-                preferences.getString(BootService.KEY_CLICKED_ACTIVITY_NAME, null)
                 editor.putString(BootReceiver.KEY_SERVICE_CLASS_NAME, serviceName)
                 editor.putString(BootService.KEY_NOTIFICATION_TITLE, notificationTitle)
                 editor.putString(BootService.KEY_NOTIFICATION_CONTENT, notificationContent)
