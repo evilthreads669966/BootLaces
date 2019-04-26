@@ -8,11 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 
 abstract class BootService : Service() {
     companion object{
         var isRunning = false
+        val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
+        val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
     }
 
     override fun onCreate() {
@@ -40,13 +43,15 @@ abstract class BootService : Service() {
             val notificationChannel = NotificationChannel(getString(R.string.channel_id), getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(notificationChannel)
         }
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val title = preferences.getString(KEY_NOTIFICATION_TITLE, "candroid")
+        val content = preferences.getString(KEY_NOTIFICATION_CONTENT, "boot laces")
         val builder = NotificationCompat.Builder(context)
-        builder.setContentTitle("title")
-            .setContentText("content")
+        builder.setContentTitle(title)
+            .setContentText(content)
             .setSmallIcon(android.R.drawable.sym_def_app_icon)
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 builder.setChannelId(getString(R.string.channel_id))
             return builder.build()
-
     }
 }

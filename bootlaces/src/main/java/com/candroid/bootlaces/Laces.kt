@@ -8,12 +8,14 @@ import kotlin.reflect.KClass
 
 class Laces{
     companion object{
-        fun tie(context: Context, serviceName: String){
+        fun tie(context: Context, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces"){
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             val serviceClassName = preferences.getString(BootReceiver.SERVICE_CLASS_NAME_KEY, "null")
             if(serviceClassName.equals("null")){
                 val editor = preferences.edit()
                 editor.putString(BootReceiver.SERVICE_CLASS_NAME_KEY, serviceName)
+                editor.putString(BootService.KEY_NOTIFICATION_TITLE, notificationTitle)
+                editor.putString(BootService.KEY_NOTIFICATION_CONTENT, notificationContent)
                 editor.apply()
             }
             if(!BootService.isRunning){
