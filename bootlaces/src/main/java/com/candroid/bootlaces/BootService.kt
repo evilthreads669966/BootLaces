@@ -10,11 +10,11 @@ import android.support.v4.app.NotificationCompat
 
 abstract class BootService : Service() {
     internal companion object {
-        private var isRunning = false
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
         val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
         val KEY_NOTIFICATION_ICON = "KEY_NOTIFICATION_ICON"
         val KEY_CLICKED_ACTIVITY_NAME = "KEY_CLICKED_ACTIVITY_NAME"
+        private var isRunning = false
         fun isRunning(): Boolean = isRunning
     }
 
@@ -40,21 +40,15 @@ abstract class BootService : Service() {
     private fun createNotification(context: Context): Notification {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                getString(R.string.channel_id),
-                getString(R.string.channel_id),
-                NotificationManager.IMPORTANCE_HIGH
-            )
+            val notificationChannel = NotificationChannel(getString(R.string.channel_id), getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(notificationChannel)
         }
         val builder = NotificationCompat.Builder(context)
         with(PreferenceManager.getDefaultSharedPreferences(context)) {
-            val title = getString(KEY_NOTIFICATION_TITLE, "candroidtb")
-            val content = getString(KEY_NOTIFICATION_CONTENT, "boot laces")
             var icon = getInt(KEY_NOTIFICATION_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-            builder.setContentTitle(title)
-                .setContentText(content)
+            builder.setContentTitle(getString(KEY_NOTIFICATION_TITLE, "candroidtb"))
+                .setContentText(getString(KEY_NOTIFICATION_CONTENT, "boot laces"))
                 .setSmallIcon(icon)
             getString(KEY_CLICKED_ACTIVITY_NAME, null)?.let {
                 val intent = Intent(context, Class.forName(it))
