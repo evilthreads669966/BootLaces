@@ -38,7 +38,7 @@ class MyService : BootService() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //default background notification 
+        //Use this method to persist and start your service for its first time 
         Laces.tie(this, MyService::class.java.name)
        
     }
