@@ -40,6 +40,7 @@ class MyService : BootService() {
     }
 ```
 
+## License
 ```
 Copyright 2019 Chris Basinger
 
