@@ -39,11 +39,12 @@ abstract class BootService : Service() {
 
     private fun createNotification(): Notification {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val builder = NotificationCompat.Builder(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(getString(R.string.channel_id), getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(notificationChannel)
+            builder.setChannelId(getString(R.string.channel_id))
         }
-        val builder = NotificationCompat.Builder(this)
         with(PreferenceManager.getDefaultSharedPreferences(this)) {
             var icon = getInt(KEY_NOTIFICATION_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
@@ -57,8 +58,6 @@ abstract class BootService : Service() {
                 val pendingIntent = PendingIntent.getActivity(this@BootService, 0, intent, 0)
                 builder.setContentIntent(pendingIntent)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                builder.setChannelId(getString(R.string.channel_id))
             return builder.build()
         }
     }
