@@ -10,11 +10,12 @@ import android.support.v4.app.NotificationCompat
 
 abstract class BootService : Service() {
     companion object {
-        var isRunning = false
+        private var isRunning = false
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
         val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
         val KEY_NOTIFICATION_ICON = "KEY_NOTIFICATION_ICON"
         val KEY_CLICKED_ACTIVITY_NAME = "KEY_CLICKED_ACTIVITY_NAME"
+        internal fun isRunning(): Boolean = isRunning
     }
 
     override fun onCreate() {

@@ -19,7 +19,7 @@ class Laces{
                 editor.putString(BootService.KEY_CLICKED_ACTIVITY_NAME, notificationClickActivity?.name)
                 editor.apply()
             }
-            if(!BootService.isRunning){
+            if(!BootService.isRunning()){
                 val intent = Intent(context, Class.forName(serviceName))
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     context.startForegroundService(intent)
