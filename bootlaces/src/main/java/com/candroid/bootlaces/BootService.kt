@@ -50,7 +50,7 @@ abstract class BootService : Service() {
             builder.setContentTitle(getString(KEY_NOTIFICATION_TITLE, "candroidtb"))
                 .setContentText(getString(KEY_NOTIFICATION_CONTENT, "boot laces"))
                 .setSmallIcon(icon)
-            getString(KEY_CLICKED_ACTIVITY_NAME, null)?.let {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) getString(KEY_CLICKED_ACTIVITY_NAME, null)?.let {
                 val intent = Intent(context, Class.forName(it))
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 intent.action = Intent.ACTION_VIEW
