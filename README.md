@@ -27,18 +27,14 @@ class MyService : BootService() {
     }
 }
 ```
-4. Use the provided method inside your app's main launcher activity's onCreate method to make sure your service starts when the device is rebooted as well as make sure it gets started for its' first time when the application is first used.
-- You just need to provide two things.
--- Context
--- The name of your service class extending from BootService
---- "MyService" or how I did it below in the example code
-- Optional parameters
--- There are several optional parameters not shown below that are used for configuring the display of your persistent service's foreground notification which is shown in the device's system status bar.
+4. Use the provided method inside your app's main launcher activity's onCreate method to make sure your service starts when the device is rebooted as well as make sure it gets started for its' first time when the application is first used. You also need to provide two things:  
+- Context  
+- The name of your service class extending from BootService  
 ```kotlin
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //Use this method to persist and start your service for its first time 
+        //default background notification 
         Laces.tie(this, MyService::class.java.name)
        
     }
