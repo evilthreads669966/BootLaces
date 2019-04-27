@@ -18,6 +18,10 @@ class Laces{
                         putString(BootService.KEY_CLICKED_ACTIVITY_NAME, notificationClickActivity?.name)
                     }?.apply()
             }
+            startService(context, serviceName)
+        }
+
+        private fun startService(context: Context, serviceName: String){
             if(!BootService.isRunning()){
                 val intent = Intent(context, Class.forName(serviceName))
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
