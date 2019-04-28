@@ -28,13 +28,13 @@ class Laces{
          * Responsible for ensuring that your implementation of [BootService] starts not only the first time the application is run but also
          * everytime the device powers on from this point forward.
          *
-         * @param context instance of your current [Context]
-         * @param serviceName name of service subclassing [BootService]
-         * @param notificationTitle title of your service's notification
-         * @param notificationContent content of your service's notification
-         * @param notificationIcon location of drawable resource for the small icon in your service's notification
-         * @param notificationClickActivity the activity to start when your service's notification is pressed
-         * @param noClickMode do nothing when your service's notification is pressed
+         * @param [context] instance of your current [Context]
+         * @param [serviceName] name of service subclassing [BootService]
+         * @param [notificationTitle] title of your [BootService]'s notification
+         * @param [notificationContent] content of your [BootService]'s notification
+         * @param [notificationIcon] location of drawable resource for the small icon in your [BootService]'s notification
+         * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
+         * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          */
         fun tie(context: Context, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
             persistService(context, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity, noClickMode)
