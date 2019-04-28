@@ -37,9 +37,9 @@ class MyService : BootService() {
         </service>
     </application>
 ```
-5. Use the provided method inside your app's main launcher activity's onCreate method to make sure your service starts when the device is rebooted as well as make sure it gets started for its' first time when the application is first used. You also need to provide two things:  
-- Context  
-- The name of your service class extending from BootService  
+5. Boot Laces provides you with one public method called tie. Pass it two values: 
+- an instance of Context  
+- the name of your service  
 ```kotlin
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
