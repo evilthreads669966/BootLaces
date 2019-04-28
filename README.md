@@ -31,10 +31,9 @@ class MyService : BootService() {
 ```xml
     <application>
         <service
-                android:name=".MyService"
-                android:enabled="true"
-                android:exported="false">
-        </service>
+            android:name=".MyService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 ```
 5. Boot Laces provides you with one public method named tie. Pass it two values: 
