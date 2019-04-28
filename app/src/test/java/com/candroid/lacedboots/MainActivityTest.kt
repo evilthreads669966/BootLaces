@@ -18,6 +18,7 @@ package com.candroid.lacedboots
 import android.content.Intent
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,16 +31,16 @@ class MainActivityTest {
     lateinit var activity : MainActivity
     @Before
     fun setUp(){
-        this.activity = Robolectric.setupActivity(MainActivity::class.java)
+        activity = Robolectric.buildActivity(MainActivity::class.java).create().get()
     }
     @Test
     fun textViewEqualsHelloWorld(){
-        val textView = this.activity.findViewById<AppCompatTextView>(R.id.textView)
-        assert(textView.text.equals("Hello World!"))
+        val textView = activity.findViewById<AppCompatTextView>(R.id.textView)
+        Assert.assertEquals(textView.text, "Hello World!")
     }
 
     @Test
     fun myServiceIsRunning(){
-        assert( activity.stopService(Intent(activity.applicationContext, MyService::class.java)))
+        Assert.assertTrue( activity.stopService(Intent(activity.applicationContext, MyService::class.java)))
     }
 }
