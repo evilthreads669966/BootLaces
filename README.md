@@ -27,7 +27,17 @@ class MyService : BootService() {
     }
 }
 ```
-4. Use the provided method inside your app's main launcher activity's onCreate method to make sure your service starts when the device is rebooted as well as make sure it gets started for its' first time when the application is first used. You also need to provide two things:  
+4. Add the service to your app's manifest file
+```xml
+    <application>
+        <service
+                android:name=".MyService"
+                android:enabled="true"
+                android:exported="false">
+        </service>
+    </application>
+```
+5. Use the provided method inside your app's main launcher activity's onCreate method to make sure your service starts when the device is rebooted as well as make sure it gets started for its' first time when the application is first used. You also need to provide two things:  
 - Context  
 - The name of your service class extending from BootService  
 ```kotlin
