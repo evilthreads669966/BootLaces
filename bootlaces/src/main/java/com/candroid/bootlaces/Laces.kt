@@ -53,10 +53,11 @@ class Laces{
         }
 
         private fun getContextClassName(context : Context, noClickMode: Boolean): String?{
-            if(context is AppCompatActivity && !noClickMode)
-                return context.javaClass.name
-            else
-                return null
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+                if(context is AppCompatActivity && !noClickMode)
+                    return context.javaClass.name
+            }
+            return null
         }
     }
 }
