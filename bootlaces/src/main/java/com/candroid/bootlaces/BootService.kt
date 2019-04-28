@@ -69,6 +69,11 @@ abstract class BootService : Service() {
         isRunning = false
     }
 
+    /**
+     * Reads in a map of key value pairs from a shared preferences file whose values are assigned to some of the propertiees of a [Notification]
+     *
+     * @return [Notification]
+     */
     private fun createNotification(): Notification {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(this)
