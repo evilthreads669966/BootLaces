@@ -36,7 +36,7 @@ class MyService : BootService() {
             android:exported="false"/>
     </application>
 ```
-5. Boot Laces provides you with one public method named tie. Pass it two objects: 
+5. Boot Laces provides you with one public method named tie. Pass in two objects: 
 - an instance of Context  
 - the name of your service  
 ```kotlin
