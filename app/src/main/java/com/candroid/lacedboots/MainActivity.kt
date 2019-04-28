@@ -16,7 +16,7 @@ limitations under the License.
 package com.candroid.lacedboots
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.Laces
 
 class MainActivity : AppCompatActivity() {

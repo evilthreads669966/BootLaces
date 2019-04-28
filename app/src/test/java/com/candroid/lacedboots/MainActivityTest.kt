@@ -17,6 +17,7 @@ package com.candroid.lacedboots
 
 import android.content.Intent
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 
 
 @RunWith(RobolectricTestRunner::class)
-class MainActivityUnitTest {
+class MainActivityTest {
     lateinit var activity : MainActivity
     @Before
     fun setUp(){
@@ -33,10 +34,9 @@ class MainActivityUnitTest {
     }
     @Test
     fun textViewEqualsHelloWorld(){
-        val textView = this.activity.findViewById<TextView>(R.id.textView)
+        val textView = this.activity.findViewById<AppCompatTextView>(R.id.textView)
         assert(textView.text.equals("Hello World!"))
     }
-
 
     @Test
     fun myServiceIsRunning(){
