@@ -20,15 +20,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.preference.PreferenceManager
+import androidx.appcompat.app.AppCompatActivity
 
 class Laces{
     companion object{
-        fun tie(context: Context, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null){
-            persistService(context, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity)
+        fun tie(context: Context, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
+            persistService(context, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity, noClickMode)
             startService(context, serviceName)
         }
 
-        private fun persistService(context: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?){
+        private fun persistService(context: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
             with(PreferenceManager.getDefaultSharedPreferences(context)){
                 val serviceClassName = getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
                 if(serviceClassName.equals("null")) edit()?.apply {
@@ -36,7 +37,7 @@ class Laces{
                     putString(BootService.KEY_NOTIFICATION_TITLE, notificationTitle)
                     putString(BootService.KEY_NOTIFICATION_CONTENT, notificationContent)
                     putInt(BootService.KEY_NOTIFICATION_ICON, notificationIcon)
-                    putString(BootService.KEY_CLICKED_ACTIVITY_NAME, notificationClickActivity?.name)
+                    putString(BootService.KEY_CLICKED_ACTIVITY_NAME, notificationClickActivity?.name ?: getContextClassName(context, noClickMode))
                 }?.apply()
             }
         }
@@ -49,6 +50,13 @@ class Laces{
                 else
                     context.startService(intent)
             }
+        }
+
+        private fun getContextClassName(context : Context, noClickMode: Boolean): String?{
+            if(context is AppCompatActivity && !noClickMode)
+                return context.javaClass.name
+            else
+                return null
         }
     }
 }
