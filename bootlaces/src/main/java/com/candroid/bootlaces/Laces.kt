@@ -41,6 +41,18 @@ class Laces{
             startService(context, serviceName)
         }
 
+        /**
+         * Creates a map of key value pairs required by [BootReceiver] to start [BootService] at device boot time and writes them to a file.
+         * [BootService] also uses these values to create a customized persistent notification.
+         *
+         * @param [context] instance of your current [Context]
+         * @param [serviceName] name of service subclassing [BootService]
+         * @param [notificationTitle] title of your [BootService]'s notification
+         * @param [notificationContent] content of your [BootService]'s notification
+         * @param [notificationIcon] location of drawable resource for the small icon in your [BootService]'s notification
+         * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
+         * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
+         */
         private fun persistService(context: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
             with(PreferenceManager.getDefaultSharedPreferences(context)){
                 val serviceClassName = getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
@@ -54,6 +66,13 @@ class Laces{
             }
         }
 
+        /**
+         * Starts a service that subclasses [BootService] in the foreground if the device is running Oreo or greater.
+         * Otherwise it gets started in the background.
+         *
+         * @param [context] instance of your current [Context]
+         * @param [serviceName] name of service subclassing [BootService]
+         */
         private fun startService(context: Context, serviceName: String){
             if(!BootService.isRunning()){
                 val intent = Intent(context, Class.forName(serviceName))
@@ -64,6 +83,13 @@ class Laces{
             }
         }
 
+        /**
+         * Returns the name of the class file that contains the current scope of the instance of [Context] that was passed in.
+         *
+         * @param [context] instance of your current [Context]
+         * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
+         * @return [String] the name of the java class containing the current context instance's scope
+         */
         private fun getContextClassName(context : Context, noClickMode: Boolean): String?{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
                 if(context is AppCompatActivity && !noClickMode)
