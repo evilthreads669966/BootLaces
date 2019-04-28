@@ -1,6 +1,6 @@
 # Boot Laces
 Boot Laces is an Android library that turns your service persistent.
-### User Instructions
+## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
 allprojects {
