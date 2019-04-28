@@ -24,6 +24,22 @@ import android.os.IBinder
 import android.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 
+/**
+ * Create a subclass and override onCreate to do any initializations such as registering receivers.
+ * Anything you do in onStartCommand will delay the notification being posted.
+ * However feel free to override any method you wish for customization.
+ * [BootService] will be started whenever the device reboots.
+ *
+ * Example usage:
+ *
+ * ```
+ *  class MyService : BootService() {
+ *      override fun onCreate() {
+ *          //do something here
+ *      }
+ *  }
+ * ```
+ */
 abstract class BootService : Service() {
     internal companion object {
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
