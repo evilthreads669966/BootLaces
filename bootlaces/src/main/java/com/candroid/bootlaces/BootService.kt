@@ -40,7 +40,7 @@ import androidx.core.app.NotificationCompat
  *  }
  * ```
  */
-abstract class BootService : Service() {
+open class BootService : Service() {
     internal companion object {
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
         val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
@@ -82,7 +82,7 @@ abstract class BootService : Service() {
             notificationManager.createNotificationChannel(notificationChannel)
             builder.setChannelId(getString(R.string.channel_id))
         }
-        with(PreferenceManager.getDefaultSharedPreferences(this)) {
+        with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(this))) {
             var icon = getInt(KEY_NOTIFICATION_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
             builder.setContentTitle(getString(KEY_NOTIFICATION_TITLE, "candroidtb"))
