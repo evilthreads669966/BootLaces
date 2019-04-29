@@ -30,10 +30,7 @@ class MyService : BootService() {
 4. Add the service to your app's manifest file
 ```xml
     <application>
-        <service
-            android:name=".MyService"
-            android:enabled="true"
-            android:exported="false"/>
+        <service android:name=".MyService"/>
     </application>
 ```
 5. Boot Laces provides you with one public method named tie. Pass in two objects: 
