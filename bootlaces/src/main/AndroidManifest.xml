@@ -18,7 +18,6 @@ limitations under the License.
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application>
-        <service android:name=".BootService" android:directBootAware="true"/>
         <receiver android:name=".BootReceiver" android:exported="false" android:directBootAware="true"
                   android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>

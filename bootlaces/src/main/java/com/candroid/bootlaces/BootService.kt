@@ -40,7 +40,7 @@ import androidx.core.app.NotificationCompat
  *  }
  * ```
  */
-open class BootService : Service() {
+abstract class BootService : Service() {
     internal companion object {
         val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
         val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
