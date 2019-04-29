@@ -28,7 +28,7 @@ class BootStorage{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
                 ctx = context.createDeviceProtectedStorageContext()
                 if(ctx.moveSharedPreferencesFrom(context, PreferenceManager.getDefaultSharedPreferencesName(context)))
-                    Log.d("BootStorage", "preference migration failed")
+                    Log.d("BootStorage", "preference migration successful")
             }else{
                 return context
             }
