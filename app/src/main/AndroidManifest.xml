@@ -9,10 +9,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <service
-                android:name=".MyService"
-                android:enabled="true"
-                android:exported="false"/>
+        <service android:name=".MyService"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
