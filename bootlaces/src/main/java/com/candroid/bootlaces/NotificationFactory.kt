@@ -26,7 +26,7 @@ import android.os.Build
 import android.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 
-class NotificationFactory {
+internal class NotificationFactory {
     companion object{
         /**
          * Reads in a map of key value pairs from a shared preferences file whose values are assigned to some of the propertiees of a [Notification]
