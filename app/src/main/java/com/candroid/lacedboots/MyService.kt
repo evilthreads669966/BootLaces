@@ -16,5 +16,18 @@ limitations under the License.
 package com.candroid.lacedboots
 
 import com.candroid.bootlaces.BootService
+import com.candroid.bootlaces.BootNotification
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MyService : BootService()
+class MyService : BootService(){
+    override fun onCreate() {
+        super.onCreate()
+        //waits ten seconds before updating notification with new information
+        GlobalScope.launch {
+            delay(10000)
+            BootNotification.update(this@MyService, "new title", "new content", android.R.drawable.stat_sys_download)
+        }
+    }
+}
