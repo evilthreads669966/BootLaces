@@ -37,9 +37,9 @@ import android.os.IBinder
  * ```
  */
 abstract class BootService : Service() {
-    internal companion object {
+    internal companion object : Running {
         private var isRunning = false
-        fun isRunning(): Boolean = isRunning
+        override fun isRunning(): Boolean = isRunning
     }
 
     override fun onCreate() {
