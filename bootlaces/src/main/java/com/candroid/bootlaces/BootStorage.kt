@@ -22,13 +22,13 @@ import android.preference.PreferenceManager
 import android.util.Log
 
 /**
- * BootStorage provides [getContext] returns the context of where your service saves data
+ * BootStorage provides [getContext] which returns the context where your service saves data. Use this to read from as well.
  *
  */
 class BootStorage{
     companion object{
         /**
-         * This provides you with the context where data exists that your service reads and writes from.
+         * This provides you with the context where your service saves data
          *
          * @param [context] the context of your service
          * @return [Context] the context where your device protected storage exists
