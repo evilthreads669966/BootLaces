@@ -16,6 +16,6 @@
 
 package com.candroid.bootlaces
 
-interface Running {
+internal interface Running {
     fun isRunning(): Boolean
 }
