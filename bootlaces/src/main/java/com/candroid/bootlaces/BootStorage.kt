@@ -21,8 +21,19 @@ import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
 
+/**
+ * BootStorage provides [getContext] which returns the context where device storage that is only accessible before the user enters there pin.
+ *
+ */
 class BootStorage{
     companion object{
+        /**
+         * This provides you with the context to use when persisting data to the device that you would like to use inside of your service.
+         * So any thing you want to read from in your service needs to be written with using the [Context] returned from this method.
+         *
+         * @param [context] the context of your service
+         * @return [Context] the context where your device protected storage exists
+         */
         fun getContext(context: Context): Context {
             val ctx : Context
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
