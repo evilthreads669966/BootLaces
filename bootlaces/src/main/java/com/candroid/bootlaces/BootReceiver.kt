@@ -28,14 +28,16 @@ internal class BootReceiver : BroadcastReceiver() {
     }
     override fun onReceive(context: Context?, intent: Intent?) {
         if(!BootService.isRunning()){
-            val preferences = PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(context!!))
-            val serviceClassName = preferences.getString(KEY_SERVICE_CLASS_NAME, "null")
-            if(!serviceClassName.equals("null")){
-                intent?.setClassName(context!!, serviceClassName)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                    context?.startForegroundService(intent)
-                }else
-                    context?.startService(intent)
+            with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(context!!))){
+                getString(KEY_SERVICE_CLASS_NAME, "null")?.let {
+                    if(!it.equals("null")){
+                        intent?.setClassName(context!!, it)
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                            context?.startForegroundService(intent)
+                        else
+                            context?.startService(intent)
+                    }
+                }
             }
         }
     }
