@@ -75,7 +75,8 @@ class BootNotification {
                 getString(KEY_CONTENT, null)?.let { builder.setContentText(it) }
                 builder.setSmallIcon(icon)
                 setContentIntent(ctx, builder, this)
-                builder.setChannelId(ctx.getString(R.string.channel_id))
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    builder.setChannelId(ctx.getString(R.string.channel_id))
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.notify(ID, builder.build())
             }
