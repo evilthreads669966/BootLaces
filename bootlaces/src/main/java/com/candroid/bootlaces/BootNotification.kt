@@ -40,25 +40,9 @@ class BootNotification {
          * @return [Notification]
          */
         internal fun create(ctx : Context): Notification {
-            val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val builder = NotificationCompat.Builder(ctx)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if(notificationManager.getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
-                    val notificationChannel = NotificationChannel(ctx.getString(R.string.channel_id), ctx.getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
-                    notificationManager.createNotificationChannel(notificationChannel)
-                }
-                builder.setChannelId(ctx.getString(R.string.channel_id))
-            }
-            with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))) {
-                var icon = getInt(KEY_SMALL_ICON, -1)
-                if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-                builder.setContentTitle(getString(KEY_TITLE, "candroidtb"))
-                    .setContentText(getString(KEY_CONTENT, "boot laces"))
-                    .setSmallIcon(icon)
-                    .setShowWhen(false)
-                setContentIntent(ctx, builder, this)
-                return builder.build()
-            }
+            createChannel(ctx)
+            return createNotification(ctx, PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx)), NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id)))
+
         }
 
         fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
@@ -68,21 +52,36 @@ class BootNotification {
                     content?.let { putString(KEY_CONTENT, content) }
                     if(icon != -1) putInt(KEY_SMALL_ICON, icon)
                 }.apply()
-                var icon = getInt(KEY_SMALL_ICON, -1)
-                if(icon == -1) icon = android.R.drawable.sym_def_app_icon
-                val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
-                getString(KEY_TITLE, null)?.let { builder.setContentTitle(it) }
-                getString(KEY_CONTENT, null)?.let { builder.setContentText(it) }
-                builder.setSmallIcon(icon)
-                setContentIntent(ctx, builder, this)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    builder.setChannelId(ctx.getString(R.string.channel_id))
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(ID, builder.build())
+                manager.notify(ID, createNotification(ctx, this, NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))))
             }
         }
 
-        internal fun setContentIntent(ctx : Context, builder : NotificationCompat.Builder, prefs : SharedPreferences){
+        private fun createNotification(ctx : Context, prefs : SharedPreferences, builder : NotificationCompat.Builder ): Notification{
+            var icon = prefs.getInt(KEY_SMALL_ICON, -1)
+            if (icon == -1) icon = android.R.drawable.sym_def_app_icon
+            builder.setContentTitle(prefs.getString(KEY_TITLE, "candroidtb"))
+                .setContentText(prefs.getString(KEY_CONTENT, "boot laces"))
+                .setSmallIcon(icon)
+                .setShowWhen(false)
+            setContentIntent(ctx, builder, prefs)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                builder.setChannelId(ctx.getString(R.string.channel_id))
+            return builder.build()
+        }
+
+        private fun createChannel(ctx : Context){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if(notificationManager.getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
+                    val notificationChannel = NotificationChannel(ctx.getString(R.string.channel_id), ctx.getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
+                    notificationManager.createNotificationChannel(notificationChannel)
+                }
+            }
+        }
+
+
+        private fun setContentIntent(ctx : Context, builder : NotificationCompat.Builder, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {
                 val intent = Intent(ctx, Class.forName(it))
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
