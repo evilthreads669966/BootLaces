@@ -28,6 +28,10 @@ import androidx.core.app.NotificationCompat
 
 internal class NotificationFactory {
     companion object{
+        val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
+        val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
+        val KEY_NOTIFICATION_ICON = "KEY_NOTIFICATION_ICON"
+        val KEY_NOTIFICATION_ACTIVITY = "KEY_NOTIFICATION_ACTIVITY"
         /**
          * Reads in a map of key value pairs from a shared preferences file whose values are assigned to some of the propertiees of a [Notification]
          *
@@ -42,13 +46,13 @@ internal class NotificationFactory {
                 builder.setChannelId(ctx.getString(R.string.channel_id))
             }
             with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))) {
-                var icon = getInt(BootService.KEY_NOTIFICATION_ICON, -1)
+                var icon = getInt(KEY_NOTIFICATION_ICON, -1)
                 if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-                builder.setContentTitle(getString(BootService.KEY_NOTIFICATION_TITLE, "candroidtb"))
-                    .setContentText(getString(BootService.KEY_NOTIFICATION_CONTENT, "boot laces"))
+                builder.setContentTitle(getString(KEY_NOTIFICATION_TITLE, "candroidtb"))
+                    .setContentText(getString(KEY_NOTIFICATION_CONTENT, "boot laces"))
                     .setSmallIcon(icon)
                     .setShowWhen(false)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) getString(BootService.KEY_CLICKED_ACTIVITY_NAME, null)?.let {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) getString(KEY_NOTIFICATION_ACTIVITY, null)?.let {
                     val intent = Intent(ctx, Class.forName(it))
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     intent.action = Intent.ACTION_VIEW

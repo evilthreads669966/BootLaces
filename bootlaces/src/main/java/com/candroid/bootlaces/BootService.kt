@@ -16,13 +16,9 @@ limitations under the License.
 */
 package com.candroid.bootlaces
 
-import android.app.*
-import android.content.Context
+import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
-import android.preference.PreferenceManager
-import androidx.core.app.NotificationCompat
 
 /**
  * Create a subclass and override onCreate to do any initializations such as registering receivers.
@@ -42,10 +38,6 @@ import androidx.core.app.NotificationCompat
  */
 abstract class BootService : Service() {
     internal companion object {
-        val KEY_NOTIFICATION_TITLE = "KEY_NOTIFICATION_TITLE"
-        val KEY_NOTIFICATION_CONTENT = "KEY_NOTIFICATION_CONTENT"
-        val KEY_NOTIFICATION_ICON = "KEY_NOTIFICATION_ICON"
-        val KEY_CLICKED_ACTIVITY_NAME = "KEY_CLICKED_ACTIVITY_NAME"
         private var isRunning = false
         fun isRunning(): Boolean = isRunning
     }
