@@ -58,10 +58,10 @@ class Laces{
                 val serviceClassName = getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
                 if(serviceClassName.equals("null")) edit()?.apply {
                     putString(BootReceiver.KEY_SERVICE_CLASS_NAME, serviceName)
-                    putString(NotificationFactory.KEY_TITLE, notificationTitle)
-                    putString(NotificationFactory.KEY_CONTENT, notificationContent)
-                    putInt(NotificationFactory.KEY_SMALL_ICON, notificationIcon)
-                    putString(NotificationFactory.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: getContextClassName(context, noClickMode))
+                    putString(BootNotification.KEY_TITLE, notificationTitle)
+                    putString(BootNotification.KEY_CONTENT, notificationContent)
+                    putInt(BootNotification.KEY_SMALL_ICON, notificationIcon)
+                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: getContextClassName(context, noClickMode))
                 }?.apply()
             }
         }
