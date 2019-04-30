@@ -61,7 +61,7 @@ class BootNotification {
             }
         }
 
-        fun updateNotification(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
+        fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
             with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))){
                 edit().apply{
                     title?.let { putString(KEY_TITLE, title) }
