@@ -41,7 +41,7 @@ class BootNotification {
          */
         internal fun create(ctx : Context): Notification {
             createChannel(ctx)
-            return createNotification(ctx, PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx)), NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id)))
+            return createNotification(ctx, PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx)))
 
         }
 
@@ -53,11 +53,12 @@ class BootNotification {
                     if(icon != -1) putInt(KEY_SMALL_ICON, icon)
                 }.apply()
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(ID, createNotification(ctx, this, NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))))
+                manager.notify(ID, createNotification(ctx, this))
             }
         }
 
-        private fun createNotification(ctx : Context, prefs : SharedPreferences, builder : NotificationCompat.Builder ): Notification{
+        private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
+            val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
             var icon = prefs.getInt(KEY_SMALL_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
             builder.setContentTitle(prefs.getString(KEY_TITLE, "candroidtb"))
