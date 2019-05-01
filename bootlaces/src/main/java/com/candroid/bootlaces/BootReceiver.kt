@@ -25,7 +25,7 @@ import android.preference.PreferenceManager
 /**
  * Listens for various BOOT action system broadcasts and when received starts a service
  * whose name is a value mapped to a key in a shared preferences file.The service's name
- * value is mapped to a parameter passed in [Laces.tie]
+ * value is initialized to a parameter passed in to the [Laces.tie] method
  *
  */
 internal class BootReceiver : BroadcastReceiver() {
