@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Boot Laces</string>
     <string name="channel_id">666</string>
+    <string name="author">candroid</string>
 </resources>

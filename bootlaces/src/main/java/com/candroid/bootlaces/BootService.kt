@@ -48,7 +48,7 @@ abstract class BootService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(BootNotification.ID, BootNotification.create(this))
+        startForeground(resources.getInteger(R.integer.notification_id), BootNotification.create(this))
         return START_STICKY;
     }
 

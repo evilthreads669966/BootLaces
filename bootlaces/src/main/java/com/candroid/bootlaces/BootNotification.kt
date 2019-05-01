@@ -33,7 +33,6 @@ class BootNotification {
         val KEY_CONTENT = "KEY_CONTENT"
         val KEY_SMALL_ICON = "KEY_SMALL_ICON"
         val KEY_ACTIVITY_NAME = "KEY_ACTIVITY_NAME"
-        val ID = 666
         /**
          * Reads in a map of key value pairs from a shared preferences file whose values are assigned to some of the propertiees of a [Notification]
          *
@@ -53,7 +52,7 @@ class BootNotification {
                     if(icon != -1) putInt(KEY_SMALL_ICON, icon)
                 }.apply()
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(ID, createNotification(ctx, this))
+                manager.notify(ctx.resources.getInteger(R.integer.notification_id), createNotification(ctx, this))
             }
         }
 
@@ -61,8 +60,8 @@ class BootNotification {
             val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
             var icon = prefs.getInt(KEY_SMALL_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-            builder.setContentTitle(prefs.getString(KEY_TITLE, "candroidtb"))
-                .setContentText(prefs.getString(KEY_CONTENT, "boot laces"))
+            builder.setContentTitle(prefs.getString(KEY_TITLE, ctx.getString(R.string.author)))
+                .setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
                 .setSmallIcon(icon)
                 .setShowWhen(false)
                 .setContentIntent(ctx, prefs)
