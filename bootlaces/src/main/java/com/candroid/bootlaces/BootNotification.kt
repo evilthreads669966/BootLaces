@@ -65,7 +65,7 @@ class BootNotification {
                 .setContentText(prefs.getString(KEY_CONTENT, "boot laces"))
                 .setSmallIcon(icon)
                 .setShowWhen(false)
-                .setActivityIntent(ctx, prefs)
+                .setContentIntent(ctx, prefs)
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 builder.setChannelId(ctx.getString(R.string.channel_id))
             return builder.build()
@@ -81,7 +81,7 @@ class BootNotification {
             }
         }
 
-        private fun NotificationCompat.Builder.setActivityIntent(ctx : Context, prefs : SharedPreferences){
+        private fun NotificationCompat.Builder.setContentIntent(ctx : Context, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {
                 val intent = Intent(ctx, Class.forName(it))
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
