@@ -27,10 +27,14 @@ class MyService : BootService(){
     override fun onCreate() {
         super.onCreate()
         receiver = PhoneStateReceiver()
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        val filter = IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if(checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-                registerReceiver(receiver, IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED))
+                registerReceiver(receiver, filter)
             }
+        }else
+            registerReceiver(receiver, filter)
+
     }
 
     override fun onDestroy() {
