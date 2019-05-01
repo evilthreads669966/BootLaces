@@ -84,17 +84,16 @@ class Laces{
         }
 
         /**
-         * Returns the context's class name if it's an instance of AppCompatActivity
+         * Returns the [Context]'s class name if it's an instance of AppCompatActivity
          *
          * @param [context] instance of your current [Context]
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          * @return [String] the name of the java class containing the current context instance's scope
          */
         private fun Context.getActivityClassName(noClickMode: Boolean): String?{
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 if(this is AppCompatActivity && !noClickMode)
                     return javaClass.name
-            }
             return null
         }
     }
