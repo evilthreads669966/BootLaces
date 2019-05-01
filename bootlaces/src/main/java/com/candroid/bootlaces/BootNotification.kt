@@ -72,7 +72,7 @@ class BootNotification {
          * Creates a notification whose properties are set from a map of key value pairs read in from a shared preferences file
          *
          * @param ctx
-         * @param [prefs] these must be instantiated from a context provided by [BootStorage]
+         * @param [prefs] this should be instantiated with a context provided by [BootStorage]
          * @return [Notification]
          */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
@@ -109,7 +109,7 @@ class BootNotification {
          * The pending intent gets fired off when the notification is pressed.
          *
          * @param ctx
-         * @param [prefs] these must be instantiated from a context provided by [BootStorage]
+         * @param [prefs] this should be instantiated with a context provided by [BootStorage]
          */
         private fun NotificationCompat.Builder.setContentIntent(ctx : Context, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {
