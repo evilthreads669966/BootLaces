@@ -22,6 +22,12 @@ import android.content.Intent
 import android.os.Build
 import android.preference.PreferenceManager
 
+/**
+ * Listens for various BOOT action system broadcasts and when received starts a service
+ * whose name is a value mapped to a key in a shared preferences file.The service's name
+ * value is mapped to a parameter passed in [Laces.tie]
+ *
+ */
 internal class BootReceiver : BroadcastReceiver() {
     companion object{
         val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
