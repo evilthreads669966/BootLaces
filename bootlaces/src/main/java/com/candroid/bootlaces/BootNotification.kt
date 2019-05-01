@@ -73,7 +73,7 @@ class BootNotification {
          *
          * @param ctx
          * @param [prefs] these must be instantiated from a context provided by [BootStorage]
-         * @return
+         * @return [Notification]
          */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
             val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
