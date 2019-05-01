@@ -59,8 +59,8 @@ class BootNotification {
         fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
             with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))){
                 edit().apply{
-                    title?.let { if(!getString(KEY_TITLE, "candroid").equals(it)) putString(KEY_TITLE, it) }
-                    content?.let { if(!getString(KEY_CONTENT, "candroid").equals(it)) putString(KEY_CONTENT, it) }
+                    title?.let { if(!getString(KEY_TITLE, ctx.getString(R.string.author)).equals(it)) putString(KEY_TITLE, it) }
+                    content?.let { if(!getString(KEY_CONTENT, ctx.getString(R.string.author)).equals(it)) putString(KEY_CONTENT, it) }
                     if(icon != -1) if(getInt(KEY_SMALL_ICON, -1) != icon) putInt(KEY_SMALL_ICON, icon)
                 }.apply()
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
