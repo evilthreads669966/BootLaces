@@ -31,6 +31,6 @@ class PhoneStateReceiver : BroadcastReceiver(){
             TelephonyManager.EXTRA_STATE_IDLE -> state = "Not in a call"
             else -> state = null
         }
-        state?.let { BootNotification.update(context!!, "Phone State", state, android.R.drawable.sym_action_call) }
+        state?.let { BootNotification.update(context!!, "Phone State", it, android.R.drawable.sym_action_call) }
     }
 }
