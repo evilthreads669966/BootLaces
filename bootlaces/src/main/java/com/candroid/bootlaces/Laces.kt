@@ -61,7 +61,7 @@ class Laces{
                     putString(BootNotification.KEY_TITLE, notificationTitle)
                     putString(BootNotification.KEY_CONTENT, notificationContent)
                     putInt(BootNotification.KEY_SMALL_ICON, notificationIcon)
-                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: getContextClassName(context, noClickMode))
+                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: context.getActivityClassName(noClickMode))
                 }?.apply()
             }
         }
@@ -84,16 +84,16 @@ class Laces{
         }
 
         /**
-         * Returns the name of the class file that contains the current scope of the instance of [Context] that was passed in.
+         * Returns the context's class name if it's an instance of AppCompatActivity
          *
          * @param [context] instance of your current [Context]
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          * @return [String] the name of the java class containing the current context instance's scope
          */
-        private fun getContextClassName(context : Context, noClickMode: Boolean): String?{
+        private fun Context.getActivityClassName(noClickMode: Boolean): String?{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-                if(context is AppCompatActivity && !noClickMode)
-                    return context.javaClass.name
+                if(this is AppCompatActivity && !noClickMode)
+                    return javaClass.name
             }
             return null
         }
