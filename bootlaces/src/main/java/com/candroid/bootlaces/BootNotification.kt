@@ -27,6 +27,10 @@ import android.os.Build
 import android.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 
+/**
+ * Provides a persistent foreground notification and the ability to update it.
+ *
+ */
 class BootNotification {
     companion object{
         val KEY_TITLE = "KEY_TITLE"
@@ -44,6 +48,14 @@ class BootNotification {
 
         }
 
+        /**
+         * Update one or more of [BootService]'s notification's properties.
+         *
+         * @param ctx
+         * @param [title] notification's title text field
+         * @param [content] notification's body text field
+         * @param [icon] notification's small icon field
+         */
         fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
             with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))){
                 edit().apply{
@@ -56,6 +68,13 @@ class BootNotification {
             }
         }
 
+        /**
+         * Creates a notification whose properties are set from a map of key value pairs read in from a shared preferences file
+         *
+         * @param ctx
+         * @param prefs
+         * @return
+         */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
             val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
             var icon = prefs.getInt(KEY_SMALL_ICON, -1)
@@ -70,6 +89,11 @@ class BootNotification {
             return builder.build()
         }
 
+        /**
+         * Creates the notification channel used by [BootService]'s persistent foreground notification
+         *
+         * @param ctx
+         */
         private fun createChannel(ctx : Context){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -80,6 +104,13 @@ class BootNotification {
             }
         }
 
+        /**
+         * Creates a pending intent that starts an activity.
+         * The pending intent gets fired off when the notification is pressed.
+         *
+         * @param ctx
+         * @param prefs
+         */
         private fun NotificationCompat.Builder.setContentIntent(ctx : Context, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {
                 val intent = Intent(ctx, Class.forName(it))
