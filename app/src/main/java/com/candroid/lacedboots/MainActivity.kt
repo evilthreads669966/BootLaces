@@ -16,6 +16,7 @@ limitations under the License.
 package com.candroid.lacedboots
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.Laces
@@ -26,11 +27,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        KotlinPermissions.with(this) // where this is an FragmentActivity instance
-            .permissions(Manifest.permission.READ_PHONE_STATE)
-            .onAccepted { permissions -> Laces.tie(this, MyService::class.java.name) }
-            .onDenied { permissions -> recreate()}
-            .onForeverDenied { permissions -> finish()}
-            .ask()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            KotlinPermissions.with(this) // where this is an FragmentActivity instance
+                .permissions(Manifest.permission.READ_PHONE_STATE)
+                .onAccepted { permissions -> Laces.tie(this, MyService::class.java.name) }
+                .onDenied { permissions -> recreate()}
+                .onForeverDenied { permissions -> finish()}
+                .ask()
+        }else
+            Laces.tie(this, MyService::class.java.name)
     }
 }
