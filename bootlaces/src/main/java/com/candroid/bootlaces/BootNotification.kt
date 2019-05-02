@@ -44,7 +44,7 @@ class BootNotification {
          */
         internal fun create(ctx : Context): Notification {
             createChannel(ctx)
-            return createNotification(ctx, PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx)))
+            return createNotification(ctx, PreferenceManager.getDefaultSharedPreferences(BootContext.getInstance(ctx)))
 
         }
 
@@ -57,7 +57,7 @@ class BootNotification {
          * @param [icon] notification's small icon field
          */
         fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
-            with(PreferenceManager.getDefaultSharedPreferences(BootStorage.getContext(ctx))){
+            with(PreferenceManager.getDefaultSharedPreferences(BootContext.getInstance(ctx))){
                 edit().apply{
                     title?.let { if(!getString(KEY_TITLE, ctx.getString(R.string.author)).equals(it)) putString(KEY_TITLE, it) }
                     content?.let { if(!getString(KEY_CONTENT, ctx.getString(R.string.author)).equals(it)) putString(KEY_CONTENT, it) }
@@ -72,7 +72,7 @@ class BootNotification {
          * Creates a notification whose properties are set from a map of key value pairs read in from a shared preferences file
          *
          * @param ctx
-         * @param [prefs] this should be instantiated with a context provided by [BootStorage]
+         * @param [prefs] this should be instantiated with a context provided by [BootContext]
          * @return [Notification]
          */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
@@ -109,7 +109,7 @@ class BootNotification {
          * The pending intent gets fired off when the notification is pressed.
          *
          * @param ctx
-         * @param [prefs] this should be instantiated with a context provided by [BootStorage]
+         * @param [prefs] this should be instantiated with a context provided by [BootContext]
          */
         private fun NotificationCompat.Builder.setContentIntent(ctx : Context, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {

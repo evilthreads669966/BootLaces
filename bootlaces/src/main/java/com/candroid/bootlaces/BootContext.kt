@@ -22,10 +22,10 @@ import android.preference.PreferenceManager
 import android.util.Log
 
 /**
- * BootStorage provides [getContext] which returns the context where your service saves data. Use this to read from as well.
+ * BootContext provides [getInstance] which returns the context where your service saves data. Use this to read from as well.
  *
  */
-class BootStorage{
+class BootContext{
     companion object{
         /**
          * This provides you with the context where your service saves data
@@ -33,12 +33,12 @@ class BootStorage{
          * @param [context] the context of your service
          * @return [Context] the context where your device protected storage exists
          */
-        fun getContext(context: Context): Context {
+        fun getInstance(context: Context): Context {
             val ctx : Context
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
                 ctx = context.createDeviceProtectedStorageContext()
                 if(ctx.moveSharedPreferencesFrom(context, PreferenceManager.getDefaultSharedPreferencesName(context)))
-                    Log.d("BootStorage", "preference migration successful")
+                    Log.d("BootContext", "preference migration successful")
             }else{
                 return context
             }
