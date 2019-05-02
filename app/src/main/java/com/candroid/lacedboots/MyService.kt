@@ -23,16 +23,10 @@ import android.os.Build
 import com.candroid.bootlaces.BootService
 
 class MyService : BootService(){
-    lateinit var receiver : CallReceiver
+    val receiver = CallReceiver()
     override fun onCreate() {
         super.onCreate()
-        receiver = CallReceiver()
-        val filter = IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-                registerReceiver(receiver, filter)
-        }else
-            registerReceiver(receiver, filter)
+        registerReceiver(receiver, IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL))
     }
 
     override fun onDestroy() {

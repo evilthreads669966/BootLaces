@@ -19,8 +19,6 @@ package com.candroid.lacedboots
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.telephony.TelephonyManager
-import com.candroid.bootlaces.BootNotification
 
 class CallReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
