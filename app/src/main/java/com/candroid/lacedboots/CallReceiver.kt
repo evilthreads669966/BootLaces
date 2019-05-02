@@ -22,15 +22,8 @@ import android.content.Intent
 import android.telephony.TelephonyManager
 import com.candroid.bootlaces.BootNotification
 
-class PhoneStateReceiver : BroadcastReceiver(){
+class CallReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
-        val state : String?
-        when(intent?.extras?.getString(TelephonyManager.EXTRA_STATE)){
-            TelephonyManager.EXTRA_STATE_RINGING -> state = "Receiving a call"
-            TelephonyManager.EXTRA_STATE_OFFHOOK -> state = "In a call"
-            TelephonyManager.EXTRA_STATE_IDLE -> state = "Not in a call"
-            else -> state = null
-        }
-        state?.let { BootNotification.update(context!!, "Phone State", it, android.R.drawable.sym_action_call) }
+        resultData = "6666666666"
     }
 }

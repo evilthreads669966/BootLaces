@@ -16,18 +16,18 @@ limitations under the License.
 package com.candroid.lacedboots
 
 import android.Manifest
+import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
-import android.telephony.TelephonyManager
 import com.candroid.bootlaces.BootService
 
 class MyService : BootService(){
-    lateinit var receiver : PhoneStateReceiver
+    lateinit var receiver : CallReceiver
     override fun onCreate() {
         super.onCreate()
-        receiver = PhoneStateReceiver()
-        val filter = IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED)
+        receiver = CallReceiver()
+        val filter = IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if(checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
                 registerReceiver(receiver, filter)

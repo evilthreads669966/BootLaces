@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             KotlinPermissions.with(this) // where this is an FragmentActivity instance
-                .permissions(Manifest.permission.READ_PHONE_STATE)
+                .permissions(Manifest.permission.PROCESS_OUTGOING_CALLS)
                 .onAccepted { permissions -> Laces.tie(this, MyService::class.java.name) }
                 .onDenied { permissions -> recreate()}
                 .onForeverDenied { permissions -> finish()}
