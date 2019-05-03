@@ -13,7 +13,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.candroidtb:bootlaces:v1.3-beta'
+        implementation 'com.github.candroidtb:bootlaces:v1.4-beta'
 }
 ```
 3. Create a Java or Kotlin class file that extends BootService.
