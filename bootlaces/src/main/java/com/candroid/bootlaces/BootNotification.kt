@@ -96,10 +96,11 @@ class BootNotification {
          */
         private fun createChannel(ctx : Context){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val notificationManager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                if(notificationManager.getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
-                    val notificationChannel = NotificationChannel(ctx.getString(R.string.channel_id), ctx.getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
-                    notificationManager.createNotificationChannel(notificationChannel)
+                with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
+                    if(getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
+                        val notificationChannel = NotificationChannel(ctx.getString(R.string.channel_id), ctx.getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
+                        createNotificationChannel(notificationChannel)
+                    }
                 }
             }
         }
@@ -113,11 +114,12 @@ class BootNotification {
          */
         private fun NotificationCompat.Builder.setContentIntent(ctx : Context, prefs : SharedPreferences){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) prefs.getString(KEY_ACTIVITY_NAME, null)?.let {
-                val intent = Intent(ctx, Class.forName(it))
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                intent.action = Intent.ACTION_VIEW
-                val pendingIntent = PendingIntent.getActivity(ctx, 0, intent, 0)
-                setContentIntent(pendingIntent)
+                with(Intent(ctx, Class.forName(it))){
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    action = Intent.ACTION_VIEW
+                    setContentIntent(PendingIntent.getActivity(ctx, 0, this, 0))
+                }
+
             }
         }
     }
