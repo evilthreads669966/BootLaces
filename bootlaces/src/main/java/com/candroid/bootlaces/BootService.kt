@@ -26,6 +26,9 @@ import android.os.IBinder
  * However feel free to override any method you wish for customization.
  * [BootService] will be started whenever the device reboots.
  *
+ * This service is direct boot aware. So any [SharedPreferences] you'd like to keep in this context please
+ * use [BootPreferences].
+ *
  * Example usage:
  *
  * ```
