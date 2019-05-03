@@ -76,17 +76,18 @@ class BootNotification {
          * @return [Notification]
          */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
-            val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))
-            var icon = prefs.getInt(KEY_SMALL_ICON, -1)
-            if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-            builder.setContentTitle(prefs.getString(KEY_TITLE, ctx.getString(R.string.author)))
-                .setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
-                .setSmallIcon(icon)
-                .setShowWhen(false)
-                .setContentIntent(ctx, prefs)
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                builder.setChannelId(ctx.getString(R.string.channel_id))
-            return builder.build()
+            with(NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))){
+                var icon = prefs.getInt(KEY_SMALL_ICON, -1)
+                if (icon == -1) icon = android.R.drawable.sym_def_app_icon
+                setContentTitle(prefs.getString(KEY_TITLE, ctx.getString(R.string.author)))
+                setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
+                setSmallIcon(icon)
+                setShowWhen(false)
+                setContentIntent(ctx, prefs)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    setChannelId(ctx.getString(R.string.channel_id))
+                return build()
+            }
         }
 
         /**
