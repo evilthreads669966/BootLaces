@@ -23,13 +23,15 @@ import android.preference.PreferenceManager
 import android.util.Log
 
 /**
- * BootPreferences provides [getInstance] which returns the context where your service saves data. Use this to read from as well.
+ * BootPreferences provides [getInstance] which returns the [SharedPreferences] located in device protected storage
+ * used for when Direct Boot is activated and the application needs to write/access data before the user enters
+ * their device credentials
  *
  */
 class BootPreferences{
     companion object{
         /**
-         * This provides you with the context where your service saves data
+         * This provides you with a [SharedPreferences] located in the device protected storage
          *
          * @param [context] the context of your service
          * @return [Context] the context where your device protected storage exists
