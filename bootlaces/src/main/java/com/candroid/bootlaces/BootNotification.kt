@@ -79,7 +79,7 @@ class BootNotification {
             with(NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))){
                 setContentTitle(prefs.getString(KEY_TITLE, ctx.getString(R.string.author)))
                 setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
-                setSmallIcon(ctx, prefs)
+                setSmallIcon(prefs)
                 setContentIntent(ctx, prefs)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     setChannelId(ctx.getString(R.string.channel_id))
@@ -121,7 +121,7 @@ class BootNotification {
             }
         }
 
-        private fun NotificationCompat.Builder.setSmallIcon(ctx : Context, prefs : SharedPreferences){
+        private fun NotificationCompat.Builder.setSmallIcon(prefs : SharedPreferences){
             var icon = prefs.getInt(KEY_SMALL_ICON, -1)
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
             setSmallIcon(icon)
