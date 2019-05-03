@@ -122,11 +122,9 @@ class BootNotification {
         }
 
         private fun NotificationCompat.Builder.setSmallIcon(ctx : Context, prefs : SharedPreferences){
-            with(prefs){
-                var icon = getInt(KEY_SMALL_ICON, -1)
-                if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-                setSmallIcon(icon)
-            }
+            var icon = prefs.getInt(KEY_SMALL_ICON, -1)
+            if (icon == -1) icon = android.R.drawable.sym_def_app_icon
+            setSmallIcon(icon)
         }
     }
 }
