@@ -96,7 +96,7 @@ class BootNotification {
         private fun createChannel(ctx : Context){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
-                    if(getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
+                    if(getNotificationChannel(getChannelId(ctx)) == null){
                         val notificationChannel = NotificationChannel(getChannelId(ctx), getChannelName(ctx), NotificationManager.IMPORTANCE_HIGH)
                         createNotificationChannel(notificationChannel)
                     }
