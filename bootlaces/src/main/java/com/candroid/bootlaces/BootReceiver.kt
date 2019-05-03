@@ -35,14 +35,12 @@ internal class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if(!BootService.isRunning()){
             with(BootPreferences.getInstance(context!!)){
-                getString(KEY_SERVICE_CLASS_NAME, "null")?.let {
-                    if(!it.equals("null")){
-                        intent?.setClassName(context!!, it)
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                            context?.startForegroundService(intent)
-                        else
-                            context?.startService(intent)
-                    }
+                getString(KEY_SERVICE_CLASS_NAME, null)?.let {
+                    intent?.setClassName(context!!, it)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        context?.startForegroundService(intent)
+                    else
+                        context?.startService(intent)
                 }
             }
         }
