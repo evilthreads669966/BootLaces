@@ -24,7 +24,7 @@ import android.util.Log
 
 /**
  * BootPreferences provides [getInstance] which returns the [SharedPreferences] file located in device protected storage
- * used for when Direct Boot is activated and the application needs to write/access data to [SharedPreferences] before the user enters
+ * used for when Direct Boot is activated and the application needs to read/write from/to [SharedPreferences] before the user enters
  * their device credentials
  *
  */
