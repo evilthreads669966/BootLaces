@@ -81,6 +81,7 @@ class BootNotification {
                 setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
                 setSmallIcon(prefs)
                 setContentIntent(ctx, prefs)
+                setShowWhen(false)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     setChannelId(ctx.getString(R.string.channel_id))
                 return build()
