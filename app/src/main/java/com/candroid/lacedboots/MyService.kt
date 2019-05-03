@@ -29,11 +29,13 @@ class MyService : BootService(){
     private val receiver = CallReceiver()
     override fun onCreate() {
         super.onCreate()
+        //start listening for outgoing calls
         registerReceiver(receiver, IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL))
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        //stop listening for outgoing calls
         unregisterReceiver(receiver)
     }
 }
