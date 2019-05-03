@@ -17,15 +17,16 @@
 package com.candroid.bootlaces
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
 
 /**
- * BootContext provides [getInstance] which returns the context where your service saves data. Use this to read from as well.
+ * BootPreferences provides [getInstance] which returns the context where your service saves data. Use this to read from as well.
  *
  */
-class BootContext{
+class BootPreferences{
     companion object{
         /**
          * This provides you with the context where your service saves data
@@ -33,16 +34,15 @@ class BootContext{
          * @param [context] the context of your service
          * @return [Context] the context where your device protected storage exists
          */
-        fun getInstance(context: Context): Context {
-            val ctx : Context
+        fun getInstance(ctx: Context): SharedPreferences {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-                ctx = context.createDeviceProtectedStorageContext()
-                if(ctx.moveSharedPreferencesFrom(context, PreferenceManager.getDefaultSharedPreferencesName(context)))
-                    Log.d("BootContext", "preference migration successful")
-            }else{
-                return context
-            }
-            return ctx
+                with(ctx.createDeviceProtectedStorageContext()){
+                    if(moveSharedPreferencesFrom(ctx, PreferenceManager.getDefaultSharedPreferencesName(ctx)))
+                        Log.d("BootPreferences", "preference migration successful")
+                    return PreferenceManager.getDefaultSharedPreferences(this)
+                }
+            }else
+                return PreferenceManager.getDefaultSharedPreferences(ctx)
         }
     }
 }

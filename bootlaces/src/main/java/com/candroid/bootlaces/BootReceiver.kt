@@ -34,7 +34,7 @@ internal class BootReceiver : BroadcastReceiver() {
     }
     override fun onReceive(context: Context?, intent: Intent?) {
         if(!BootService.isRunning()){
-            with(PreferenceManager.getDefaultSharedPreferences(BootContext.getInstance(context!!))){
+            with(BootPreferences.getInstance(context!!)){
                 getString(KEY_SERVICE_CLASS_NAME, "null")?.let {
                     if(!it.equals("null")){
                         intent?.setClassName(context!!, it)

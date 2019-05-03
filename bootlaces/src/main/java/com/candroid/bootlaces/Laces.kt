@@ -53,15 +53,15 @@ class Laces{
          * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          */
-        private fun persistService(context: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
-            with(PreferenceManager.getDefaultSharedPreferences(BootContext.getInstance(context))){
+        private fun persistService(ctx: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
+            with(BootPreferences.getInstance(ctx)){
                 val serviceClassName = getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
                 if(serviceClassName.equals("null")) edit()?.apply {
                     putString(BootReceiver.KEY_SERVICE_CLASS_NAME, serviceName)
                     putString(BootNotification.KEY_TITLE, notificationTitle)
                     putString(BootNotification.KEY_CONTENT, notificationContent)
                     putInt(BootNotification.KEY_SMALL_ICON, notificationIcon)
-                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: context.getActivityClassName(noClickMode))
+                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: ctx.getActivityClassName(noClickMode))
                 }?.apply()
             }
         }
