@@ -83,7 +83,7 @@ class BootNotification {
                 setContentIntent(ctx, prefs)
                 setShowWhen(false)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    setChannelId(ctx.getString(R.string.channel_id))
+                    setChannelId(getChannelId(ctx))
                 return build()
             }
         }
@@ -97,7 +97,7 @@ class BootNotification {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
                     if(getNotificationChannel(ctx.getString(R.string.channel_id)) == null){
-                        val notificationChannel = NotificationChannel(ctx.getString(R.string.channel_id), ctx.getString(R.string.channel_id), NotificationManager.IMPORTANCE_HIGH)
+                        val notificationChannel = NotificationChannel(getChannelId(ctx), getChannelName(ctx), NotificationManager.IMPORTANCE_HIGH)
                         createNotificationChannel(notificationChannel)
                     }
                 }
@@ -129,5 +129,9 @@ class BootNotification {
         }
 
         internal fun getId(ctx: Context) = ctx.resources.getInteger(R.integer.notification_id)
+
+        internal fun getChannelId(ctx: Context) = ctx.resources.getString(R.string.channel_id)
+
+        internal fun getChannelName(ctx: Context) = ctx.resources.getString(R.string.channel_name)
     }
 }
