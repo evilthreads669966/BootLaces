@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.candroid.bootlaces.BootService
 
+/*I register a [CallReceiver] whose life spans the lifecycle of the current context which is our service class.*/
 class MyService : BootService(){
     private val receiver = CallReceiver()
     override fun onCreate() {
