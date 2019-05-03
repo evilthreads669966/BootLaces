@@ -64,7 +64,7 @@ class BootNotification {
                     if(icon != -1) if(getInt(KEY_SMALL_ICON, -1) != icon) putInt(KEY_SMALL_ICON, icon)
                 }.apply()
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                manager.notify(ctx.resources.getInteger(R.integer.notification_id), createNotification(ctx, this))
+                manager.notify(getId(ctx), createNotification(ctx, this))
             }
         }
 
@@ -127,5 +127,7 @@ class BootNotification {
             if (icon == -1) icon = android.R.drawable.sym_def_app_icon
             setSmallIcon(icon)
         }
+
+        internal fun getId(ctx: Context) = ctx.resources.getInteger(R.integer.notification_id)
     }
 }
