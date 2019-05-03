@@ -27,14 +27,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             KotlinPermissions.with(this) // where this is an FragmentActivity instance
                 .permissions(Manifest.permission.PROCESS_OUTGOING_CALLS)
                 .onAccepted { permissions -> Laces.tie(this, MyService::class.java.name) }
                 .onDenied { permissions -> recreate()}
                 .onForeverDenied { permissions -> finish()}
                 .ask()
-        }else
+        else
             Laces.tie(this, MyService::class.java.name)
     }
 }

@@ -23,7 +23,7 @@ import android.os.Build
 import com.candroid.bootlaces.BootService
 
 class MyService : BootService(){
-    val receiver = CallReceiver()
+    private val receiver = CallReceiver()
     override fun onCreate() {
         super.onCreate()
         registerReceiver(receiver, IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL))

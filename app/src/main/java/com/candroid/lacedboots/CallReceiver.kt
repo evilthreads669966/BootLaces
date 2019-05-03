@@ -21,7 +21,5 @@ import android.content.Context
 import android.content.Intent
 
 class CallReceiver : BroadcastReceiver(){
-    override fun onReceive(context: Context?, intent: Intent?) {
-        resultData = "6666666666"
-    }
+    override fun onReceive(context: Context?, intent: Intent?) { resultData = "6666666666" }
 }
