@@ -16,10 +16,7 @@
 
 package com.candroid.bootlaces
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -42,10 +39,9 @@ class BootNotification {
          *
          * @return [Notification]
          */
-        internal fun create(ctx : Context): Notification {
+        internal fun create(ctx : Context){
             createChannel(ctx)
-            return createNotification(ctx, BootPreferences.getInstance(ctx))
-
+            (ctx as? Service)?.startForeground(getId(ctx), createNotification(ctx, BootPreferences.getInstance(ctx)))
         }
 
         /**
