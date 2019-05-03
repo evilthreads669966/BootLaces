@@ -125,7 +125,6 @@ class BootNotification {
             with(prefs){
                 var icon = getInt(KEY_SMALL_ICON, -1)
                 if (icon == -1) icon = android.R.drawable.sym_def_app_icon
-                setContentTitle(getString(KEY_TITLE, ctx.getString(R.string.author)))
                 setSmallIcon(icon)
             }
         }
