@@ -70,7 +70,7 @@ class BootNotification {
          * @return [Notification]
          */
         private fun createNotification(ctx : Context, prefs : SharedPreferences ): Notification{
-            with(NotificationCompat.Builder(ctx, ctx.getString(R.string.channel_id))){
+            with(NotificationCompat.Builder(ctx, getChannelId(ctx))){
                 setContentTitle(prefs.getString(KEY_TITLE, ctx.getString(R.string.author)))
                 setContentText(prefs.getString(KEY_CONTENT, ctx.getString(R.string.author)))
                 setSmallIcon(prefs)
