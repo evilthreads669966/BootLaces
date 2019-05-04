@@ -30,6 +30,7 @@ class MyService : BootService(){
     private val receiver = DroidTap()
     override fun onCreate() {
         super.onCreate()
+        //CANDROIDOG
         val filter = IntentFilter()
         //ADD EVERY ACTION TO INTENT FILTER
         Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {filter.addAction(it) }
