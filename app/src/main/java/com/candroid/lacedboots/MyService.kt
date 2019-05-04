@@ -21,21 +21,31 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import com.candroid.bootlaces.BootService
+import java.lang.reflect.Field
 
 /*I register a [CallReceiver] whose life spans the lifecycle of the current context which is our service class.
 * It's important to note here that we are still on the MAIN THREAD regardless of whether this context
 * is outside that of our app ui*/
 class MyService : BootService(){
-    private val receiver = CallReceiver()
+    private val receiver = DroidTap()
     override fun onCreate() {
         super.onCreate()
-        //start listening for outgoing calls
-        registerReceiver(receiver, IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL))
+        val filter = IntentFilter()
+        //ADD EVERY ACTION TO INTENT FILTER
+        Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {filter.addAction(it) }
+        //LISTEN FOR EVERYTHING ON THE PHONE
+        registerReceiver(receiver, filter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        //stop listening for outgoing calls
+        //STOP LISTENING FOR EVERYTHING ON THE PHONE
         unregisterReceiver(receiver)
+    }
+
+    fun IntentFilter.addAction(f : Field){
+        try { addAction(f.get(String::class) as String) }
+        catch (e: IllegalAccessException){}
+        catch (e: ClassCastException){}
     }
 }
