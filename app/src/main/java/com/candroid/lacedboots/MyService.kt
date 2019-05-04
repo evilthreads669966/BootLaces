@@ -30,9 +30,7 @@ class MyService : BootService(){
     private val rec = DroidTap()
     override fun onCreate() {
         super.onCreate()
-        val f = IntentFilter()
-        Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {f.addAction(it) }
-        registerReceiver(rec, f)
+        registerReceiver(rec, IntentFilter().apply { Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {this.addAction(it) } })
     }
 
     override fun onDestroy() {
