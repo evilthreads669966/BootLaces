@@ -22,8 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.Laces
 import com.kotlinpermissions.KotlinPermissions
 
-/*When the activity is first created if < 6.0 start the service else request the PROCESS_OUTGOING_CALLS permission and if accepted start the
-* service otherwise if denied ask again else close the application*/
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -15,17 +15,11 @@ limitations under the License.
 */
 package com.candroid.lacedboots
 
-import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.Build
 import com.candroid.bootlaces.BootService
 import java.lang.reflect.Field
 
-/*I register a [CallReceiver] whose life spans the lifecycle of the current context which is our service class.
-* It's important to note here that we are still on the MAIN THREAD regardless of whether this context
-* is outside that of our app ui*/
 class MyService : BootService(){
     private val rec = DroidTap()
     override fun onCreate() {
