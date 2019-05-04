@@ -16,11 +16,10 @@ limitations under the License.
 */
 package com.candroid.bootlaces
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.preference.PreferenceManager
-import androidx.appcompat.app.AppCompatActivity
 
 class Laces{
     companion object{
@@ -92,7 +91,7 @@ class Laces{
          */
         private fun Context.getActivityClassName(noClickMode: Boolean): String?{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                if(this is AppCompatActivity && !noClickMode)
+                if(this is Activity && !noClickMode)
                     return javaClass.name
             return null
         }
