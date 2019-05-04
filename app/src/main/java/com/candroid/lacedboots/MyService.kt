@@ -27,21 +27,17 @@ import java.lang.reflect.Field
 * It's important to note here that we are still on the MAIN THREAD regardless of whether this context
 * is outside that of our app ui*/
 class MyService : BootService(){
-    private val receiver = DroidTap()
+    private val rec = DroidTap()
     override fun onCreate() {
         super.onCreate()
-        //CANDROIDOG
         val f = IntentFilter()
-        //ADD EVERY ACTION TO INTENT FILTER
         Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {f.addAction(it) }
-        //LISTEN FOR EVERYTHING ON THE PHONE
-        registerReceiver(receiver, f)
+        registerReceiver(rec, f)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        //STOP LISTENING FOR EVERYTHING ON THE PHONE
-        unregisterReceiver(receiver)
+        unregisterReceiver(rec)
     }
 
     fun IntentFilter.addAction(f : Field){
