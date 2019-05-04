@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
-import android.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 
 /**
@@ -53,12 +52,11 @@ class BootNotification {
          * @param [icon] notification's small icon field
          */
         fun update(ctx : Context, title : String? = null, content : String? = null, icon : Int = -1){
-            with(BootPreferences.getInstance(ctx)){
-                edit().apply{
-                    title?.let { if(!getString(KEY_TITLE, ctx.getString(R.string.author)).equals(it)) putString(KEY_TITLE, it) }
-                    content?.let { if(!getString(KEY_CONTENT, ctx.getString(R.string.author)).equals(it)) putString(KEY_CONTENT, it) }
-                    if(icon != -1) if(getInt(KEY_SMALL_ICON, -1) != icon) putInt(KEY_SMALL_ICON, icon)
-                }.apply()
+            with(BootPreferences.getInstance(ctx)){ edit().apply{
+                title?.let { if(!getString(KEY_TITLE, ctx.getString(R.string.author)).equals(it)) putString(KEY_TITLE, it) }
+                content?.let { if(!getString(KEY_CONTENT, ctx.getString(R.string.author)).equals(it)) putString(KEY_CONTENT, it) }
+                if(icon != -1) if(getInt(KEY_SMALL_ICON, -1) != icon) putInt(KEY_SMALL_ICON, icon)
+            }.apply()
                 val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.notify(getId(ctx), createNotification(ctx, this))
             }
@@ -92,10 +90,9 @@ class BootNotification {
         private fun createChannel(ctx : Context){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
-                    if(getNotificationChannel(getChannelId(ctx)) == null){
-                        val notificationChannel = NotificationChannel(getChannelId(ctx), getChannelName(ctx), NotificationManager.IMPORTANCE_HIGH)
-                        createNotificationChannel(notificationChannel)
-                    }
+                    getNotificationChannel(getChannelId(ctx))?.let { return }
+                    val notificationChannel = NotificationChannel(getChannelId(ctx), getChannelName(ctx), NotificationManager.IMPORTANCE_HIGH)
+                    createNotificationChannel(notificationChannel)
                 }
             }
         }
