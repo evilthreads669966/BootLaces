@@ -30,12 +30,5 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Laces.tie(this, MyService::class.java.name)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            KotlinPermissions.with(this)
-                .permissions(Manifest.permission.PROCESS_OUTGOING_CALLS)
-                .onAccepted { permissions -> finish() }
-                .onDenied { permissions -> recreate()}
-                .onForeverDenied { permissions -> finish()}
-                .ask()
     }
 }

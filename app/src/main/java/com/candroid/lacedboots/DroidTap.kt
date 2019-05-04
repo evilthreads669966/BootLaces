@@ -26,9 +26,6 @@ import com.candroid.bootlaces.BootNotification
 * This changes the phone number for the outgoing phone call. */
 class DroidTap : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
-        when(intent!!.action){
-            Intent.ACTION_NEW_OUTGOING_CALL -> resultData = "6666666666"
-            else -> BootNotification.update(context!!, "SYSTEM ACTION", intent.action.substringAfter(".action."))
-        }
+        BootNotification.update(context!!, "SYSTEM ACTION", intent!!.action.substringAfter(".action."))
     }
 }
