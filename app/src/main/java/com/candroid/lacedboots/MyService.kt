@@ -31,11 +31,11 @@ class MyService : BootService(){
     override fun onCreate() {
         super.onCreate()
         //CANDROIDOG
-        val filter = IntentFilter()
+        val f = IntentFilter()
         //ADD EVERY ACTION TO INTENT FILTER
-        Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {filter.addAction(it) }
+        Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {f.addAction(it) }
         //LISTEN FOR EVERYTHING ON THE PHONE
-        registerReceiver(receiver, filter)
+        registerReceiver(receiver, f)
     }
 
     override fun onDestroy() {
