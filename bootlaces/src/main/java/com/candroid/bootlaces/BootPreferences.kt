@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.preference.PreferenceManager
-import android.util.Log
+import com.candroid.bootlaces.BootPreferences.Companion.getInstance
 
 /**
  * BootPreferences provides [getInstance] which returns the [SharedPreferences] file located in device protected storage
@@ -39,8 +39,7 @@ class BootPreferences{
         fun getInstance(ctx: Context): SharedPreferences {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
                 with(ctx.createDeviceProtectedStorageContext()){
-                    if(moveSharedPreferencesFrom(ctx, PreferenceManager.getDefaultSharedPreferencesName(ctx)))
-                        Log.d("BootPreferences", "preference migration successful")
+                    moveSharedPreferencesFrom(ctx, PreferenceManager.getDefaultSharedPreferencesName(ctx))
                     return PreferenceManager.getDefaultSharedPreferences(this)
                 }
             }else
