@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.preference.PreferenceManager
 
 /**
  * Listens for various BOOT action system broadcasts and when received starts a service
@@ -33,17 +32,13 @@ internal class BootReceiver : BroadcastReceiver() {
         val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
     }
     override fun onReceive(context: Context?, intent: Intent?) {
-        if(!BootService.isRunning()){
-            with(BootPreferences.getInstance(context!!)){
-                getString(KEY_SERVICE_CLASS_NAME, "null")?.let {
-                    if(!it.equals("null")){
-                        intent?.setClassName(context!!, it)
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                            context?.startForegroundService(intent)
-                        else
-                            context?.startService(intent)
-                    }
-                }
+        if(!BootService.isRunning()) with(BootPreferences.getInstance(context!!)){
+            getString(KEY_SERVICE_CLASS_NAME, "null").takeUnless { it.equals("null") }.apply {
+                intent?.setClassName(context!!, this)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    context?.startForegroundService(intent)
+                else
+                    context?.startService(intent)
             }
         }
     }
