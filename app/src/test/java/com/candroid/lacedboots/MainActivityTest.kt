@@ -16,7 +16,6 @@ limitations under the License.
 package com.candroid.lacedboots
 
 import android.content.Intent
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import org.junit.Assert
 import org.junit.Before
@@ -41,6 +40,13 @@ class MainActivityTest {
 
     @Test
     fun myServiceIsRunning(){
+        Assert.assertTrue( activity.stopService(Intent(activity.applicationContext, MyService::class.java)))
+    }
+
+    @Test
+    fun serviceStartsAfterReboot(){
+        activity.stopService(Intent(activity.applicationContext, MyService::class.java))
+        activity.sendBroadcast(Intent(Intent.ACTION_BOOT_COMPLETED))
         Assert.assertTrue( activity.stopService(Intent(activity.applicationContext, MyService::class.java)))
     }
 }
