@@ -35,10 +35,8 @@ internal class BootReceiver : BroadcastReceiver() {
         if(!BootService.isRunning()) with(BootPreferences.getInstance(context!!)){
             getString(KEY_SERVICE_CLASS_NAME, "null").takeUnless { it.equals("null") }.apply {
                 intent?.setClassName(context!!, this)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    context?.startForegroundService(intent)
-                else
-                    context?.startService(intent)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context?.startForegroundService(intent)
+                else context?.startService(intent)
             }
         }
     }
