@@ -76,6 +76,8 @@ class BootNotification {
                 setSmallIcon(prefs)
                 setContentIntent(ctx, prefs)
                 setShowWhen(false)
+                setAutoCancel(false)
+                setOngoing(true)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     setChannelId(getChannelId(ctx))
                 return build()
