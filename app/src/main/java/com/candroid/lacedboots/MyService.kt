@@ -15,8 +15,13 @@ limitations under the License.
 */
 package com.candroid.lacedboots
 
+import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
+import android.net.wifi.p2p.WifiP2pManager
 import com.candroid.bootlaces.BootService
 import java.lang.reflect.Field
 
@@ -24,12 +29,26 @@ class MyService : BootService(){
     private val rec = DroidTap()
     override fun onCreate() {
         super.onCreate()
-        registerReceiver(rec, IntentFilter().apply { Intent::class.java.declaredFields.filter { it.name.contains("ACTION") }.forEach {this.addAction(it) } })
+        val list = mutableListOf<Field>()
+        list.addAll(Intent::class.java.declaredFields)
+        list.addAll(WifiP2pManager::class.java.declaredFields)
+        list.addAll(WifiManager::class.java.declaredFields)
+        list.addAll(ConnectivityManager::class.java.declaredFields)
+        list.addAll(BluetoothAdapter::class.java.declaredFields)
+        list.addAll(AudioManager::class.java.declaredFields)
+        registerReceiver(rec, IntentFilter().apply { list.filter { it.name.contains("ACTION") }.forEach {this.addAction(it) } }
+            .apply { list.filter { it.name.contains("CATEGORY") }.forEach { this.addCategory(it) } })
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(rec)
+    }
+
+    fun IntentFilter.addCategory(f : Field){
+        try { addCategory(f.get(String::class) as String) }
+        catch (e: IllegalAccessException){}
+        catch (e: ClassCastException){}
     }
 
     fun IntentFilter.addAction(f : Field){
