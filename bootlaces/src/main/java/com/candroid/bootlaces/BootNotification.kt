@@ -78,6 +78,7 @@ class BootNotification {
                 setShowWhen(false)
                 setAutoCancel(false)
                 setOngoing(true)
+                setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     setChannelId(getChannelId(ctx))
                 return build()
