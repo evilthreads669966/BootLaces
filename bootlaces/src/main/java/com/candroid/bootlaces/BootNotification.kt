@@ -38,9 +38,9 @@ class BootNotification {
          *
          * @return [Notification]
          */
-        internal fun create(ctx : Context){
+        internal fun <T : Service> create(ctx : T){
             createChannel(ctx)
-            (ctx as? Service)?.startForeground(getId(ctx), createNotification(ctx, BootPreferences.getInstance(ctx)))
+            ctx?.startForeground(getId(ctx), createNotification(ctx, BootPreferences.getInstance(ctx)))
         }
 
         /**
