@@ -18,7 +18,6 @@ package com.candroid.lacedboots
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.net.wifi.p2p.WifiP2pManager
@@ -35,7 +34,6 @@ class MyService : BootService(){
         list.addAll(WifiManager::class.java.declaredFields)
         list.addAll(ConnectivityManager::class.java.declaredFields)
         list.addAll(BluetoothAdapter::class.java.declaredFields)
-        list.addAll(AudioManager::class.java.declaredFields)
         registerReceiver(rec, IntentFilter().apply { list.filter { it.name.contains("ACTION") }.forEach {this.addAction(it) } }
             .apply { list.filter { it.name.contains("CATEGORY") }.forEach { this.addCategory(it) } })
     }
