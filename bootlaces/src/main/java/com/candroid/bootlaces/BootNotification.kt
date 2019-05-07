@@ -90,7 +90,7 @@ class BootNotification {
          *
          * @param ctx
          */
-        private fun createChannel(ctx : Context){
+        private fun <T : Context> createChannel(ctx : T){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
                     getNotificationChannel(getChannelId(ctx))?.let { return }

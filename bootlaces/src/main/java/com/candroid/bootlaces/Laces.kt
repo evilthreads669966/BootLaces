@@ -35,7 +35,7 @@ class Laces{
          * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          */
-        fun tie(context: Context, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
+        fun <T : Activity> tie(context: T, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
             persistService(context, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity, noClickMode)
             startService(context, serviceName)
         }
@@ -52,7 +52,7 @@ class Laces{
          * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          */
-        private fun persistService(ctx: Context, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
+        private fun <T : Activity> persistService(ctx: T, serviceName: String, notificationTitle: String, notificationContent: String, notificationIcon: Int, notificationClickActivity: Class<Any>?, noClickMode: Boolean){
             with(BootPreferences.getInstance(ctx)){
                 val serviceClassName = getString(BootReceiver.KEY_SERVICE_CLASS_NAME, "null")
                 if(serviceClassName.equals("null")) edit()?.apply {
@@ -89,10 +89,9 @@ class Laces{
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          * @return [String] the name of the java class containing the current context instance's scope
          */
-        private fun Context.getActivityClassName(noClickMode: Boolean): String?{
+        private fun <T : Activity> T.getActivityClassName(noClickMode: Boolean): String?{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                if(this is Activity && !noClickMode)
-                    return javaClass.name
+                if(!noClickMode) return javaClass.name
             return null
         }
     }
