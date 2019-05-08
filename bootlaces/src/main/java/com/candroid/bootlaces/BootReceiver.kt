@@ -32,7 +32,7 @@ internal class BootReceiver : BroadcastReceiver() {
         val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
     }
     override fun onReceive(context: Context?, intent: Intent?) {
-        if(!BootService.isRunning()) with(BootPreferences.getInstance(context!!)){
+        if(BootService.getState() == States.STOPPED) with(BootPreferences.getInstance(context!!)){
             getString(KEY_SERVICE_CLASS_NAME, "null").takeUnless { it.equals("null") }.apply {
                 intent?.setClassName(context!!, this)
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context?.startForegroundService(intent)

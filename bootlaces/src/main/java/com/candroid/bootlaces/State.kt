@@ -16,6 +16,7 @@
 
 package com.candroid.bootlaces
 
-internal interface Running {
-    fun isRunning(): Boolean = false
+internal interface State {
+    fun getState(): States = States.STOPPED
+
 }

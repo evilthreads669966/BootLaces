@@ -40,14 +40,14 @@ import android.os.IBinder
  * ```
  */
 abstract class BootService : Service() {
-    internal companion object : Running {
-        private var isRunning = false
-        override fun isRunning(): Boolean = isRunning
+    internal companion object : State {
+        private var state = States.STOPPED
+        override fun getState(): States = state
     }
 
     override fun onCreate() {
         super.onCreate()
-        isRunning = true
+        state = States.STARTED
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -61,6 +61,6 @@ abstract class BootService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isRunning = false
+        state = States.STOPPED
     }
 }
