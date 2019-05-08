@@ -20,7 +20,6 @@ import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.Laces
-import com.kotlinpermissions.KotlinPermissions
 
 class MainActivity : AppCompatActivity() {
 
