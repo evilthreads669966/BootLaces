@@ -18,5 +18,4 @@ package com.candroid.bootlaces
 
 internal interface State {
     fun getState(): States = States.STOPPED
-
 }

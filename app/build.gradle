@@ -36,9 +36,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.2'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0"
-    implementation 'ru.superjob:kotlin-permissions:1.0.3'
-
     implementation project(':bootlaces')
 }

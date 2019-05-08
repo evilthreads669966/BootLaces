@@ -56,9 +56,7 @@ abstract class BootService : Service() {
         return START_STICKY;
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? { return null }
 
     override fun onDestroy() {
         super.onDestroy()

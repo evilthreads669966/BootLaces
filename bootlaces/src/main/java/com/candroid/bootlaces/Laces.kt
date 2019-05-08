@@ -35,9 +35,9 @@ class Laces{
          * @param [notificationClickActivity] the activity to start when your [BootService]'s notification is pressed
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          */
-        fun <T : Activity> tie(context: T, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
-            persistService(context, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity, noClickMode)
-            startService(context, serviceName)
+        fun <T : Activity> tie(ctx: T, serviceName: String, notificationTitle: String = "candroid", notificationContent: String = "boot laces", notificationIcon: Int = -1, notificationClickActivity: Class<Any>? = null, noClickMode: Boolean = false){
+            persistService(ctx, serviceName, notificationTitle, notificationContent, notificationIcon, notificationClickActivity, noClickMode)
+            startService(ctx, serviceName)
         }
 
         /**
@@ -60,7 +60,7 @@ class Laces{
                     putString(BootNotification.KEY_TITLE, notificationTitle)
                     putString(BootNotification.KEY_CONTENT, notificationContent)
                     putInt(BootNotification.KEY_SMALL_ICON, notificationIcon)
-                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: ctx.getActivityClassName(noClickMode))
+                    putString(BootNotification.KEY_ACTIVITY_NAME, notificationClickActivity?.name ?: ctx.getClassName(noClickMode))
                 }?.apply()
             }
         }
@@ -72,14 +72,14 @@ class Laces{
          * @param [context] instance of your current [Context]
          * @param [serviceName] name of service subclassing [BootService]
          */
-        private fun startService(context: Context, serviceName: String){
-            if(!BootService.isRunning()){
-                val intent = Intent(context, Class.forName(serviceName))
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    context.startForegroundService(intent)
-                else
-                    context.startService(intent)
-            }
+        private fun startService(ctx: Context, serviceName: String){
+            if(!BootService.isRunning())
+                with(Intent(ctx, Class.forName(serviceName))){
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        ctx.startForegroundService(this)
+                    else
+                        ctx.startService(this)
+                }
         }
 
         /**
@@ -89,7 +89,7 @@ class Laces{
          * @param [noClickMode] do nothing when your [BootService]'s notification is pressed
          * @return [String] the name of the java class containing the current context instance's scope
          */
-        private fun <T : Activity> T.getActivityClassName(noClickMode: Boolean): String?{
+        private fun <T : Activity> T.getClassName(noClickMode: Boolean): String?{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 if(!noClickMode) return javaClass.name
             return null

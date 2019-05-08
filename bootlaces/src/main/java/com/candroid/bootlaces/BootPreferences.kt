@@ -37,13 +37,12 @@ class BootPreferences{
          * @return [Context] the context where your device protected storage exists
          */
         fun getInstance(ctx: Context): SharedPreferences {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                 with(ctx.createDeviceProtectedStorageContext()){
                     moveSharedPreferencesFrom(ctx, PreferenceManager.getDefaultSharedPreferencesName(ctx))
                     return PreferenceManager.getDefaultSharedPreferences(this)
                 }
-            }else
-                return PreferenceManager.getDefaultSharedPreferences(ctx)
+            else return PreferenceManager.getDefaultSharedPreferences(ctx)
         }
     }
 }

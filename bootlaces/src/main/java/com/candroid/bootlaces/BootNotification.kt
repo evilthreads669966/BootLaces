@@ -114,7 +114,6 @@ class BootNotification {
                     action = Intent.ACTION_VIEW
                     setContentIntent(PendingIntent.getActivity(ctx, 0, this, 0))
                 }
-
             }
         }
 
