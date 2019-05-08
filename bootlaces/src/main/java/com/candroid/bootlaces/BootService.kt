@@ -43,6 +43,7 @@ abstract class BootService : Service() {
     internal companion object : State {
         private var state = States.STOPPED
         override fun getState(): States = state
+        fun isRunning() = getState() == States.STARTED
     }
 
     override fun onCreate() {

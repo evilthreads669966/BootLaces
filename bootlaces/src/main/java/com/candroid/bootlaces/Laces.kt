@@ -73,7 +73,7 @@ class Laces{
          * @param [serviceName] name of service subclassing [BootService]
          */
         private fun startService(context: Context, serviceName: String){
-            if(BootService.getState() == States.STOPPED){
+            if(!BootService.isRunning()){
                 val intent = Intent(context, Class.forName(serviceName))
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     context.startForegroundService(intent)
