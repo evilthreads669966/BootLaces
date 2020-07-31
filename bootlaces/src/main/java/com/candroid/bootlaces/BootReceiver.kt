@@ -21,22 +21,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 
-/**
- * Listens for various BOOT action system broadcasts and when received starts a service
- * whose name is a value mapped to a key in a shared preferences file.The service's name
- * value is initialized to a parameter passed in to the [Laces.tie] method
- *
- */
-internal class BootReceiver : BroadcastReceiver() {
-    companion object{
-        val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
-    }
+/*starts the service from the serviceName property in boot service configuration at device boot*/
+
+val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
+
+class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        if(!BootService.isRunning()) with(BootPreferences.getInstance(context!!)){
-            getString(KEY_SERVICE_CLASS_NAME, "null").takeUnless { it.equals("null") }.apply {
-                intent?.setClassName(context!!, this)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context?.startForegroundService(intent)
-                else context?.startService(intent)
+        if(BootServiceState.isStopped()){
+            AppContainer.getInstance(context!!).service.getServiceName()?.run {
+                intent?.setClassName(context, this)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    context.startForegroundService(intent)
+                else
+                    context.startService(intent)
             }
         }
     }
