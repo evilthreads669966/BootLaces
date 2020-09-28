@@ -14,6 +14,7 @@ allprojects {
 ```gradle
 dependencies {
         implementation 'com.github.evilthreads669966:bootlaces:1.0'
+        implementation "androidx.lifecycle:lifecycle-service:2.2.0
 }
 ```
 3. Create a Kotlin class file that extends BootService.
