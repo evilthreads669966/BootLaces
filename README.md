@@ -1,5 +1,5 @@
 # Boot Laces
-Boot Laces is an Android library that turns your service persistent.
+### Boot Laces is an Android library that turns your service persistent.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
@@ -13,13 +13,13 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.candroidtb:bootlaces:v1.4-beta'
+        implementation 'com.github.evilthreads669966:bootlaces:1.0'
 }
 ```
 3. Create a Java or Kotlin class file that extends BootService.
 ```kotlin
 import com.candroid.bootlaces.BootService
-
+//BootService is lifecycle aware so you can register an observer
 class MyService : BootService() {
     override fun onCreate() {
         super.onCreate()
@@ -33,17 +33,27 @@ class MyService : BootService() {
         <service android:name=".MyService" android:directBootAware="true"/>
     </application>
 ```
-5. Boot Laces provides you with one public method named tie. Pass in two objects: 
-- an instance of Context  
-- the name of your service  
+5. Boot Laces provides you with two functional methods named bootService and updateNotification. 
+Pass in one argument and initialize one property inside your lambda block: 
+- Activity Context  
+- initialize service property to the name of your derived service class of BootService  
 ```kotlin
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        //default background notification 
-        Laces.tie(this, MyService::class.java.name)
-       
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+    bootService(ctx){
+        service = LockService::class
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            noPress = true
+            notificationTitle = "I LOVE YOU"
+            notificationContent = "Evil Threads love you one time!"
+        }
     }
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        bootNotification(ctx){
+            notificationContent = "Evil Threads love you ${ScreenVisibility.count()} times!"
+        }
+}
 ```
 
 ## License
