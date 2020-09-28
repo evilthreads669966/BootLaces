@@ -16,7 +16,7 @@ dependencies {
         implementation 'com.github.evilthreads669966:bootlaces:1.0'
 }
 ```
-3. Create a Java or Kotlin class file that extends BootService.
+3. Create a Kotlin class file that extends BootService.
 ```kotlin
 import com.candroid.bootlaces.BootService
 //BootService is lifecycle aware so you can register an observer
