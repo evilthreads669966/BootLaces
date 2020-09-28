@@ -41,7 +41,7 @@ Pass in one argument and initialize one property inside your lambda block:
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    bootService(ctx){
+    bootService(this){
         service = LockService::class
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             noPress = true
