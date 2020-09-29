@@ -50,6 +50,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
             notificationContent = "Evil Threads love you one time!"
         }
     }
+    //bootNotification will update the content or title of your persistent background notification
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         bootNotification(ctx){
             notificationContent = "Evil Threads love you ${ScreenVisibility.count()} times!"
