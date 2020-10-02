@@ -59,7 +59,7 @@ object AppModules{
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class App: Application(){
-    val lockManager by inject<ILockManager>()
+    val lockManager by inject<LockManager>()
 
     companion object{
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { App() }
