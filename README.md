@@ -34,27 +34,30 @@ class MyService : BootService() {
         <service android:name=".MyService" android:directBootAware="true"/>
     </application>
 ```
-5. Boot Laces provides you with two functional methods named bootService and updateNotification. 
-Pass in one argument and initialize one property inside your lambda block: 
-- Activity Context  
-- initialize service property to the name of your derived service class of BootService  
+5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService
 ```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-    bootService(this){
-        service = LockService::class
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            noPress = true
-            notificationTitle = "I LOVE YOU"
-            notificationContent = "Evil Threads love you one time!"
-        }
+//this is the minimal requirement to get Boot Laces running
+bootService(this){
+    service = LockService::class
+}
+```
+6. Initialize the properties of your persistent foreground notification within bootService's lambda. If you are only supporting Oreo and up then you do not need a Build.Version check.
+```kotlin
+bootService(this){
+    service = LockService::class
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        //noPress is for whether you want your notification to bring up an Activity when pressed
+        noPress = true
+        notificationTitle = "I LOVE YOU"
+        notificationContent = "Evil Threads loves you!"
     }
-    //bootNotification will update the content or title of your persistent background notification
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        bootNotification(ctx){
-            notificationContent = "Evil Threads love you ${ScreenVisibility.count()} times!"
-        }
+}
+```
+7. Update your notification by passing any context as an argument to bootNotificaton and then initializing its' properties inside of the lambda.
+```kotlin
+bootNotification(ctx){
+    notificationTitle = "I HATE YOU"
+    notificationContent = "Evil Threads hates you!"
 }
 ```
 
@@ -62,15 +65,15 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ```
 Copyright 2019 Chris Basinger
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 ```
