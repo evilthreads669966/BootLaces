@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -64,46 +65,71 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
  *  }
  * ```
  */
-abstract class BootService : NotificationService() {
+/*a non-lifecycle aware BootService component. It does not require any libraries*/
+abstract class BootService : Service() {
+    private val notifProxy = NotificationProxy()
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
         BootServiceState.setRunning()
+        notifProxy.onStart(this)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        notifProxy.onCreate(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         BootServiceState.setStopped()
+        notifProxy.onDestroy(this)
     }
 }
 
-/*base class that handles the creation of the persistent background service notification requirement*/
-sealed class NotificationService: LifecycleService(){
-   private val mUpdateReceiver by lazy { UpdateReceiver() }
+/*a lifecycle aware BootService component that allows for registering an observable. It requires the androidx lifecycle-services library*/
+abstract class LifecycleBootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
+    private val notifProxy = NotificationProxy()
 
     override fun getLifecycle() = mDispatcher.lifecycle
 
     override fun onCreate() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            LocalBroadcastManager.getInstance(applicationContext).registerReceiver(mUpdateReceiver, IntentFilter(Actions.ACTION_UPDATE))
+        notifProxy.onCreate(this)
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
         mDispatcher.onServicePreSuperOnStart()
         super.onStart(intent, startId)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            bootNotification()
+        notifProxy.onStart(this)
     }
-
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
         super.onDestroy()
+        notifProxy.onDestroy(this)
+    }
+}
+
+/*everything related to handling the persistent foreground notification is delegated to this object*/
+internal class NotificationProxy{
+    private val mUpdateReceiver by lazy { UpdateReceiver() }
+
+    fun onStart(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(mUpdateReceiver)
+            bootNotification(ctx)
+    }
+
+    fun onCreate(ctx: Service){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            LocalBroadcastManager.getInstance(ctx).registerReceiver(mUpdateReceiver, IntentFilter(Actions.ACTION_UPDATE))
+    }
+
+    fun onDestroy(ctx: Service){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            LocalBroadcastManager.getInstance(ctx).unregisterReceiver(mUpdateReceiver)
     }
 
     inner class UpdateReceiver(): BroadcastReceiver(){
@@ -123,9 +149,10 @@ sealed class NotificationService: LifecycleService(){
             AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: -1)
         }
     }
+
     /*create boot service notification*/
-    private fun bootNotification() {
-        BootLacesServiceImpl.createChannel(this)
-        startForeground(BootLacesServiceImpl.getId(this), AppContainer.getInstance(this).service.create())
+    internal fun bootNotification(ctx: Service) {
+        BootLacesServiceImpl.createChannel(ctx)
+        ctx.startForeground(BootLacesServiceImpl.getId(ctx), AppContainer.getInstance(ctx).service.create())
     }
 }

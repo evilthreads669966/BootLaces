@@ -14,15 +14,22 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:1.0'
+        implementation 'com.github.evilthreads669966:bootlaces:2.0'
+        //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
 ```
 3. Create a Kotlin class file that extends BootService.
 ```kotlin
-import com.candroid.bootlaces.BootService
 //BootService is lifecycle aware so you can register an observer
 class MyService : BootService() {
+    override fun onCreate() {
+        super.onCreate()
+        //do something here
+    }
+}
+//if you want a lifecycle aware BootService for registering an observer. Then use this observable version of BootService
+class MyService : LifecycleBootService() {
     override fun onCreate() {
         super.onCreate()
         //do something here
