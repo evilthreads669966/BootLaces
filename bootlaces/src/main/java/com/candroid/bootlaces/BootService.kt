@@ -19,6 +19,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -68,6 +69,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 /*a non-lifecycle aware BootService component. It does not require any libraries*/
 abstract class BootService : Service() {
     private val notifProxy = NotificationProxy()
+
+    override fun onBind(p0: Intent?): IBinder? = null
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
