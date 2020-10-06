@@ -19,6 +19,7 @@ import android.content.IntentFilter
 import android.os.PowerManager
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.BootService
+import com.candroid.bootlaces.LifecycleBootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -47,7 +48,7 @@ import kotlinx.coroutines.yield
 */
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class LockService : BootService(){
+class LockService : LifecycleBootService(){
     private lateinit var rec: CloseDialogReceiver
 
     init {
