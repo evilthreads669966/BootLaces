@@ -62,7 +62,8 @@ data class BootNotification(
 
 
 /*initialize bootservice with configuration properties*/
-fun bootService(ctx: AppCompatActivity, config: Configuration.() -> Unit){
+fun bootService(ctx: AppCompatActivity, payload: (() -> Unit)? = null ,config: Configuration.() -> Unit){
+    deferredPayload = payload
     configuration.run{
         this.ctx = ctx
         this.config()

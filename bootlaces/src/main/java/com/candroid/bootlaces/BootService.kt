@@ -22,6 +22,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 /*
             (   (                ) (             (     (
@@ -90,10 +91,18 @@ abstract class BootService : Service() {
     }
 }
 
+internal var deferredPayload: (() -> Unit)? = null
+
 /*a lifecycle aware BootService component that allows for registering an observable. It requires the androidx lifecycle-services library*/
 abstract class LifecycleBootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
     private val notifProxy = NotificationProxy()
+
+    init {
+        lifecycleScope.launchWhenCreated {
+            deferredPayload?.invoke()
+        }
+    }
 
     override fun getLifecycle() = mDispatcher.lifecycle
 
