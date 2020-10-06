@@ -17,6 +17,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -53,7 +54,9 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun startService(){
-        bootService(ctx){
+        bootService(ctx, {
+            Log.d("PAYLOAD", "I'm a payload")
+        }){
             service = LockService::class
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                 noPress = true
