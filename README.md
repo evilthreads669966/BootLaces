@@ -21,7 +21,6 @@ dependencies {
 ```
 3. Create a Kotlin class file that extends BootService.
 ```kotlin
-//BootService is lifecycle aware so you can register an observer
 class MyService : BootService() {
     override fun onCreate() {
         super.onCreate()
