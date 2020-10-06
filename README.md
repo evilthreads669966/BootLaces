@@ -19,7 +19,7 @@ dependencies {
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
 ```
-3. Create a Kotlin class file that extends BootService.
+3. Create a Kotlin class file that extends BootService or LifecycleBootService
 ```kotlin
 class MyService : BootService() {
     override fun onCreate() {
