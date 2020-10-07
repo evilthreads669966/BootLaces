@@ -91,7 +91,7 @@ abstract class BootService : Service() {
     }
 }
 
-internal var deferredPayload: (() -> Unit)? = null
+internal var deferredPayload: (suspend () -> Unit)? = null
 
 /*a lifecycle aware BootService component that allows for registering an observable. It requires the androidx lifecycle-services library*/
 abstract class LifecycleBootService: LifecycleService() {
