@@ -62,11 +62,10 @@ bootService(this){
 
 //if you want to pass a payload to run off the main thread in your service then supply a function as an argument to bootService
 //this only works if you're using LifecycleBootService
-bootService(ctx, payload = {
-    Keylogger.subscribe(this){ entry ->
-    	Log.d("KEYLOGGER", entry.toString())
-    }
-}){
+val myPayload = suspend {
+    //do something
+}
+bootService(this, payload = myPayload){
     service = LockService::class
 }
 ```
