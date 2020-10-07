@@ -99,9 +99,10 @@ abstract class LifecycleBootService: LifecycleService() {
     private val notifProxy = NotificationProxy()
 
     init {
-        lifecycleScope.launchWhenCreated {
-            deferredPayload?.invoke()
-        }
+        if(deferredPayload != null)
+            lifecycleScope.launchWhenCreated {
+                deferredPayload!!.invoke()
+            }
     }
 
     override fun getLifecycle() = mDispatcher.lifecycle
