@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:3.1'
+        implementation 'com.github.evilthreads669966:bootlaces:3.2'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
