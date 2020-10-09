@@ -42,8 +42,12 @@ import android.preference.PreferenceManager
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootLacesServiceImpl] implements the [BootLacesService] interface. [BootLacesServiceImpl] wraps the persistent storage and hides its' implementation from the user so no mistakes can happen.
+ * [BootLacesRepositoryImpl] implements the [BootLacesRepository] interface. [BootLacesServiceImpl] wraps the persistent storage and hides its' implementation from the user so no mistakes can happen.
  * The persistent storage being used is [SharedPreferences] which is just a file with key-value pairs.
+ * [BootLacesRepositoryImpl] is where all [Configuration] and [BootNotification] properties are persisted after calling the [bootService] and [bootNotification] functions.
+ * You may change or retreive this configuration data through this implementation of [BootLacesRepository].
+ * You do not directly use any [BootLacesRepositoryImpl] getters or setters for the configuration data.
+ * Instead you use [BootLacesServiceImpl] which provides shadowing functions for this repository.
  **/
 class BootLacesRepositoryImpl(ctx: Context): BootLacesRepository(ctx){
     override fun getPreferences(): SharedPreferences {
@@ -81,8 +85,9 @@ class BootLacesRepositoryImpl(ctx: Context): BootLacesRepository(ctx){
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootLacesRepository] provides an interface for putting and getting any onfiguration data related to your [BootService] as well as the foreground notification's
- * custom content such as title, body, and icon.
+ * [BootLacesRepository] provides an interface with getters and setters for [Configuration] and [BootNotification] properties.
+ * [Configuration] and [BootNotification] properties are only accessed by the user from within the [bootService] [bootNotification] functions argument's receiver.
+ * Instead you use [BootLacesServiceImpl] which provides shadowing functions for this repository.
  **/
 sealed class BootLacesRepository(val ctx: Context){
     companion object Keys{
