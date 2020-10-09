@@ -16,8 +16,10 @@ package com.candroid.bootlaces
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Build
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -47,17 +49,20 @@ import android.os.Build
  * [BootReceiver] is responsible for starting [BootService] at boot time.
  **/
 
-val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
+val KEY_SERVICE = "KEY_SERVICE_CLASS_NAME"
 
-class BootReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent?) {
-        if(BootServiceState.isStopped()){
-            AppContainer.getInstance(context!!).service.getServiceName()?.run {
-                intent?.setClassName(context, this)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    context.startForegroundService(intent)
-                else
-                    context.startService(intent)
+internal class BootReceiver : BroadcastReceiver() {
+    override fun onReceive(ctx: Context?, intent: Intent?) {
+        if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
+            runBlocking {
+                val bootServiceConfig = AppContainer.getInstance(ctx!!).repository.getBootNotificationConfig().firstOrNull()
+                if(bootServiceConfig != null && bootServiceConfig.service != null){
+                    intent?.setClassName(ctx, bootServiceConfig.service!!)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        ctx.startForegroundService(intent)
+                    else
+                        ctx.startService(intent)
+                }
             }
         }
     }
