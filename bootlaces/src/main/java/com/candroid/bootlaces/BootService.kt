@@ -145,7 +145,7 @@ abstract class LifecycleBootService: LifecycleService() {
  * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootLacesServiceImpl.create] function to create the foreground notification in [onStart]
  **/
 internal class NotificationProxy{
-    private val mUpdateReceiver by lazy { UpdateReceiver() }
+    private lateinit var receiver: UpdateReceiver
 
     fun onStart(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -153,31 +153,45 @@ internal class NotificationProxy{
     }
 
     fun onCreate(ctx: Service){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            LocalBroadcastManager.getInstance(ctx).registerReceiver(mUpdateReceiver, IntentFilter(Actions.ACTION_UPDATE))
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val filter = IntentFilter(Actions.ACTION_UPDATE)
+            receiver = UpdateReceiver()
+            LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
+        }
     }
 
     fun onDestroy(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            LocalBroadcastManager.getInstance(ctx).unregisterReceiver(mUpdateReceiver)
+            LocalBroadcastManager.getInstance(ctx).unregisterReceiver(receiver)
     }
 
-
+    /**
+     * @author Chris Basinger
+     * @email evilthreads669966@gmail.com
+     * @date 10/09/20
+     *
+     * [NotificationProxy.UpdateReceiver] subscribes to the [Actions.ACTION_UPDATE] local broadcast and is managed within the scope of [NotificationProxy].
+     * The user calls [bootNotification] passing in one or more [BootNotification] properties to update the current persistent [Notifcation].
+     * [bootNotification] then sends a broadcast with an intent containing the [Actions.ACTION_UPDATE] action, and a [Notification] title, body, and icon.
+     * After processing the new [Notification] data, [NotificationProxy.UpdateReceiver] then calls [BootLacesServiceImpl.update] to post a new [Notification] reflecting the changes.
+     * */
     inner class UpdateReceiver(): BroadcastReceiver(){
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            var title: String? = null
-            var content: String? = null
-            var icon: Int? = null
-            if(intent!!.hasExtra(BootLacesRepository.KEY_TITLE)){
-                title = intent.getStringExtra(BootLacesRepository.KEY_TITLE)
+            if(intent?.action.equals(Actions.ACTION_UPDATE)){
+                var title: String? = null
+                var content: String? = null
+                var icon: Int? = null
+                if(intent!!.hasExtra(BootLacesRepository.KEY_TITLE)){
+                    title = intent.getStringExtra(BootLacesRepository.KEY_TITLE)
+                }
+                if(intent.hasExtra(BootLacesRepository.KEY_CONTENT)){
+                    content = intent.getStringExtra(BootLacesRepository.KEY_CONTENT)
+                }
+                if(intent.hasExtra(BootLacesRepository.KEY_SMALL_ICON)){
+                    icon = intent.getIntExtra(BootLacesRepository.KEY_SMALL_ICON, -1)
+                }
+                AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: -1)
             }
-            if(intent.hasExtra(BootLacesRepository.KEY_CONTENT)){
-                content = intent.getStringExtra(BootLacesRepository.KEY_CONTENT)
-            }
-            if(intent.hasExtra(BootLacesRepository.KEY_SMALL_ICON)){
-                icon = intent.getIntExtra(BootLacesRepository.KEY_SMALL_ICON, -1)
-            }
-            AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: -1)
         }
     }
 
