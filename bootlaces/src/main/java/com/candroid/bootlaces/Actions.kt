@@ -32,6 +32,13 @@ package com.candroid.bootlaces
 ............\..............(
 ..............\.............\...
 */
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [Actions] holds the actions used for broadcasting a request to change [BootService]'s foreground [Notification] title, body, or icon.
+ **/
 object Actions{
     val ACTION_UPDATE = "ACTION_UPDATE"
 }

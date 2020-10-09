@@ -14,8 +14,6 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.Context
-import org.koin.android.ext.koin.androidContext
-import org.koin.dsl.module
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -34,16 +32,17 @@ import org.koin.dsl.module
 .........\.................'...../
 ..........''...\.......... _.·´
 ............\..............(
-..............\.............\...
-*/
-val libraryModule = module {
-    single { BootLacesRepositoryImpl(androidContext()) }
-    single { BootLacesServiceImpl(get(), androidContext()) }
-}
-
+..............\.............\...*/
+ /**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [AppContainer contains a singleton reference to [BootLacesService]. [BootLacesService] handles all transactions regarding configuration data which is stored in its' [BootLacesRepository].
+ * All configuration data regarding [BootService] its' foreground notification are stored [BootLacesRepository]. It is important to only use this singelton's instance of [BootLacesService].
+ **/
 class AppContainer(val ctx: Context){
     val service by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { BootLacesServiceImpl(BootLacesRepositoryImpl(ctx),ctx) }
-    //val service by inject<BootLacesServiceImpl>(clazz = BootLacesServiceImpl::class.java)
     companion object{
         private var INSTANCE: AppContainer? = null
         fun getInstance(ctx: Context): AppContainer{

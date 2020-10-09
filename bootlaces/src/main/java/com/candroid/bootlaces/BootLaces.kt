@@ -13,10 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlin.reflect.KClass
 /*
@@ -41,19 +41,37 @@ import kotlin.reflect.KClass
 */
 private val configuration = Configuration()
 
-/*holds the configuration properties for the boot service*/
-data class Configuration(
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [Configuration] is used to temporarily hold the configuration data that is persisted in [BootLacesRepository].
+ * [bootService] takes a named function as an argument with a receiver object of type [Configuration].
+ * It is only within the [bootService] function that you would ever access this object. You never instatiate [Configuration] on your own.
+ * [Configuration] contains all [BootService] and foreground [Notification] data besides the notification channel and name.
+ **/data class Configuration(
     var service: KClass<*>? = null,
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
     var notificationIcon: Int = -1,
-    var notificationClickActivity: Class<AppCompatActivity>? = null,
+    var notificationClickActivity: Class<Activity>? = null,
     var noPress: Boolean = false) {
-    lateinit var ctx: AppCompatActivity
+    lateinit var ctx: Activity
     val serviceName: String?
         get() =  service?.java?.name
 }
 
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootNotification] is a data holder for [BootService] persistent foreground [Notification].
+ * It holds the [Notification] title, body, and icon.
+ * You only access [BootNotification] indirectly through the [bootNotification] function with a functional argument with a receiver of type [BootNotification].
+ * Never instatiate [BootNotification]. You only use the accompanying [bootNotification] function to access its' properties.
+ **/
 data class BootNotification(
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
@@ -61,8 +79,16 @@ data class BootNotification(
 )
 
 
-/*initialize bootservice with configuration properties*/
-fun bootService(ctx: AppCompatActivity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [bootService] is a function that allows you to initialize [BootService] configuartion properties through a functional argument with a receiver of type [Configuration]
+ * [bootService] should be called in your launcher [Activity.onCreate] or [Activity.onResume] lifecycle callbacks.
+ * [bootService] is responsible for starting your [BootService] for the first time the application is used after install.
+ * Once the device has been restarted, the [BootReceiver] will handle starting [BootService]
+ **/fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
     deferredPayload = payload
     configuration.run{
         this.ctx = ctx

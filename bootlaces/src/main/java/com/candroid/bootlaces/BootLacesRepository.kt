@@ -37,6 +37,14 @@ import android.preference.PreferenceManager
 ............\..............(
 ..............\.............\...
 */
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootLacesServiceImpl] implements the [BootLacesService] interface. [BootLacesServiceImpl] wraps the persistent storage and hides its' implementation from the user so no mistakes can happen.
+ * The persistent storage being used is [SharedPreferences] which is just a file with key-value pairs.
+ **/
 class BootLacesRepositoryImpl(ctx: Context): BootLacesRepository(ctx){
     override fun getPreferences(): SharedPreferences {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
@@ -68,6 +76,14 @@ class BootLacesRepositoryImpl(ctx: Context): BootLacesRepository(ctx){
     override fun fetchActivity() = mPrefs.getString(KEY_ACTIVITY_NAME, null)
 }
 
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootLacesRepository] provides an interface for putting and getting any onfiguration data related to your [BootService] as well as the foreground notification's
+ * custom content such as title, body, and icon.
+ **/
 sealed class BootLacesRepository(val ctx: Context){
     companion object Keys{
         val KEY_TITLE = "KEY_TITLE"

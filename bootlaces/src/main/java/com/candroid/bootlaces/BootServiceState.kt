@@ -12,6 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
+
+import android.content.SharedPreferences
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -32,7 +35,16 @@ package com.candroid.bootlaces
 ............\..............(
 ..............\.............\...
 */
-/*lifecycle state awareness for BootService*/
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootServiceState] holds the [BootService] current lifecycle state.
+ * The [BootServiceState] is set in [BootService] lifecycle callback methods.
+ * [Service.onCreate] sets the state to started.
+ * [Service.onDestroy] sets the state to stopped.
+ **/
 object BootServiceState {
     private var state = States.STOPPED
 

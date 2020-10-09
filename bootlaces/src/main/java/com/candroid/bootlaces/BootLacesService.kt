@@ -43,6 +43,14 @@ import com.candroid.bootlaces.BootLacesRepository.Keys.KEY_TITLE
 ............\..............(
 ..............\.............\...
 */
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootLacesServiceImpl] implements the functionality for creating, updating, and setting the channel id and name. Beneath this class is
+ * already implemented functionality that allows for CRUD operations that allow you to set and retreive configuration data relating to your [BootService] and the content for your foreground notification
+ **/
 class BootLacesServiceImpl(repo: BootLacesRepository, ctx: Context): BootLacesService(repo, ctx){
     companion object Util : BootNotificationUtil() {
         override fun setContentIntent(ctx: Context, builder: NotificationCompat.Builder, prefs: SharedPreferences) {
@@ -101,7 +109,14 @@ class BootLacesServiceImpl(repo: BootLacesRepository, ctx: Context): BootLacesSe
     }
 }
 
-
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootNotificationUtil] provides the interface for configuring foreground notification data for the operating system such as its' channel id and name.
+ * This configuring data is less useful to the user as it is highly unlikely that you will need to provide much more than an integer and a name. Neither are very important to the functionality of your [BootService] aside from being set.
+ **/
 abstract class BootNotificationUtil{
     /*set activity screen to display when boot service notification is pressed*/
     internal abstract fun setContentIntent(ctx: Context, builder: NotificationCompat.Builder, prefs: SharedPreferences)
@@ -116,6 +131,15 @@ abstract class BootNotificationUtil{
     internal abstract fun getChannelName(ctx: Context): String
 }
 
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootLacesService] provides all CRUD operations for the [BootService] and its' foreground notification's configuration data to [BootLacesServiceImpl]
+ * All CRUD operations in this class are responsible for [BootService] and foreground notification configuration data. It must be implemented by a subclass
+ * where the user of the library is responsible for overriding abstract functions for updating and creating the foreground notification.
+ **/
 sealed class BootLacesService(val repo: BootLacesRepository, val ctx: Context){
     /*internal function for creating notification object*/
     internal abstract fun create(): Notification

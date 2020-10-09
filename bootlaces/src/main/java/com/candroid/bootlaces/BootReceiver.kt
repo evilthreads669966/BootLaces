@@ -16,6 +16,7 @@ package com.candroid.bootlaces
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 /*
             (   (                ) (             (     (
@@ -37,8 +38,14 @@ import android.os.Build
 ............\..............(
 ..............\.............\...
 */
-/*starts the service from the serviceName property in boot service configuration at device boot*/
-val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * [BootReceiver] subscribes to BOOT_COMPLETED system broadcasts which are broadcast once the device has finished turning on or rebooting.
+ * [BootReceiver] is responsible for starting [BootService] at boot time.
+ **/val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
