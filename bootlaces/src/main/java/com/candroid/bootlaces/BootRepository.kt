@@ -41,7 +41,7 @@ import java.io.IOException
 ..............\.............\...
 */
 internal class BootRepository(ctx: Context) {
-    internal val dataStore: DataStore<Preferences> = ctx.applicationContext.createDataStore(name = NAME)
+    private val dataStore: DataStore<Preferences> = ctx.applicationContext.createDataStore(name = NAME)
 
     companion object{
         val KEY_TITLE = "KEY_TITLE"
@@ -50,32 +50,11 @@ internal class BootRepository(ctx: Context) {
         val KEY_ACTIVITY = "KEY_ACTIVITY"
         val KEY_SERVICE = "KEY_SERVICE"
         val NAME = "myrepository"
-        val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
-        val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)
-        val PREF_KEY_ICON = preferencesKey<Int>(KEY_ICON)
-        val PREF_KEY_SERVICE = preferencesKey<String>(KEY_SERVICE)
-        val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
-    }
-
-    fun getTitle() = dataStore.data.catch {
-        if (it is IOException)
-            emit(emptyPreferences())
-    }.map { prefs ->
-        prefs[PREF_KEY_TITLE]
-    }
-
-    fun getContent() = dataStore.data.catch {
-        if (it is IOException)
-            emit(emptyPreferences())
-    }.map { prefs ->
-        prefs[PREF_KEY_CONTENT]
-    }
-
-    fun getIcon() = dataStore.data.catch {
-        if (it is IOException)
-            emit(emptyPreferences())
-    }.map { prefs ->
-        prefs[PREF_KEY_ICON]
+        private val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
+        private val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)
+        private val PREF_KEY_ICON = preferencesKey<Int>(KEY_ICON)
+        private val PREF_KEY_SERVICE = preferencesKey<String>(KEY_SERVICE)
+        private val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
     }
 
     fun getBootNotificationConfig() = dataStore.data.catch {
@@ -91,13 +70,6 @@ internal class BootRepository(ctx: Context) {
         }
     }
 
-    fun getActivity() = dataStore.data.catch {
-        if (it is IOException)
-            emit(emptyPreferences())
-    }.map { prefs ->
-        prefs[PREF_KEY_ACTIVITY]
-    }
-
     suspend fun setNotification(service: String?, activity: String?, title: String?, content: String?, icon: Int?) = dataStore.edit { prefs ->
         if (service != null)
             prefs[PREF_KEY_SERVICE] = service
@@ -110,8 +82,6 @@ internal class BootRepository(ctx: Context) {
         if (icon != null)
             prefs[PREF_KEY_ICON] = icon
     }
-
-
 }
 
 internal data class BootServiceConfig(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)
