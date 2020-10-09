@@ -47,7 +47,8 @@ import android.preference.PreferenceManager
  * [BootLacesRepositoryImpl] is where all [Configuration] and [BootNotification] properties are persisted after calling the [bootService] and [bootNotification] functions.
  * You may change or retreive this configuration data through this implementation of [BootLacesRepository].
  * You do not directly use any [BootLacesRepositoryImpl] getters or setters for the configuration data.
- * Instead you use [BootLacesServiceImpl] which provides shadowing functions for this repository.
+ * Instead you use [bootService] and [bootNotification] which provides you with a way to modify these properties from within a functional named argument's receiver type.
+ * The receiver type of both [bootService] and [bootNotification] provides you access to the properties of [Configuration] and [BootNotification]. Any configuration properties that are changed will persisted for you under the hood.
  **/
 class BootLacesRepositoryImpl(ctx: Context): BootLacesRepository(ctx){
     override fun getPreferences(): SharedPreferences {
