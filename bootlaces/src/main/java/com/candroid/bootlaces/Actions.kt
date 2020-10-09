@@ -38,6 +38,8 @@ package com.candroid.bootlaces
  * @date 10/09/20
  *
  * [Actions] holds the actions used for broadcasting a request to change [BootService]'s foreground [Notification] title, body, or icon.
+ * [NotificationProxy.UpdateReceiver] registers with an intent filter for [Actions.ACTION_UPDATE]. [Actions.ACTION_UPDATE] is broadcast only from within the [bootNotification]
+ * function if the [BootNotification] receivers' properties are changed to different values than those already stored in [BootLacesRepositoryImpl].
  **/
 object Actions{
     val ACTION_UPDATE = "ACTION_UPDATE"

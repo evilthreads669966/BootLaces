@@ -48,8 +48,10 @@ import com.candroid.bootlaces.BootLacesRepository.Keys.KEY_TITLE
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootLacesServiceImpl] implements the functionality for creating, updating, and setting the channel id and name. Beneath this class is
- * already implemented functionality that allows for CRUD operations that allow you to set and retreive configuration data relating to your [BootService] and the content for your foreground notification
+ * [BootLacesServiceImpl] implements the functionality defined in [BootLacesService] for setting and getting persistent configuration data stored in [BootLacesRepository].
+ * [BootLacesRepositoryImpl] is also responsible for implementing [BootNotificationUtil] which contains methods that handle Android OS specific configuration data regarding a
+ * persistent [Notification] that are not a part of [BootNotification]'s properties. [BootLacesServiceImpl] is the only class you use to access [Configuration] and
+ * [BootNotification] data as well for creating or directly updating [Notification].
  **/
 class BootLacesServiceImpl(repo: BootLacesRepository, ctx: Context): BootLacesService(repo, ctx){
     companion object Util : BootNotificationUtil() {
@@ -114,8 +116,9 @@ class BootLacesServiceImpl(repo: BootLacesRepository, ctx: Context): BootLacesSe
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootNotificationUtil] provides the interface for configuring foreground notification data for the operating system such as its' channel id and name.
- * This configuring data is less useful to the user as it is highly unlikely that you will need to provide much more than an integer and a name. Neither are very important to the functionality of your [BootService] aside from being set.
+ * [BootNotificationUtil] is responsible for getting and setting [Notifcation] configuration data related to the Android operating system and is not found in
+ * [BootNotification]'s properties. [BootNotificationUtil] is used only by [BootLacesServiceImpl].
+ * [BootLacesService] is not aware of this object.
  **/
 abstract class BootNotificationUtil{
     /*set activity screen to display when boot service notification is pressed*/
@@ -136,9 +139,11 @@ abstract class BootNotificationUtil{
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootLacesService] provides all CRUD operations for the [BootService] and its' foreground notification's configuration data to [BootLacesServiceImpl]
- * All CRUD operations in this class are responsible for [BootService] and foreground notification configuration data. It must be implemented by a subclass
- * where the user of the library is responsible for overriding abstract functions for updating and creating the foreground notification.
+ * [BootLacesService] handles all interactions with the configuartion storage for [Configuration] amd [BootNotification].
+ * You never instantiate [BootLacesRepository]. [BootLacesService] also provides transaction functions for retreiving, inserting, and replacing multiple types [BootNotification] properties at once.
+ * [BootLacesService.create] is a convenience method for creating a [Notification] that is used only by [NotificationProxy] in [NotificationProxy.onStart] and [NotificationProxy.bootNotification]
+ * [BootLacesService.update] is a convenience method for updating the [Notification] title. body, and icon that is used only by [NotificationProxy.UpdateReceiver].
+ * [BootLacesService] has a corresponding method for every one of [BootLacesRepository]'s methods for inserting, replacing, and retreiving [Configuration] and [BootNotification] data that is persisted in storage.
  **/
 sealed class BootLacesService(val repo: BootLacesRepository, val ctx: Context){
     /*internal function for creating notification object*/
