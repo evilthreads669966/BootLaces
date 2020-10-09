@@ -45,7 +45,9 @@ import android.os.Build
  *
  * [BootReceiver] subscribes to BOOT_COMPLETED system broadcasts which are broadcast once the device has finished turning on or rebooting.
  * [BootReceiver] is responsible for starting [BootService] at boot time.
- **/val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
+ **/
+
+val KEY_SERVICE_CLASS_NAME = "KEY_SERVICE_CLASS_NAME"
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {

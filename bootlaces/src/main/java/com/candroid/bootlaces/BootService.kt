@@ -60,7 +60,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 abstract class BootService : Service() {
     private val notifProxy = NotificationProxy()
 
-    override fun onBind(p0: Intent?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStart(intent: Intent?, startId: Int) {
         super.onStart(intent, startId)
@@ -112,6 +112,7 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         notifProxy.onCreate(this)
+        BootServiceState.setRunning()
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -124,6 +125,7 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnDestroy()
         super.onDestroy()
         notifProxy.onDestroy(this)
+        BootServiceState.setStopped()
     }
 }
 
@@ -141,7 +143,8 @@ abstract class LifecycleBootService: LifecycleService() {
  * [Actions.ACTION_UPDATE] is sent from [bootNotification] everytime the foreground notification's content is updated. [bootNotification] takes in notification configuration data and persists it and then sends a broadcast to [UpdateReceiver] with this information.
  * [UpdateReceiver] is responsible for updating foreground notification title, body, and icon at runtime after it has already been created.
  * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootLacesServiceImpl.create] function to create the foreground notification in [onStart]
- **/internal class NotificationProxy{
+ **/
+internal class NotificationProxy{
     private val mUpdateReceiver by lazy { UpdateReceiver() }
 
     fun onStart(ctx: Service){

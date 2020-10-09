@@ -18,7 +18,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.BootService
 import com.candroid.bootlaces.LifecycleBootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +25,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.yield
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
