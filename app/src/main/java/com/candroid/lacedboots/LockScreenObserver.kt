@@ -54,11 +54,7 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun startService(){
-        val payload = suspend {
-            Log.d("PAYLOAD", "I'm a payload")
-            Unit
-        }
-        bootService(ctx, payload = payload){
+        bootService(ctx){
             service = LockService::class
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                 noPress = true

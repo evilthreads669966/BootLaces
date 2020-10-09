@@ -17,8 +17,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -50,11 +54,12 @@ private val configuration = Configuration()
  * [bootService] takes a named function as an argument with a receiver object of type [Configuration].
  * It is only within the [bootService] function that you would ever access this object. You never instatiate [Configuration] on your own.
  * [Configuration] contains all [BootService] and foreground [Notification] data besides the notification channel and name.
- **/data class Configuration(
+ **/
+data class Configuration(
     var service: KClass<*>? = null,
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
-    var notificationIcon: Int = -1,
+    var notificationIcon: Int = android.R.drawable.sym_def_app_icon,
     var notificationClickActivity: Class<Activity>? = null,
     var noPress: Boolean = false) {
     lateinit var ctx: Activity
@@ -75,7 +80,7 @@ private val configuration = Configuration()
 data class BootNotification(
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
-    var notificationIcon: Int = -1
+    var notificationIcon: Int = android.R.drawable.sym_def_app_icon
 )
 
 
@@ -88,15 +93,25 @@ data class BootNotification(
  * [bootService] should be called in your launcher [Activity.onCreate] or [Activity.onResume] lifecycle callbacks.
  * [bootService] is responsible for starting your [BootService] for the first time the application is used after install.
  * Once the device has been restarted, the [BootReceiver] will handle starting [BootService]
- **/fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
+ **/
+fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
     deferredPayload = payload
     configuration.run{
         this.ctx = ctx
         this.config()
     }
-    requireNotNull(configuration.serviceName)
-    ctx.save()
-    ctx.load()
+    runBlocking {
+        AppContainer.getInstance(ctx).repository.setNotification(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
+        val bootNotifConfig = AppContainer.getInstance(ctx).repository.getBootNotificationConfig().firstOrNull()
+        Log.d("BOOTLACES", bootNotifConfig.toString())
+        if(bootNotifConfig != null && bootNotifConfig.service != null){
+            val intent = Intent(ctx, Class.forName(bootNotifConfig.service!!))
+            if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                ctx.startForegroundService(intent)
+            else
+                ctx.startService(intent)
+        }
+    }
 }
 
 /*update title and/or content text and/or icon of boot service notification*/
@@ -106,43 +121,9 @@ fun bootNotification(ctx: Context, config: BootNotification.() -> Unit){
     }
     val updateIntent = Intent().apply {
         action = Actions.ACTION_UPDATE
-        putExtra(BootLacesRepository.Keys.KEY_TITLE, notifcation.notificationTitle)
-        putExtra(BootLacesRepository.Keys.KEY_CONTENT, notifcation.notificationContent)
-        putExtra(BootLacesRepository.Keys.KEY_SMALL_ICON, notifcation.notificationIcon)
+        putExtra(BootRepository.KEY_TITLE, notifcation.notificationTitle)
+        putExtra(BootRepository.KEY_CONTENT, notifcation.notificationContent)
+        putExtra(BootRepository.KEY_ICON, notifcation.notificationIcon)
     }
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(updateIntent)
-}
-
-/*save boot service configuration properties for reboot*/
-private fun Context.save(){
-    val serviceClassName = AppContainer.getInstance(this).service.getServiceName()
-    if(serviceClassName == null){
-        AppContainer.getInstance(this).service.run {
-            configuration.serviceName?.let { setServiceName(it) }
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                setNotificationTitle(configuration.notificationTitle)
-                setNotificationContent(configuration.notificationContent)
-                setNotificationIcon(configuration.notificationIcon)
-                configuration.takeUnless { it.noPress }?.let { setNotificationActivity(it.notificationClickActivity?.name ?: getContextClassName()!!) }
-            }
-        }
-    }
-}
-
-/*start boot service*/
-private fun Context.load(){
-    if(BootServiceState.isStopped())
-        with(Intent(this, Class.forName(configuration.serviceName ?: "null"))){
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                this@load.startForegroundService(this)
-            else
-                this@load.startService(this)
-        }
-}
-
-/*get class name for activity*/
-private fun Context.getContextClassName(): String?{
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-        if(!configuration.noPress) return javaClass.name
-    return null
 }

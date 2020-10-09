@@ -14,6 +14,7 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.Context
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -41,8 +42,9 @@ import android.content.Context
  * [AppContainer contains a singleton reference to [BootLacesService]. [BootLacesService] handles all transactions regarding configuration data which is stored in its' [BootLacesRepository].
  * All configuration data regarding [BootService] its' foreground notification are stored [BootLacesRepository]. It is important to only use this singelton's instance of [BootLacesService].
  **/
-class AppContainer(val ctx: Context){
-    val service by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { BootLacesServiceImpl(BootLacesRepositoryImpl(ctx),ctx) }
+internal class AppContainer(ctx: Context){
+     val repository = BootRepository(ctx)
+     val service = BootNotificationService(ctx)
     companion object{
         private var INSTANCE: AppContainer? = null
         fun getInstance(ctx: Context): AppContainer{

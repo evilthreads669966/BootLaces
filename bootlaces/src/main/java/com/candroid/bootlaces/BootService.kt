@@ -24,6 +24,9 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.candroid.bootlaces.NotificationProxy.UpdateReceiver
+import kotlinx.coroutines.*
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -59,13 +62,16 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
  **/
 abstract class BootService : Service() {
     private val notifProxy = NotificationProxy()
-
+    lateinit var job: Job
     override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onStart(intent: Intent?, startId: Int) {
-        super.onStart(intent, startId)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         BootServiceState.setRunning()
-        notifProxy.onStart(this)
+        runBlocking {
+            notifProxy.onStart(this@BootService)
+        }
+        return START_STICKY
     }
 
     override fun onCreate() {
@@ -77,6 +83,7 @@ abstract class BootService : Service() {
         super.onDestroy()
         BootServiceState.setStopped()
         notifProxy.onDestroy(this)
+        job.cancel()
     }
 }
 
@@ -104,27 +111,35 @@ abstract class LifecycleBootService: LifecycleService() {
             lifecycleScope.launchWhenCreated {
                 deferredPayload!!.invoke()
             }
+        lifecycleScope.launchWhenStarted {
+            notifProxy.onStart(this@LifecycleBootService)
+        }
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        super.onBind(intent)
+        return null
     }
 
     override fun getLifecycle() = mDispatcher.lifecycle
 
     override fun onCreate() {
         mDispatcher.onServicePreSuperOnCreate()
+        BootServiceState.setRunning()
         super.onCreate()
         notifProxy.onCreate(this)
-        BootServiceState.setRunning()
     }
 
-    override fun onStart(intent: Intent?, startId: Int) {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mDispatcher.onServicePreSuperOnStart()
-        super.onStart(intent, startId)
-        notifProxy.onStart(this)
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
-        super.onDestroy()
         notifProxy.onDestroy(this)
+        super.onDestroy()
         BootServiceState.setStopped()
     }
 }
@@ -142,12 +157,12 @@ abstract class LifecycleBootService: LifecycleService() {
  * [NotificationProxy] also contains a [BroadcastReceiver] implementation named [UpdateReceiver]. This receiver is responsible for subscribing to the [Actions.ACTION_UPDATE] broadcast which is local to the app.
  * [Actions.ACTION_UPDATE] is sent from [bootNotification] everytime the foreground notification's content is updated. [bootNotification] takes in notification configuration data and persists it and then sends a broadcast to [UpdateReceiver] with this information.
  * [UpdateReceiver] is responsible for updating foreground notification title, body, and icon at runtime after it has already been created.
- * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootLacesServiceImpl.create] function to create the foreground notification in [onStart]
+ * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootNotificationService.create] function to create the foreground notification in [onStart]
  **/
 internal class NotificationProxy{
     private lateinit var receiver: UpdateReceiver
 
-    fun onStart(ctx: Service){
+    suspend fun onStart(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             bootNotification(ctx)
     }
@@ -173,7 +188,7 @@ internal class NotificationProxy{
      * [NotificationProxy.UpdateReceiver] subscribes to the [Actions.ACTION_UPDATE] local broadcast and is managed within the scope of [NotificationProxy].
      * The user calls [bootNotification] passing in one or more [BootNotification] properties to update the current persistent [Notifcation].
      * [bootNotification] then sends a broadcast with an intent containing the [Actions.ACTION_UPDATE] action, and a [Notification] title, body, and icon.
-     * After processing the new [Notification] data, [NotificationProxy.UpdateReceiver] then calls [BootLacesServiceImpl.update] to post a new [Notification] reflecting the changes.
+     * After processing the new [Notification] data, [NotificationProxy.UpdateReceiver] then calls [BootNotificationService.update] to post a new [Notification] reflecting the changes.
      * */
     inner class UpdateReceiver(): BroadcastReceiver(){
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -181,23 +196,25 @@ internal class NotificationProxy{
                 var title: String? = null
                 var content: String? = null
                 var icon: Int? = null
-                if(intent!!.hasExtra(BootLacesRepository.KEY_TITLE)){
-                    title = intent.getStringExtra(BootLacesRepository.KEY_TITLE)
+                if(intent!!.hasExtra(BootRepository.KEY_TITLE)){
+                    title = intent.getStringExtra(BootRepository.KEY_TITLE)
                 }
-                if(intent.hasExtra(BootLacesRepository.KEY_CONTENT)){
-                    content = intent.getStringExtra(BootLacesRepository.KEY_CONTENT)
+                if(intent.hasExtra(BootRepository.KEY_CONTENT)){
+                    content = intent.getStringExtra(BootRepository.KEY_CONTENT)
                 }
-                if(intent.hasExtra(BootLacesRepository.KEY_SMALL_ICON)){
-                    icon = intent.getIntExtra(BootLacesRepository.KEY_SMALL_ICON, -1)
+                if(intent.hasExtra(BootRepository.KEY_ICON)){
+                    icon = intent.getIntExtra(BootRepository.KEY_ICON, -1)
                 }
-                AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: -1)
+                runBlocking {
+                    AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: android.R.drawable.sym_def_app_icon) }
             }
         }
     }
+}
 
-    /*create boot service notification*/
-    internal fun bootNotification(ctx: Service) {
-        BootLacesServiceImpl.createChannel(ctx)
-        ctx.startForeground(BootLacesServiceImpl.getId(ctx), AppContainer.getInstance(ctx).service.create())
-    }
+/*create boot service notification*/
+internal suspend fun bootNotification(ctx: Service) {
+    AppContainer.getInstance(ctx).service.createChannel()
+    val id = AppContainer.getInstance(ctx).service.getId()
+    ctx.startForeground(id, AppContainer.getInstance(ctx).service.create())
 }
