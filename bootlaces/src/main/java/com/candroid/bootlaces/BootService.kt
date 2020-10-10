@@ -53,21 +53,19 @@ import kotlinx.coroutines.runBlocking
  * @date 10/09/20
  **/
 abstract class BootService : Service() {
-    private val notifProxy = NotificationProxy()
-    lateinit var job: Job
+    private lateinit var notifProxy: NotificationProxy
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         BootServiceState.setRunning()
-        runBlocking {
-            notifProxy.onStart(this@BootService)
-        }
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
+        notifProxy = NotificationProxy()
         notifProxy.onCreate(this)
     }
 
@@ -75,7 +73,6 @@ abstract class BootService : Service() {
         super.onDestroy()
         BootServiceState.setStopped()
         notifProxy.onDestroy(this)
-        job.cancel()
     }
 }
 
@@ -83,21 +80,13 @@ internal var deferredPayload: (suspend () -> Unit)? = null
 
 abstract class LifecycleBootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
-    private val notifProxy = NotificationProxy()
+    private lateinit var notifProxy: NotificationProxy
 
     init {
         if(deferredPayload != null)
             lifecycleScope.launchWhenCreated {
                 deferredPayload!!.invoke()
             }
-        lifecycleScope.launchWhenStarted {
-            notifProxy.onStart(this@LifecycleBootService)
-        }
-    }
-
-    override fun onBind(intent: Intent): IBinder? {
-        super.onBind(intent)
-        return null
     }
 
     override fun getLifecycle() = mDispatcher.lifecycle
@@ -106,11 +95,16 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         BootServiceState.setRunning()
         super.onCreate()
+        notifProxy = NotificationProxy()
         notifProxy.onCreate(this)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStart(intent: Intent?, startId: Int) {
         mDispatcher.onServicePreSuperOnStart()
+        super.onStart(intent, startId)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
@@ -126,16 +120,14 @@ abstract class LifecycleBootService: LifecycleService() {
 internal class NotificationProxy{
     private lateinit var receiver: UpdateReceiver
 
-    suspend fun onStart(ctx: Service){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            bootNotification(ctx)
-    }
-
     fun onCreate(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val filter = IntentFilter(Actions.ACTION_UPDATE)
             receiver = UpdateReceiver()
             LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
+            runBlocking {
+                bootNotification(ctx)
+            }
         }
     }
 
