@@ -17,6 +17,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
@@ -50,17 +52,16 @@ import kotlinx.coroutines.runBlocking
  **/
 internal class BootReceiver : BroadcastReceiver() {
 
-    override fun onReceive(ctx: Context?, intent: Intent?) {
+    @ExperimentalCoroutinesApi
+    override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
+        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() }
         if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
-            runBlocking {
-                val boot = BootRepository.getInstance(ctx!!).loadBoot().firstOrNull()
-                if(boot?.service != null){
-                    intent?.setClassName(ctx, boot.service!!)
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        ctx.startForegroundService(intent)
-                    else
-                        ctx.startService(intent)
-                }
+            if(boot.await()?.service != null){
+                intent?.setClassName(ctx!!, boot.getCompleted()?.service!!)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    ctx!!.startForegroundService(intent)
+                else
+                    ctx!!.startService(intent)
             }
         }
     }
