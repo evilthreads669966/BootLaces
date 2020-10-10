@@ -18,7 +18,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.candroid.bootlaces.LifecycleBootService.Companion.deferredPayload
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
@@ -51,8 +50,8 @@ private val configuration = Configuration()
  * @date 10/09/20
  *
  * [Configuration] is used to temporarily hold the configuration data that is persisted in [BootLacesRepository].
- * [bootService] takes a named function as an argument with a receiver object of type [Configuration].
- * It is only within the [bootService] function that you would ever access this object. You never instatiate [Configuration] on your own.
+ * [startBoot] takes a named function as an argument with a receiver object of type [Configuration].
+ * It is only within the [startBoot] function that you would ever access this object. You never instatiate [Configuration] on your own.
  * [Configuration] contains all [BootService] and foreground [Notification] data besides the notification channel and name.
  **/
 data class Configuration(
@@ -74,8 +73,8 @@ data class Configuration(
  *
  * [BootNotification] is a data holder for [BootService] persistent foreground [Notification].
  * It holds the [Notification] title, body, and icon.
- * You only access [BootNotification] indirectly through the [startBootNotification] function with a functional argument with a receiver of type [BootNotification].
- * Never instatiate [BootNotification]. You only use the accompanying [startBootNotification] function to access its' properties.
+ * You only access [BootNotification] indirectly through the [updateBoot] function with a functional argument with a receiver of type [BootNotification].
+ * Never instatiate [BootNotification]. You only use the accompanying [updateBoot] function to access its' properties.
  **/
 data class BootNotification(
     var notificationTitle: String = "evil threads",
@@ -89,20 +88,20 @@ data class BootNotification(
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [bootService] is a function that allows you to initialize [BootService] configuartion properties through a functional argument with a receiver of type [Configuration]
- * [bootService] should be called in your launcher [Activity.onCreate] or [Activity.onResume] lifecycle callbacks.
- * [bootService] is responsible for starting your [BootService] for the first time the application is used after install.
+ * [startBoot] is a function that allows you to initialize [BootService] configuartion properties through a functional argument with a receiver of type [Configuration]
+ * [startBoot] should be called in your launcher [Activity.onCreate] or [Activity.onResume] lifecycle callbacks.
+ * [startBoot] is responsible for starting your [BootService] for the first time the application is used after install.
  * Once the device has been restarted, the [BootReceiver] will handle starting [BootService]
  **/
-fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
+fun startBoot(ctx: Activity, payload: (suspend () -> Unit)? = null, config: Configuration.() -> Unit){
     LifecycleBootService.deferredPayload = payload
     configuration.run{
         this.ctx = ctx
         this.config()
     }
     runBlocking {
-        AppContainer.getInstance(ctx).repository.saveBoot(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
-        val bootNotifConfig = AppContainer.getInstance(ctx).repository.loadBoot().firstOrNull()
+        BootRepository.getInstance(ctx).saveBoot(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
+        val bootNotifConfig = BootRepository.getInstance(ctx).loadBoot().firstOrNull()
         if(bootNotifConfig?.service != null){
             val intent = Intent(ctx, Class.forName(bootNotifConfig.service!!))
             if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
@@ -114,7 +113,7 @@ fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Co
 }
 
 /*update title and/or content text and/or icon of boot service notification*/
-fun startBootNotification(ctx: Context, config: BootNotification.() -> Unit){
+fun updateBoot(ctx: Context, config: BootNotification.() -> Unit){
     val notifcation = BootNotification(configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon).apply{
         this.config()
     }
