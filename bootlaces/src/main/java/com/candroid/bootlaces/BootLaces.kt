@@ -18,8 +18,11 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /*
             (   (                ) (             (     (
@@ -59,7 +62,7 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
         Log.d(this::class.java.name, "REALLY BAD")
         if (boot.service == null)
             throw BootException()
-        val job = Scopes.BOOT_SCOPE.launch {
+        Scopes.BOOT_SCOPE.launch {
             BootRepository.getInstance(this@startBoot).saveBoot(boot)
         }
         val intent = Intent(this@startBoot, Class.forName(boot.service!!))
@@ -67,7 +70,6 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
             startForegroundService(intent)
         else
             startService(intent)
-        job.join()
     }
 }
 
