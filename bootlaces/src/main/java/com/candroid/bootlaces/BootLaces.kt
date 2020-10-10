@@ -59,7 +59,7 @@ data class Configuration(
     var service: KClass<*>? = null,
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
-    var notificationIcon: Int = android.R.drawable.sym_def_app_icon,
+    var notificationIcon: Int? = null,
     var notificationClickActivity: Class<Activity>? = null,
     var noPress: Boolean = false) {
     lateinit var ctx: Activity
@@ -80,7 +80,7 @@ data class Configuration(
 data class BootNotification(
     var notificationTitle: String = "evil threads",
     var notificationContent: String = "boot laces",
-    var notificationIcon: Int = android.R.drawable.sym_def_app_icon
+    var notificationIcon: Int? = null
 )
 
 
@@ -103,8 +103,7 @@ fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Co
     runBlocking {
         AppContainer.getInstance(ctx).repository.setNotification(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
         val bootNotifConfig = AppContainer.getInstance(ctx).repository.getBootNotificationConfig().firstOrNull()
-        Log.d("BOOTLACES", bootNotifConfig.toString())
-        if(bootNotifConfig != null && bootNotifConfig.service != null){
+        if(bootNotifConfig?.service != null){
             val intent = Intent(ctx, Class.forName(bootNotifConfig.service!!))
             if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
                 ctx.startForegroundService(intent)

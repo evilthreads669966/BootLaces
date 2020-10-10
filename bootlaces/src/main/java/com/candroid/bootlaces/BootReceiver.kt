@@ -48,15 +48,12 @@ import kotlinx.coroutines.runBlocking
  * [BootReceiver] subscribes to BOOT_COMPLETED system broadcasts which are broadcast once the device has finished turning on or rebooting.
  * [BootReceiver] is responsible for starting [BootService] at boot time.
  **/
-
-val KEY_SERVICE = "KEY_SERVICE_CLASS_NAME"
-
 internal class BootReceiver : BroadcastReceiver() {
     override fun onReceive(ctx: Context?, intent: Intent?) {
         if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
             runBlocking {
                 val bootServiceConfig = AppContainer.getInstance(ctx!!).repository.getBootNotificationConfig().firstOrNull()
-                if(bootServiceConfig != null && bootServiceConfig.service != null){
+                if(bootServiceConfig?.service != null){
                     intent?.setClassName(ctx, bootServiceConfig.service!!)
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                         ctx.startForegroundService(intent)
