@@ -83,7 +83,7 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx).loadBoot().firstOrNull() }.await()
+        val boot = BootRepository.getInstance(ctx).loadBoot().firstOrNull()
         if(boot != null){
             Configuration.createChannel(ctx)
             val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID).apply {
