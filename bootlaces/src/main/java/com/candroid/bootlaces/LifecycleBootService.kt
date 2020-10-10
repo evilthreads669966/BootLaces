@@ -50,7 +50,7 @@ abstract class LifecycleBootService: LifecycleService() {
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
         notifProxy.onDestroy(this)
-        super.onDestroy()
         BootServiceState.setStopped()
+        super.onDestroy()
     }
 }

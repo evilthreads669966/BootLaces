@@ -83,4 +83,3 @@ inline fun updateBoot(ctx: Context, crossinline config: Boot.() -> Unit){
     }
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(updateIntent)
 }
-

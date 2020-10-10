@@ -13,10 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -40,32 +39,12 @@ import android.os.IBinder
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/09/20
+ * @date 10/10/20
  *
- * Persistent foreground service that is started by the startBoot method and BootReceiver
+ * Scopes.BOOT_SCOPE is an Application level coroutine scope used by DataStore for asynchronous file I/O as well as through out our
+ * module. It is cleaned up inside of BootService onDestroy callback.
  **/
-abstract class BootService : Service() {
-    private lateinit var notifProxy: NotificationProxy
-
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        BootServiceState.setRunning()
-        return START_STICKY
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        notifProxy = NotificationProxy()
-        notifProxy.onCreate(this)
-    }
-
-    override fun onDestroy() {
-        notifProxy.onDestroy(this)
-        BootServiceState.setStopped()
-        super.onDestroy()
-    }
+@PublishedApi
+internal object Scopes{
+    val BOOT_SCOPE by lazy(LazyThreadSafetyMode.NONE) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
 }
-
-

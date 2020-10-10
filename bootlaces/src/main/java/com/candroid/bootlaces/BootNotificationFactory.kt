@@ -23,6 +23,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 /*
             (   (                ) (             (     (
@@ -70,12 +71,11 @@ internal class BootNotificationFactory(val ctx: Context){
 
         fun createChannel(ctx: Context): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
-                    if(getNotificationChannel(CHANNEL_ID) == null){
-                        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
-                        createNotificationChannel(channel)
-                        return true
-                    }
+                val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if(mgr.getNotificationChannel(CHANNEL_ID) == null){
+                    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+                    mgr.createNotificationChannel(channel)
+                    return true
                 }
             }
             return false
@@ -105,7 +105,7 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun updateBootNotification(boot: Boot) {
-        BootRepository.getInstance(ctx).saveBoot(boot)
+        Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(ctx).saveBoot(boot) }
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, createNotification())
     }

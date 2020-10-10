@@ -35,8 +35,6 @@ internal class NotificationProxy{
     fun onDestroy(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             LocalBroadcastManager.getInstance(ctx).unregisterReceiver(receiver)
-        job.cancel()
-        updateReceiverJob?.cancel()
         Scopes.BOOT_SCOPE.coroutineContext.also { it.cancelChildren() }.cancel()
     }
 
@@ -53,7 +51,7 @@ internal class NotificationProxy{
 
     inner class UpdateReceiver: BroadcastReceiver(){
 
-        override fun onReceive(ctx: Context?, intent: Intent?) {
+        override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
             if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false){
                 val boot = Boot()
 
@@ -68,14 +66,11 @@ internal class NotificationProxy{
 
                 if(intent.hasExtra(BootRepository.KEY_ICON))
                     boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
-
+                if(updateReceiverJob?.isActive ?: false)
+                    delay(1000)
                updateReceiverJob = Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot) }
             }
         }
     }
 }
 
-@PublishedApi
-internal object Scopes{
-    val BOOT_SCOPE by lazy(LazyThreadSafetyMode.NONE) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
-}
