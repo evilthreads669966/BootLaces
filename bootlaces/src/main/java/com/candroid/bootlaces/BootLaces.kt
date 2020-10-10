@@ -17,7 +17,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -101,8 +100,8 @@ fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Co
         this.config()
     }
     runBlocking {
-        AppContainer.getInstance(ctx).repository.setNotification(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
-        val bootNotifConfig = AppContainer.getInstance(ctx).repository.getBootNotificationConfig().firstOrNull()
+        AppContainer.getInstance(ctx).repository.saveBoot(configuration.serviceName, configuration.notificationClickActivity?.name, configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon)
+        val bootNotifConfig = AppContainer.getInstance(ctx).repository.loadBoot().firstOrNull()
         if(bootNotifConfig?.service != null){
             val intent = Intent(ctx, Class.forName(bootNotifConfig.service!!))
             if(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)

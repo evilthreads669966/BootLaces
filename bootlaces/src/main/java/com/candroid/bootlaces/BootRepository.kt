@@ -65,13 +65,13 @@ internal class BootRepository(ctx: Context) {
         private val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
     }
 
-    fun getBootNotificationConfig() = dataStore.data.catch { e ->
+    fun loadBoot() = dataStore.data.catch { e ->
         when(e){
             is IOException -> emit(emptyPreferences())
             else -> Log.e(TAG, e.message!!)
         }
     }.map { prefs ->
-        BootServiceConfig().apply {
+        Boot().apply {
             service = prefs[PREF_KEY_SERVICE]
             activity = prefs[PREF_KEY_ACTIVITY]
             title = prefs[PREF_KEY_TITLE]
@@ -80,7 +80,7 @@ internal class BootRepository(ctx: Context) {
         }
     }
 
-    suspend fun setNotification(service: String?, activity: String?, title: String?, content: String?, icon: Int?) = dataStore.edit { prefs ->
+    suspend fun saveBoot(service: String?, activity: String?, title: String?, content: String?, icon: Int?) = dataStore.edit { prefs ->
         service?.let { prefs[PREF_KEY_SERVICE] = service }
         activity?.let { prefs[PREF_KEY_ACTIVITY] = activity }
         title?.let { prefs[PREF_KEY_TITLE] = title }
@@ -89,4 +89,4 @@ internal class BootRepository(ctx: Context) {
     }
 }
 
-internal data class BootServiceConfig(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)
+internal data class Boot(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)
