@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:4.1'
+        implementation 'com.github.evilthreads669966:bootlaces:4.1.1'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
@@ -40,7 +40,10 @@ class MyService : LifecycleBootService() {
     - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
 ```xml
     <application>
-        <service android:name=".MyService" android:directBootAware="true" android:foregroundServiceType="dataSync"/>
+	<service android:name=".LockService"
+	    android:directBootAware="true"
+	    android:foregroundServiceType="dataSync"
+	  />    
     </application>
 ```
 5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService
