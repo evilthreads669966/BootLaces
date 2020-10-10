@@ -7,7 +7,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * @author Chris Basinger
@@ -18,17 +21,13 @@ import kotlinx.coroutines.*
  * */
 internal class NotificationProxy{
     private lateinit var receiver: UpdateReceiver
-    lateinit var job: Job
 
-    companion object{
-        var updateReceiverJob: Job? = null
-    }
     fun onCreate(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val filter = IntentFilter(Actions.ACTION_UPDATE)
             receiver = UpdateReceiver()
             LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
-            job = Scopes.BOOT_SCOPE.launch { startBootNotification(ctx) }
+            Scopes.BOOT_SCOPE.launch { startBootNotification(ctx) }
         }
     }
 
@@ -66,9 +65,7 @@ internal class NotificationProxy{
 
                 if(intent.hasExtra(BootRepository.KEY_ICON))
                     boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
-                if(updateReceiverJob?.isActive ?: false)
-                    delay(1000)
-               updateReceiverJob = Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot) }
+                Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot) }
             }
         }
     }
