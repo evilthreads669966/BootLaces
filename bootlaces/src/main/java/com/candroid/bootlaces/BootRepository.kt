@@ -14,11 +14,17 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.datastore.DataStore
+import androidx.datastore.DataStoreFactory
 import androidx.datastore.preferences.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import java.io.File
 import java.io.IOException
 import java.lang.Exception
 
@@ -48,9 +54,21 @@ import java.lang.Exception
  * @date 10/09/20
  **/
 internal class BootRepository(ctx: Context) {
-    private val dataStore: DataStore<Preferences> = ctx.applicationContext.createDataStore(NAME)
+    private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = { File(ctx.applicationContext.filesDir, "$NAME.preferences_pb").apply { createNewFile() } },
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    )
 
     companion object{
+        private var INSTANCE: BootRepository? = null
+
+        @Synchronized
+        fun getInstance(ctx: Context): BootRepository{
+            if(INSTANCE == null)
+                INSTANCE = BootRepository(ctx)
+            return INSTANCE!!
+        }
+
         val TAG = this::class.java.simpleName
         val KEY_TITLE = "KEY_TITLE"
         val KEY_CONTENT = "KEY_CONTENT"

@@ -48,8 +48,6 @@ import kotlinx.coroutines.flow.firstOrNull
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Not really the best factory but I was trying to pick a good name. More responsibilties than a simple factory pattern should have.
- * Creates [Notifications] and updates foreground [Notification]
  **/
 internal class BootNotificationFactory(val ctx: Context){
 
@@ -84,28 +82,29 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val boot = AppContainer.getInstance(ctx).repository.loadBoot().firstOrNull()
+        val boot = BootRepository.getInstance(ctx).loadBoot().firstOrNull()
         if(boot != null){
             Configuration.createChannel(ctx)
-            val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID)
-            builder.setContentTitle(boot.title ?: Configuration.DEFAULT_TITLE)
-            builder.setContentText(boot.content ?: Configuration.DEFAULT_CONTENT)
-            builder.setSmallIcon(boot.icon ?: android.R.drawable.sym_def_app_icon)
-            if(boot.activity != null)
-                builder.setContentIntent(boot.activity!!)
-            builder.setShowWhen(false)
-            builder.setAutoCancel(false)
-            builder.setOngoing(true)
-            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                builder.setChannelId(Configuration.CHANNEL_ID)
+            val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID).apply {
+                setContentTitle(boot.title ?: Configuration.DEFAULT_TITLE)
+                setContentText(boot.content ?: Configuration.DEFAULT_CONTENT)
+                setSmallIcon(boot.icon ?: android.R.drawable.sym_def_app_icon)
+                if(boot.activity != null)
+                    setContentIntent(boot.activity!!)
+                setShowWhen(false)
+                setAutoCancel(false)
+                setOngoing(true)
+                setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    setChannelId(Configuration.CHANNEL_ID)
+            }
             return builder.build()
         }
         return null
     }
 
     suspend fun updateForegroundNotification(title: String?, content: String?, icon: Int?) {
-        AppContainer.getInstance(ctx).repository.saveBoot(null, null, title, content, icon)
+        BootRepository.getInstance(ctx).saveBoot(null, null, title, content, icon)
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, createNotification())
     }
@@ -118,6 +117,5 @@ internal class BootNotificationFactory(val ctx: Context){
         }
         setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
     }
-
 }
 
