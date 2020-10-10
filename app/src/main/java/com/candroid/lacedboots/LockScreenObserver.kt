@@ -17,13 +17,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.candroid.bootlaces.bootNotification
+import com.candroid.bootlaces.startBootNotification
 import com.candroid.bootlaces.bootService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -71,7 +70,7 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun updateForegroundNotification(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            bootNotification(ctx){
+            startBootNotification(ctx){
                 notificationContent = "Evil Threads love you ${ScreenVisibility.count()} times!"
             }
     }

@@ -24,7 +24,6 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 
 /*
@@ -126,7 +125,7 @@ internal class NotificationProxy{
             receiver = UpdateReceiver()
             LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
             runBlocking {
-                bootNotification(ctx)
+                startBootNotification(ctx)
             }
         }
     }
@@ -137,7 +136,7 @@ internal class NotificationProxy{
     }
 
     /*create boot service notification*/
-    internal suspend fun bootNotification(ctx: Service) {
+    private suspend fun startBootNotification(ctx: Service) {
         BootNotificationFactory.Configuration.createChannel(ctx)
         val notification = BootNotificationFactory.getInstance(ctx).createNotification()
         notification?.let { notif -> ctx.startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif) }

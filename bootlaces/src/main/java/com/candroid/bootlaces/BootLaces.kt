@@ -73,8 +73,8 @@ data class Configuration(
  *
  * [BootNotification] is a data holder for [BootService] persistent foreground [Notification].
  * It holds the [Notification] title, body, and icon.
- * You only access [BootNotification] indirectly through the [bootNotification] function with a functional argument with a receiver of type [BootNotification].
- * Never instatiate [BootNotification]. You only use the accompanying [bootNotification] function to access its' properties.
+ * You only access [BootNotification] indirectly through the [startBootNotification] function with a functional argument with a receiver of type [BootNotification].
+ * Never instatiate [BootNotification]. You only use the accompanying [startBootNotification] function to access its' properties.
  **/
 data class BootNotification(
     var notificationTitle: String = "evil threads",
@@ -113,7 +113,7 @@ fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Co
 }
 
 /*update title and/or content text and/or icon of boot service notification*/
-fun bootNotification(ctx: Context, config: BootNotification.() -> Unit){
+fun startBootNotification(ctx: Context, config: BootNotification.() -> Unit){
     val notifcation = BootNotification(configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon).apply{
         this.config()
     }
