@@ -18,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.candroid.bootlaces.LifecycleBootService.Companion.deferredPayload
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
