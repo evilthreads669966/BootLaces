@@ -93,11 +93,12 @@ internal class BootRepository(ctx: Context) {
     }
 
     suspend fun saveBoot(boot: Boot) = dataStore.edit { prefs ->
-        boot.service?.takeUnless { service -> service.equals(prefs[PREF_KEY_SERVICE]) }?.let { service -> prefs[PREF_KEY_SERVICE] = service }
-        boot.activity?.takeUnless { activity -> activity.equals(prefs[PREF_KEY_ACTIVITY]) }?.let { activity -> prefs[PREF_KEY_ACTIVITY] = activity }
-        boot.title?.takeUnless { title -> title.equals(prefs[PREF_KEY_TITLE]) }?.let { title -> prefs[PREF_KEY_TITLE] = title }
-        boot.content?.takeUnless { content -> content.equals(prefs[PREF_KEY_CONTENT]) }?.let { content -> prefs[PREF_KEY_CONTENT] = content }
-        boot.icon?.takeUnless { icon -> icon == prefs[PREF_KEY_ICON] }?.let { icon -> prefs[PREF_KEY_ICON] = icon }
+        boot.run {
+            service?.let { prefs[PREF_KEY_SERVICE] = it }
+            activity?.let { prefs[PREF_KEY_ACTIVITY] = it }
+            title?.let { prefs[PREF_KEY_TITLE] = it }
+            content?.let { prefs[PREF_KEY_CONTENT] = it }
+            icon?.let { prefs[PREF_KEY_ICON] = it }
+        }
     }
 }
-

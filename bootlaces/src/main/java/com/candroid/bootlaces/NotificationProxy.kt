@@ -10,7 +10,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * @author Chris Basinger
@@ -50,7 +49,7 @@ internal class NotificationProxy{
 
     inner class UpdateReceiver: BroadcastReceiver(){
 
-        override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
+        override fun onReceive(ctx: Context?, intent: Intent?){
             if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false){
                 val boot = Boot()
 

@@ -55,22 +55,21 @@ import kotlinx.coroutines.runBlocking
 @Throws(BootException::class)
 inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: Boot.() -> Unit) = runBlocking{
     LifecycleBootService.payload = payload
-    val boot =  Scopes.BOOT_SCOPE.async { BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: Boot() }
-    if(boot.await().service != null)
+    //see if we already have the boot data in storage.
+    val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: Boot() }.await()
+    //check if startBoot has ever ran before since installing the app. If so we can go back
+    if(boot.service != null)
         return@runBlocking
-    boot.getCompleted().apply { init() }.let { boot ->
-        Log.d(this::class.java.name, "REALLY BAD")
-        if (boot.service == null)
-            throw BootException()
-        Scopes.BOOT_SCOPE.launch {
-            BootRepository.getInstance(this@startBoot).saveBoot(boot)
-        }
-        val intent = Intent(this@startBoot, Class.forName(boot.service!!))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            startForegroundService(intent)
-        else
-            startService(intent)
-    }
+    //add data to Boot and crash on purpose if service arg is null
+    boot.apply { init() }.takeIf { it.service == null }?.let{ return@runBlocking }
+    //save the notification data and service name to storage
+    Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(this@startBoot).saveBoot(boot) }
+    //start BootService
+    val intent = Intent(this@startBoot, Class.forName(boot.service!!))
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        startForegroundService(intent)
+    else
+        startService(intent)
 }
 
 /* Change the Boot properties for the persistent foreground notificaiton*/

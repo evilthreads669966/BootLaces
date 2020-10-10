@@ -46,5 +46,5 @@ import kotlinx.coroutines.SupervisorJob
  **/
 @PublishedApi
 internal object Scopes{
-    val BOOT_SCOPE by lazy(LazyThreadSafetyMode.NONE) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    val BOOT_SCOPE = CoroutineScope(Dispatchers.IO + SupervisorJob())
 }
