@@ -52,7 +52,7 @@ internal class BootReceiver : BroadcastReceiver() {
     override fun onReceive(ctx: Context?, intent: Intent?) {
         if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
             runBlocking {
-                val bootServiceConfig = AppContainer.getInstance(ctx!!).repository.getBootNotificationConfig().firstOrNull()
+                val bootServiceConfig = AppContainer.getInstance(ctx!!).repository.loadBoot().firstOrNull()
                 if(bootServiceConfig?.service != null){
                     intent?.setClassName(ctx, bootServiceConfig.service!!)
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

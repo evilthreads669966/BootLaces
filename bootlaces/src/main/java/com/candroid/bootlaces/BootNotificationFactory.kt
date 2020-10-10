@@ -66,6 +66,8 @@ internal class BootNotificationFactory(val ctx: Context){
         val CHANNEL_ID = "666"
         val CHANNEL_NAME = "evil"
         val FOREGROUND_ID = 6666
+        val DEFAULT_TITLE = "EVIL THREADS"
+        val DEFAULT_CONTENT = "BOOT LACES"
 
         fun createChannel(ctx: Context): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -82,15 +84,15 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val bootNotifConfig = AppContainer.getInstance(ctx).repository.getBootNotificationConfig().firstOrNull()
-        if(bootNotifConfig != null){
+        val boot = AppContainer.getInstance(ctx).repository.loadBoot().firstOrNull()
+        if(boot != null){
             Configuration.createChannel(ctx)
             val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID)
-            builder.setContentTitle(bootNotifConfig.title)
-            builder.setContentText(bootNotifConfig.content)
-            builder.setSmallIcon(bootNotifConfig.icon ?: android.R.drawable.sym_def_app_icon)
-            if(bootNotifConfig.activity != null)
-                builder.setContentIntent(bootNotifConfig.activity!!)
+            builder.setContentTitle(boot.title ?: Configuration.DEFAULT_TITLE)
+            builder.setContentText(boot.content ?: Configuration.DEFAULT_CONTENT)
+            builder.setSmallIcon(boot.icon ?: android.R.drawable.sym_def_app_icon)
+            if(boot.activity != null)
+                builder.setContentIntent(boot.activity!!)
             builder.setShowWhen(false)
             builder.setAutoCancel(false)
             builder.setOngoing(true)
@@ -103,7 +105,7 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun updateForegroundNotification(title: String?, content: String?, icon: Int?) {
-        AppContainer.getInstance(ctx).repository.setNotification(null, null, title, content, icon)
+        AppContainer.getInstance(ctx).repository.saveBoot(null, null, title, content, icon)
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, this@BootNotificationFactory.createNotification())
     }
