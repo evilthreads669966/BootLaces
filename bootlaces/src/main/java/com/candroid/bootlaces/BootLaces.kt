@@ -55,14 +55,11 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
         throw InvalidParameterException("BootService is required by startBoot")
     runBlocking {
         BootRepository.getInstance(this@startBoot).saveBoot(boot)
-        val bootNotifConfig = BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull()
-        if(bootNotifConfig?.service != null){
-            val intent = Intent(this@startBoot, Class.forName(bootNotifConfig.service!!))
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                startForegroundService(intent)
-            else
-                startService(intent)
-        }
+        val intent = Intent(this@startBoot, Class.forName(boot.service!!))
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForegroundService(intent)
+        else
+            startService(intent)
     }
 }
 
