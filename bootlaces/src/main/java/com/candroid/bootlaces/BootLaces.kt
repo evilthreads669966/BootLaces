@@ -18,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.candroid.bootlaces.LifecycleBootService.Companion.deferredPayload
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
@@ -94,7 +95,7 @@ data class BootNotification(
  * Once the device has been restarted, the [BootReceiver] will handle starting [BootService]
  **/
 fun bootService(ctx: Activity, payload: (suspend () -> Unit)? = null ,config: Configuration.() -> Unit){
-    deferredPayload = payload
+    LifecycleBootService.deferredPayload = payload
     configuration.run{
         this.ctx = ctx
         this.config()

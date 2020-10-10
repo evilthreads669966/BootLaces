@@ -75,11 +75,14 @@ abstract class BootService : Service() {
     }
 }
 
-internal var deferredPayload: (suspend () -> Unit)? = null
 
 abstract class LifecycleBootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
     private lateinit var notifProxy: NotificationProxy
+
+    internal companion object{
+        var deferredPayload: (suspend () -> Unit)? = null
+    }
 
     init {
         if(deferredPayload != null)
@@ -136,10 +139,14 @@ internal class NotificationProxy{
     }
 
     /*create boot service notification*/
-    private suspend fun startBootNotification(ctx: Service) {
+    private suspend fun startBootNotification(ctx: Service): Boolean {
         BootNotificationFactory.Configuration.createChannel(ctx)
         val notification = BootNotificationFactory.getInstance(ctx).createNotification()
-        notification?.let { notif -> ctx.startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif) }
+        notification?.let { notif ->
+            ctx.startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif)
+            return true
+        }
+        return false
     }
 
     inner class UpdateReceiver(): BroadcastReceiver(){
