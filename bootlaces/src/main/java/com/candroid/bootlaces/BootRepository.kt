@@ -52,7 +52,7 @@ import java.io.IOException
 internal class BootRepository(ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { File(ctx.applicationContext.filesDir, FILE_NAME).apply { createNewFile() } },
-        scope = CoroutineScope(Scopes.BOOT_SCOPE.coroutineContext)
+        scope = Scopes.BOOT_SCOPE
     )
 
     companion object{
