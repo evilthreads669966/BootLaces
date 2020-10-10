@@ -102,7 +102,7 @@ internal class BootNotificationFactory(val ctx: Context){
         return null
     }
 
-    suspend fun updateForegroundNotification(boot: Boot) {
+    suspend fun updateBootNotification(boot: Boot) {
         BootRepository.getInstance(ctx).saveBoot(boot)
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, createNotification())
