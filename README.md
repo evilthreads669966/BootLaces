@@ -49,13 +49,13 @@ class MyService : LifecycleBootService() {
 5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService
 ```kotlin
 //this is the minimal requirement to get Boot Laces running
-startBoot(this){
+startBoot{
     service = LockService::class.java.name
 }
 ```
 6. Initialize the properties of your persistent foreground notification within bootService's lambda. If you are only supporting Oreo and up then you do not need a Build.Version check.
 ```kotlin
-startBoot(this){
+startBoot{
     service = LockService::class.java.name
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         //the activity to place inside the pending intent for your notification when selected. This activity will launch.
@@ -70,7 +70,7 @@ startBoot(this){
 val myPayload = suspend {
     //do something
 }
-startBoot(this, payload = myPayload){
+startBoot(payload = myPayload){
     service = LockService::class.java.name
 }
 ```
