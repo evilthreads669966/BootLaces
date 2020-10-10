@@ -61,8 +61,7 @@ internal class BootRepository(ctx: Context) {
 
     companion object{
         private var INSTANCE: BootRepository? = null
-
-        @Synchronized
+        
         fun getInstance(ctx: Context): BootRepository{
             if(INSTANCE == null)
                 INSTANCE = BootRepository(ctx)
