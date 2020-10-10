@@ -9,7 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".LockService" android:directBootAware="true" android:foregroundServiceType="dataSync" />
+        <service android:name=".LockService"
+            android:directBootAware="true"
+            android:foregroundServiceType="dataSync"
+            />
         <activity
             android:name=".LockScreenActivity"
             android:launchMode="singleInstance"

@@ -22,7 +22,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.flow.firstOrNull
-
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -103,12 +102,11 @@ internal class BootNotificationFactory(val ctx: Context){
         return null
     }
 
-    suspend fun updateForegroundNotification(title: String?, content: String?, icon: Int?) {
-        BootRepository.getInstance(ctx).saveBoot(null, null, title, content, icon)
+    suspend fun updateForegroundNotification(boot: Boot) {
+        BootRepository.getInstance(ctx).saveBoot(boot)
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, createNotification())
     }
-
 
     private fun NotificationCompat.Builder.setContentIntent(activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
