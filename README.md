@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:4.1.1'
+        implementation 'com.github.evilthreads669966:bootlaces:4.2'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
@@ -50,18 +50,18 @@ class MyService : LifecycleBootService() {
 ```kotlin
 //this is the minimal requirement to get Boot Laces running
 startBoot(this){
-    service = LockService::class
+    service = LockService::class.qualifiedName
 }
 ```
 6. Initialize the properties of your persistent foreground notification within bootService's lambda. If you are only supporting Oreo and up then you do not need a Build.Version check.
 ```kotlin
 startBoot(this){
-    service = LockService::class
+    service = LockService::class.qualifiedName
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-        //noPress is for whether you want your notification to bring up an Activity when pressed
-        noPress = true
-        notificationTitle = "I LOVE YOU"
-        notificationContent = "Evil Threads loves you!"
+        //the activity to place inside the pending intent for your notification when selected. This activity will launch.
+        activity = MyActivity::class.qualifiedName
+        title = "I LOVE YOU"
+        content = "Evil Threads loves you!"
     }
 }
 
@@ -71,14 +71,15 @@ val myPayload = suspend {
     //do something
 }
 startBoot(this, payload = myPayload){
-    service = LockService::class
+    service = LockService::class.qualifiedName
 }
 ```
 7. Update your notification by passing any context as an argument to bootNotificaton and then initializing its' properties inside of the lambda.
 ```kotlin
 updateBoot(ctx){
-    notificationTitle = "I HATE YOU"
-    notificationContent = "Evil Threads hates you!"
+    title = "I HATE YOU"
+    content = "Evil Threads hates you!"
+    icon = android.R.drawable.presence_online
 }
 ```
 ## Important To Know

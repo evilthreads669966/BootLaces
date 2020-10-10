@@ -22,11 +22,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.candroid.bootlaces.Configuration
-import com.candroid.bootlaces.updateBoot
 import com.candroid.bootlaces.startBoot
+import com.candroid.bootlaces.updateBoot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -54,12 +54,12 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun startService(){
-        startBoot(ctx){
-            service = LockService::class
+        ctx.startBoot{
+            service = LockService::class.qualifiedName
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                noPress = true
-                notificationTitle = "I LOVE YOU"
-                notificationContent = "Evil Threads love you one time!"
+                title = "I LOVE YOU"
+                content = "Evil Threads love you one time!"
+                activity = LockScreenActivity::class.qualifiedName
             }
         }
         ctx.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -72,7 +72,7 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
     private fun updateForegroundNotification(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             updateBoot(ctx){
-                notificationContent = "Evil Threads love you ${ScreenVisibility.count()} times!"
+                content = "Evil Threads love you ${ScreenVisibility.count()} times!"
             }
     }
 

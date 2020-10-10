@@ -14,10 +14,8 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.datastore.DataStore
-import androidx.datastore.DataStoreFactory
 import androidx.datastore.preferences.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +24,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 
 /*
             (   (                ) (             (     (
@@ -98,13 +95,13 @@ internal class BootRepository(ctx: Context) {
         }
     }
 
-    suspend fun saveBoot(service: String?, activity: String?, title: String?, content: String?, icon: Int?) = dataStore.edit { prefs ->
-        service?.let { prefs[PREF_KEY_SERVICE] = service }
-        activity?.let { prefs[PREF_KEY_ACTIVITY] = activity }
-        title?.let { prefs[PREF_KEY_TITLE] = title }
-        content?.let { prefs[PREF_KEY_CONTENT] = content }
-        icon?.let { prefs[PREF_KEY_ICON] = icon }
+    suspend fun saveBoot(boot: Boot) = dataStore.edit { prefs ->
+        boot.service?.takeUnless { service -> service.equals(prefs[PREF_KEY_SERVICE]) }?.let { service -> prefs[PREF_KEY_SERVICE] = service }
+        boot.activity?.takeUnless { activity -> activity.equals(prefs[PREF_KEY_ACTIVITY]) }?.let { activity -> prefs[PREF_KEY_ACTIVITY] = activity }
+        boot.title?.takeUnless { title -> title.equals(prefs[PREF_KEY_TITLE]) }?.let { title -> prefs[PREF_KEY_TITLE] = title }
+        boot.content?.takeUnless { content -> content.equals(prefs[PREF_KEY_CONTENT]) }?.let { content -> prefs[PREF_KEY_CONTENT] = content }
+        boot.icon?.takeUnless { icon -> icon == prefs[PREF_KEY_ICON] }?.let { icon -> prefs[PREF_KEY_ICON] = icon }
     }
 }
-@PublishedApi
-internal data class Boot(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)
+
+data class Boot(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)

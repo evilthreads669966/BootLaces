@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -83,13 +82,13 @@ abstract class LifecycleBootService: LifecycleService() {
 
     @PublishedApi
     internal companion object{
-        var deferredPayload: (suspend () -> Unit)? = null
+        var payload: (suspend () -> Unit)? = null
     }
 
     init {
-        if(deferredPayload != null)
+        if(payload != null)
             lifecycleScope.launchWhenCreated {
-                deferredPayload!!.invoke()
+                payload!!.invoke()
             }
     }
 
@@ -151,24 +150,26 @@ internal class NotificationProxy{
         return false
     }
 
-    inner class UpdateReceiver(): BroadcastReceiver(){
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            if(intent?.action.equals(Actions.ACTION_UPDATE)){
-                var title: String? = null
-                var content: String? = null
-                var icon: Int? = null
+    inner class UpdateReceiver: BroadcastReceiver(){
 
-                if(intent!!.hasExtra(BootRepository.KEY_TITLE))
-                    title = intent.getStringExtra(BootRepository.KEY_TITLE)
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false){
+                val boot = Boot()
+
+                if(intent!!.hasExtra(BootRepository.KEY_ACTIVITY))
+                    boot.activity = intent.getStringExtra(BootRepository.KEY_ACTIVITY)
+
+                if(intent.hasExtra(BootRepository.KEY_TITLE))
+                    boot.title = intent.getStringExtra(BootRepository.KEY_TITLE)
 
                 if(intent.hasExtra(BootRepository.KEY_CONTENT))
-                    content = intent.getStringExtra(BootRepository.KEY_CONTENT)
+                    boot.content = intent.getStringExtra(BootRepository.KEY_CONTENT)
 
                 if(intent.hasExtra(BootRepository.KEY_ICON))
-                    icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
+                    boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
 
                 runBlocking {
-                    BootNotificationFactory.getInstance(ctx!!).updateForegroundNotification(title, content, icon)
+                    BootNotificationFactory.getInstance(ctx!!).updateForegroundNotification(boot)
                 }
             }
         }
