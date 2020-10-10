@@ -48,11 +48,12 @@ import java.security.InvalidParameterException
  *
  * Starts your BootService and initalizes its' required configuration data for a foreground notification
  **/
+@Throws(BootException::class)
 inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: Boot.() -> Unit){
     LifecycleBootService.payload = payload
     val boot = Boot().apply { init() }
     if(boot.service == null)
-        throw InvalidParameterException("BootService is required by startBoot")
+        throw BootException()
     runBlocking {
         BootRepository.getInstance(this@startBoot).saveBoot(boot)
         val intent = Intent(this@startBoot, Class.forName(boot.service!!))
@@ -75,3 +76,4 @@ inline fun updateBoot(ctx: Context, crossinline config: Boot.() -> Unit){
     }
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(updateIntent)
 }
+
