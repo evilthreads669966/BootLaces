@@ -104,4 +104,3 @@ internal class BootRepository(ctx: Context) {
     }
 }
 
-data class Boot(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)
