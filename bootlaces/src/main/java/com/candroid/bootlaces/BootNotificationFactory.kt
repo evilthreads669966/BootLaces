@@ -43,54 +43,79 @@ import kotlinx.coroutines.flow.firstOrNull
 ............\..............(
 ..............\.............\...
 */
-internal class BootNotificationService(val ctx: Context){
-    fun setContentIntent(builder: NotificationCompat.Builder, activity: String) {
-        with(Intent(ctx, Class.forName(activity))) {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            action = Intent.ACTION_VIEW
-            builder.setContentIntent(PendingIntent.getActivity(ctx, 0, this, 0))
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/09/20
+ *
+ * Not really the best factory but I was trying to pick a good name. More responsibilties than a simple factory pattern should have.
+ * Creates [Notifications] and updates foreground [Notification]
+ **/
+internal class BootNotificationFactory(val ctx: Context){
+
+    companion object{
+        private var INSTANCE: BootNotificationFactory? = null
+        fun getInstance(ctx: Context): BootNotificationFactory{
+            if(INSTANCE == null)
+                INSTANCE = BootNotificationFactory(ctx)
+            return INSTANCE!!
         }
     }
 
-    fun createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
-                getNotificationChannel(getChannelId())?.let { return }
-                val notificationChannel = NotificationChannel(getChannelId(), getChannelName(), NotificationManager.IMPORTANCE_HIGH)
-                createNotificationChannel(notificationChannel)
+    object Configuration{
+        val CHANNEL_ID = "666"
+        val CHANNEL_NAME = "evil"
+        val FOREGROUND_ID = 6666
+
+        fun createChannel(ctx: Context): Boolean {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                with(ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager){
+                    if(getNotificationChannel(CHANNEL_ID) == null){
+                        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+                        createNotificationChannel(channel)
+                        return true
+                    }
+                }
             }
+            return false
         }
     }
 
-    fun getId() = ctx.resources.getInteger(R.integer.notification_id)
-
-    fun getChannelId(): String = ctx.resources.getString(R.string.channel_id)
-
-    fun getChannelName(): String = ctx.resources.getString(R.string.channel_name)
-
-    suspend fun create(): Notification? {
+    suspend fun createNotification(): Notification? {
         val bootNotifConfig = AppContainer.getInstance(ctx).repository.getBootNotificationConfig().firstOrNull()
         if(bootNotifConfig != null){
-            val builder = NotificationCompat.Builder(ctx, getChannelId())
+            Configuration.createChannel(ctx)
+            val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID)
             builder.setContentTitle(bootNotifConfig.title)
             builder.setContentText(bootNotifConfig.content)
             builder.setSmallIcon(bootNotifConfig.icon ?: android.R.drawable.sym_def_app_icon)
             if(bootNotifConfig.activity != null)
-                setContentIntent(builder, bootNotifConfig.activity!!)
+                builder.setContentIntent(bootNotifConfig.activity!!)
             builder.setShowWhen(false)
             builder.setAutoCancel(false)
             builder.setOngoing(true)
             builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                builder.setChannelId(getChannelId())
+                builder.setChannelId(Configuration.CHANNEL_ID)
             return builder.build()
         }
         return null
     }
 
-    suspend fun update(title: String?, content: String?, icon: Int) {
+    suspend fun updateForegroundNotification(title: String?, content: String?, icon: Int?) {
         AppContainer.getInstance(ctx).repository.setNotification(null, null, title, content, icon)
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(getId(), this@BootNotificationService.create())
+        manager.notify(Configuration.FOREGROUND_ID, this@BootNotificationFactory.createNotification())
     }
+
+
+    private fun NotificationCompat.Builder.setContentIntent(activity: String) {
+        val intent = Intent(ctx, Class.forName(activity)).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            action = Intent.ACTION_VIEW
+        }
+        setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
+    }
+
 }
+

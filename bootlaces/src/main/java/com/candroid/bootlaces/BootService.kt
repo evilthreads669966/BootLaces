@@ -157,7 +157,7 @@ abstract class LifecycleBootService: LifecycleService() {
  * [NotificationProxy] also contains a [BroadcastReceiver] implementation named [UpdateReceiver]. This receiver is responsible for subscribing to the [Actions.ACTION_UPDATE] broadcast which is local to the app.
  * [Actions.ACTION_UPDATE] is sent from [bootNotification] everytime the foreground notification's content is updated. [bootNotification] takes in notification configuration data and persists it and then sends a broadcast to [UpdateReceiver] with this information.
  * [UpdateReceiver] is responsible for updating foreground notification title, body, and icon at runtime after it has already been created.
- * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootNotificationService.create] function to create the foreground notification in [onStart]
+ * [NotificationProxy.bootNotification] is used internally to create a notification. It uses [BootNotificationFactory.createNotification] function to create the foreground notification in [onStart]
  **/
 internal class NotificationProxy{
     private lateinit var receiver: UpdateReceiver
@@ -188,7 +188,7 @@ internal class NotificationProxy{
      * [NotificationProxy.UpdateReceiver] subscribes to the [Actions.ACTION_UPDATE] local broadcast and is managed within the scope of [NotificationProxy].
      * The user calls [bootNotification] passing in one or more [BootNotification] properties to update the current persistent [Notifcation].
      * [bootNotification] then sends a broadcast with an intent containing the [Actions.ACTION_UPDATE] action, and a [Notification] title, body, and icon.
-     * After processing the new [Notification] data, [NotificationProxy.UpdateReceiver] then calls [BootNotificationService.update] to post a new [Notification] reflecting the changes.
+     * After processing the new [Notification] data, [NotificationProxy.UpdateReceiver] then calls [BootNotificationFactory.updateForegroundNotification] to post a new [Notification] reflecting the changes.
      * */
     inner class UpdateReceiver(): BroadcastReceiver(){
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -196,17 +196,19 @@ internal class NotificationProxy{
                 var title: String? = null
                 var content: String? = null
                 var icon: Int? = null
-                if(intent!!.hasExtra(BootRepository.KEY_TITLE)){
+
+                if(intent!!.hasExtra(BootRepository.KEY_TITLE))
                     title = intent.getStringExtra(BootRepository.KEY_TITLE)
-                }
-                if(intent.hasExtra(BootRepository.KEY_CONTENT)){
+
+                if(intent.hasExtra(BootRepository.KEY_CONTENT))
                     content = intent.getStringExtra(BootRepository.KEY_CONTENT)
-                }
-                if(intent.hasExtra(BootRepository.KEY_ICON)){
-                    icon = intent.getIntExtra(BootRepository.KEY_ICON, -1)
-                }
+
+                if(intent.hasExtra(BootRepository.KEY_ICON))
+                    icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
+
                 runBlocking {
-                    AppContainer.getInstance(ctx!!).service.update(title, content, icon ?: android.R.drawable.sym_def_app_icon) }
+                    BootNotificationFactory.getInstance(ctx!!).updateForegroundNotification(title, content, icon)
+                }
             }
         }
     }
@@ -214,7 +216,7 @@ internal class NotificationProxy{
 
 /*create boot service notification*/
 internal suspend fun bootNotification(ctx: Service) {
-    AppContainer.getInstance(ctx).service.createChannel()
-    val id = AppContainer.getInstance(ctx).service.getId()
-    ctx.startForeground(id, AppContainer.getInstance(ctx).service.create())
+    BootNotificationFactory.Configuration.createChannel(ctx)
+    val notification = BootNotificationFactory.getInstance(ctx).createNotification()
+    notification?.let { notif -> ctx.startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif) }
 }

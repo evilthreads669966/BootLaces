@@ -38,15 +38,13 @@ import android.content.Context
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
- *
- * [AppContainer contains a singleton reference to [BootLacesService]. [BootLacesService] handles all transactions regarding configuration data which is stored in its' [BootLacesRepository].
- * All configuration data regarding [BootService] its' foreground notification are stored [BootLacesRepository]. It is important to only use this singelton's instance of [BootLacesService].
  **/
 internal class AppContainer(ctx: Context){
-     val repository = BootRepository(ctx)
-     val service = BootNotificationService(ctx)
+     val repository by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { BootRepository(ctx) }
+
     companion object{
         private var INSTANCE: AppContainer? = null
+
         fun getInstance(ctx: Context): AppContainer{
             if(INSTANCE == null)
                 INSTANCE = AppContainer(ctx)
