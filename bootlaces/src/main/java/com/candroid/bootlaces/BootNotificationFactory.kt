@@ -83,8 +83,7 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val boot = BootRepository.getInstance(ctx).loadBoot().firstOrNull()
-        if(boot != null){
+        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx).loadBoot().firstOrNull() ?: Boot()}.await()
             Configuration.createChannel(ctx)
             val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID).apply {
                 setContentTitle(boot.title ?: Configuration.DEFAULT_TITLE)
@@ -100,8 +99,6 @@ internal class BootNotificationFactory(val ctx: Context){
                     setChannelId(Configuration.CHANNEL_ID)
             }
             return builder.build()
-        }
-        return null
     }
 
     suspend fun updateBootNotification(boot: Boot) {
