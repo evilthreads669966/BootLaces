@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:4.2.1'
+        implementation 'com.github.evilthreads669966:bootlaces:4.2.2'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
@@ -50,16 +50,16 @@ class MyService : LifecycleBootService() {
 ```kotlin
 //this is the minimal requirement to get Boot Laces running
 startBoot(this){
-    service = LockService::class.qualifiedName
+    service = LockService::class.java.name
 }
 ```
 6. Initialize the properties of your persistent foreground notification within bootService's lambda. If you are only supporting Oreo and up then you do not need a Build.Version check.
 ```kotlin
 startBoot(this){
-    service = LockService::class.qualifiedName
+    service = LockService::class.java.name
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         //the activity to place inside the pending intent for your notification when selected. This activity will launch.
-        activity = MyActivity::class.qualifiedName
+        activity = MyActivity::class.java.name
         title = "I LOVE YOU"
         content = "Evil Threads loves you!"
     }
@@ -71,7 +71,7 @@ val myPayload = suspend {
     //do something
 }
 startBoot(this, payload = myPayload){
-    service = LockService::class.qualifiedName
+    service = LockService::class.java.name
 }
 ```
 7. Update your notification by passing any context as an argument to bootNotificaton and then initializing its' properties inside of the lambda.
