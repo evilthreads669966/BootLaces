@@ -53,15 +53,16 @@ import java.lang.Exception
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  **/
+@PublishedApi
 internal class BootRepository(ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        produceFile = { File(ctx.applicationContext.filesDir, "$NAME.preferences_pb").apply { createNewFile() } },
+        produceFile = { File(ctx.applicationContext.filesDir, FILE_NAME).apply { createNewFile() } },
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     )
 
     companion object{
         private var INSTANCE: BootRepository? = null
-        
+
         fun getInstance(ctx: Context): BootRepository{
             if(INSTANCE == null)
                 INSTANCE = BootRepository(ctx)
@@ -74,7 +75,7 @@ internal class BootRepository(ctx: Context) {
         val KEY_ICON = "KEY_ICON"
         val KEY_ACTIVITY = "KEY_ACTIVITY"
         val KEY_SERVICE = "KEY_SERVICE"
-        private val NAME = "bootlaces"
+        private val FILE_NAME = "bootlaces.preferences_pb"
         private val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
         private val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)
         private val PREF_KEY_ICON = preferencesKey<Int>(KEY_ICON)
@@ -105,5 +106,5 @@ internal class BootRepository(ctx: Context) {
         icon?.let { prefs[PREF_KEY_ICON] = icon }
     }
 }
-
+@PublishedApi
 internal data class Boot(var service: String? = null, var activity: String? = null, var title: String? = null, var content: String? = null, var icon: Int?  = null)

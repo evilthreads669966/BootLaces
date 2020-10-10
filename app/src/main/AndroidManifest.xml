@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.candroid.lacedboots">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.candroid.lacedboots">
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application
         android:name=".App"
@@ -10,10 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service
-            android:name=".LockService"
-            android:directBootAware="true" />
-
+        <service android:name=".LockService" android:directBootAware="true" android:foregroundServiceType="dataSync" />
         <activity
             android:name=".LockScreenActivity"
             android:launchMode="singleInstance"
@@ -24,10 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".LockJobService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name=".LockJobService" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 </manifest>

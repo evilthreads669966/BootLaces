@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.candroid.bootlaces.Configuration
 import com.candroid.bootlaces.updateBoot
 import com.candroid.bootlaces.startBoot
 import kotlinx.coroutines.ExperimentalCoroutinesApi

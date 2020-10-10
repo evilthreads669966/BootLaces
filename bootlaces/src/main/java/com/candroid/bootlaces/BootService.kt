@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -80,6 +81,7 @@ abstract class LifecycleBootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
     private lateinit var notifProxy: NotificationProxy
 
+    @PublishedApi
     internal companion object{
         var deferredPayload: (suspend () -> Unit)? = null
     }

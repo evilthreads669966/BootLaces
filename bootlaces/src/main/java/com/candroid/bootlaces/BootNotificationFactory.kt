@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.firstOrNull
  **/
 internal class BootNotificationFactory(val ctx: Context){
 
-    companion object{
+    internal companion object{
         private var INSTANCE: BootNotificationFactory? = null
         fun getInstance(ctx: Context): BootNotificationFactory{
             if(INSTANCE == null)
@@ -60,7 +60,7 @@ internal class BootNotificationFactory(val ctx: Context){
         }
     }
 
-    object Configuration{
+    internal object Configuration{
         val CHANNEL_ID = "666"
         val CHANNEL_NAME = "evil"
         val FOREGROUND_ID = 6666
@@ -118,4 +118,3 @@ internal class BootNotificationFactory(val ctx: Context){
         setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
     }
 }
-

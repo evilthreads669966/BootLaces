@@ -36,9 +36,11 @@ class MyService : LifecycleBootService() {
 }
 ```
 4. Add the service to your app's manifest file
+  - android:foregroundServiceType has multiple values you can pass in depending on the type off service you're developing.
+    - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
 ```xml
     <application>
-        <service android:name=".MyService" android:directBootAware="true"/>
+        <service android:name=".MyService" android:directBootAware="true" android:foregroundServiceType="dataSync"/>
     </application>
 ```
 5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService

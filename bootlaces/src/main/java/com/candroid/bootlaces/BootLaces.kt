@@ -43,7 +43,8 @@ import kotlin.reflect.KClass
 ............\..............(
 ..............\.............\...
 */
-private val configuration = Configuration()
+@PublishedApi
+internal val configuration = Configuration()
 
 /**
  * @author Chris Basinger
@@ -78,8 +79,8 @@ data class Configuration(
  * Never instatiate [BootNotification]. You only use the accompanying [updateBoot] function to access its' properties.
  **/
 data class BootNotification(
-    var notificationTitle: String = "evil threads",
-    var notificationContent: String = "boot laces",
+    var notificationTitle: String? = null,
+    var notificationContent: String? = null,
     var notificationIcon: Int? = null
 )
 
@@ -94,7 +95,7 @@ data class BootNotification(
  * [startBoot] is responsible for starting your [BootService] for the first time the application is used after install.
  * Once the device has been restarted, the [BootReceiver] will handle starting [BootService]
  **/
-fun startBoot(ctx: Activity, payload: (suspend () -> Unit)? = null, config: Configuration.() -> Unit){
+inline fun startBoot(ctx: Activity, noinline payload: ( suspend () -> Unit)? = null,  crossinline config: Configuration.() -> Unit){
     LifecycleBootService.deferredPayload = payload
     configuration.run{
         this.ctx = ctx
@@ -114,7 +115,7 @@ fun startBoot(ctx: Activity, payload: (suspend () -> Unit)? = null, config: Conf
 }
 
 /*update title and/or content text and/or icon of boot service notification*/
-fun updateBoot(ctx: Context, config: BootNotification.() -> Unit){
+inline fun updateBoot(ctx: Context, crossinline config: BootNotification.() -> Unit){
     val notifcation = BootNotification(configuration.notificationTitle, configuration.notificationContent, configuration.notificationIcon).apply{
         this.config()
     }
