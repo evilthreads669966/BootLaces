@@ -21,7 +21,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -81,7 +83,7 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val boot = BootRepository.getInstance(ctx).loadBoot().firstOrNull()
+        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx).loadBoot().firstOrNull() }.await()
         if(boot != null){
             Configuration.createChannel(ctx)
             val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID).apply {

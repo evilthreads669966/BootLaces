@@ -16,10 +16,10 @@ package com.candroid.bootlaces
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
-import java.security.InvalidParameterException
 
 /*
             (   (                ) (             (     (
@@ -48,19 +48,26 @@ import java.security.InvalidParameterException
  *
  * Starts your BootService and initalizes its' required configuration data for a foreground notification
  **/
+@ExperimentalCoroutinesApi
 @Throws(BootException::class)
-inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: Boot.() -> Unit){
+inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: Boot.() -> Unit) = runBlocking{
     LifecycleBootService.payload = payload
-    val boot = Boot().apply { init() }
-    if(boot.service == null)
-        throw BootException()
-    runBlocking {
-        BootRepository.getInstance(this@startBoot).saveBoot(boot)
+    val boot =  Scopes.BOOT_SCOPE.async { BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: Boot() }
+    if(boot.await().service != null)
+        return@runBlocking
+    boot.getCompleted().apply { init() }.let { boot ->
+        Log.d(this::class.java.name, "REALLY BAD")
+        if (boot.service == null)
+            throw BootException()
+        val job = Scopes.BOOT_SCOPE.launch {
+            BootRepository.getInstance(this@startBoot).saveBoot(boot)
+        }
         val intent = Intent(this@startBoot, Class.forName(boot.service!!))
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             startForegroundService(intent)
         else
             startService(intent)
+        job.join()
     }
 }
 

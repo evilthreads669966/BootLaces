@@ -7,7 +7,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
@@ -17,21 +18,26 @@ import kotlinx.coroutines.runBlocking
  * */
 internal class NotificationProxy{
     private lateinit var receiver: UpdateReceiver
+    lateinit var job: Job
 
+    companion object{
+        var updateReceiverJob: Job? = null
+    }
     fun onCreate(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val filter = IntentFilter(Actions.ACTION_UPDATE)
             receiver = UpdateReceiver()
             LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
-            runBlocking {
-                startBootNotification(ctx)
-            }
+            job = Scopes.BOOT_SCOPE.launch { startBootNotification(ctx) }
         }
     }
 
     fun onDestroy(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             LocalBroadcastManager.getInstance(ctx).unregisterReceiver(receiver)
+        job.cancel()
+        updateReceiverJob?.cancel()
+        Scopes.BOOT_SCOPE.coroutineContext.also { it.cancelChildren() }.cancel()
     }
 
     /*create boot service notification*/
@@ -63,10 +69,13 @@ internal class NotificationProxy{
                 if(intent.hasExtra(BootRepository.KEY_ICON))
                     boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
 
-                runBlocking {
-                    BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot)
-                }
+               updateReceiverJob = Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot) }
             }
         }
     }
+}
+
+@PublishedApi
+internal object Scopes{
+    val BOOT_SCOPE by lazy(LazyThreadSafetyMode.NONE) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
 }
