@@ -169,7 +169,7 @@ internal class NotificationProxy{
                     boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
 
                 runBlocking {
-                    BootNotificationFactory.getInstance(ctx!!).updateForegroundNotification(boot)
+                    BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot)
                 }
             }
         }
