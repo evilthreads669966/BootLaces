@@ -17,7 +17,6 @@ import android.content.Context
 import android.util.Log
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -52,7 +51,7 @@ import java.io.IOException
 internal class BootRepository(ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { File(ctx.applicationContext.filesDir, FILE_NAME).apply { createNewFile() } },
-        scope = CoroutineScope(Scopes.BOOT_SCOPE.coroutineContext)
+        scope = Scopes.BOOT_SCOPE
     )
 
     companion object{
