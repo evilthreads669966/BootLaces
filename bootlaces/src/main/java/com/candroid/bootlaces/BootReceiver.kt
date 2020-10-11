@@ -18,7 +18,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
@@ -47,23 +46,21 @@ import kotlinx.coroutines.runBlocking
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootReceiver] subscribes to BOOT_COMPLETED system broadcasts which are broadcast once the device has finished turning on or rebooting.
- * [BootReceiver] is responsible for starting [BootService] at boot time.
+ * Starts BootService after the phone turns on.
  **/
 internal class BootReceiver : BroadcastReceiver() {
     @ExperimentalCoroutinesApi
-    override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
-        val bootConfig = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() }
-        Boot.getInstance().apply { clone(bootConfig.await()!!) }.run {
-            if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
-                if(Boot.getInstance().service != null){
-                    intent?.setClassName(ctx!!, this.service!!)
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        ctx!!.startForegroundService(intent)
-                    else
-                        ctx!!.startService(intent)
-                }
+    override fun onReceive(ctx: Context?, intent: Intent?) = runCatching {
+        runBlocking {
+            val bootConfig = BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() ?: throw BootException()
+            val boot = Boot.getInstance().apply { clone(bootConfig) }
+            if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false) {
+                intent?.setClassName(ctx, boot.service!!)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    ctx.startForegroundService(intent)
+                else
+                    ctx.startService(intent)
             }
         }
-    }
+    }.getOrDefault(Unit)
 }
