@@ -65,8 +65,8 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
         ctx.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
-/*    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun requestOverlay() = checkPermission()*/
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    private fun requestOverlay() = checkPermission()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun updateForegroundNotification(){
@@ -76,8 +76,8 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
             }
     }
 
-/*    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    private fun kill() = ctx.kill()*/
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    private fun kill() = ctx.kill()
 
     private fun checkPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
