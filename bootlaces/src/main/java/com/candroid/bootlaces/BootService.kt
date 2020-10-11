@@ -42,10 +42,9 @@ import android.os.IBinder
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Persistent foreground service that is started by the startBoot method and BootReceiver
+ * Persistent foreground service
  **/
 abstract class BootService : Service() {
-    private lateinit var notifProxy: NotificationProxy
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -57,15 +56,13 @@ abstract class BootService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        notifProxy = NotificationProxy()
-        notifProxy.onCreate(this)
+        BroadcastRegistry.register(this)
     }
 
     override fun onDestroy() {
-        notifProxy.onDestroy(this)
         BootServiceState.setStopped()
+        BroadcastRegistry.unregister(this)
         super.onDestroy()
     }
 }
-
 

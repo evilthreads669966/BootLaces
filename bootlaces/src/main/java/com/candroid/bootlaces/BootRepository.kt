@@ -17,6 +17,9 @@ import android.content.Context
 import android.util.Log
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -47,12 +50,15 @@ import java.io.IOException
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
+ *
+ * Saves your Boot when your phone turns off.
+ * Loads your Boot when the phone turns on.
  **/
 @PublishedApi
 internal class BootRepository(ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { File(ctx.applicationContext.filesDir, PREF_FILE_NAME).apply { createNewFile() } },
-        scope = Scopes.BOOT_SCOPE
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     )
 
     companion object{

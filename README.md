@@ -1,6 +1,7 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
 ### Boot Laces is an Android library that turns your service persistent.
+#### A boot for turning your services into persistent foreground services.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
@@ -14,7 +15,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:4.2.2'
+        implementation 'com.github.evilthreads669966:bootlaces:5.0'
         //if you are using LifecycleBootService you need to include this library        
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
 }
@@ -39,12 +40,7 @@ class MyService : LifecycleBootService() {
   - android:foregroundServiceType has multiple values you can pass in depending on the type off service you're developing.
     - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
 ```xml
-    <application>
-	<service android:name=".LockService"
-	    android:directBootAware="true"
-	    android:foregroundServiceType="dataSync"
-	  />    
-    </application>
+	<service android:name=".MyService" android:foregroundServiceType="dataSync" />    
 ```
 5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService
 ```kotlin
@@ -58,8 +54,7 @@ startBoot{
 startBoot{
     service = LockService::class.java.name
     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-        //the activity to place inside the pending intent for your notification when selected. This activity will launch.
-        activity = MyActivity::class.java.name
+        activity = MainActivity::class.java.name  //onNotificationPressed start this activity
         title = "I LOVE YOU"
         content = "Evil Threads loves you!"
     }

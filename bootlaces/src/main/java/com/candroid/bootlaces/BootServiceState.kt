@@ -40,10 +40,7 @@ import android.content.SharedPreferences
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * [BootServiceState] holds the [BootService] current lifecycle state.
- * The [BootServiceState] is set in [BootService] lifecycle callback methods.
- * [Service.onCreate] sets the state to started.
- * [Service.onDestroy] sets the state to stopped.
+ * Check whether your BootService is running in the background
  **/
 object BootServiceState {
     private var state = States.STOPPED

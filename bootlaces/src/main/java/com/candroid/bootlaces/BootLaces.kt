@@ -47,27 +47,23 @@ import kotlinx.coroutines.runBlocking
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Starts your BootService and initalizes its' required configuration data for a foreground notification
+ * Initialize your Boot for starting BootService.
  **/
 @ExperimentalCoroutinesApi
 @Throws(BootException::class)
 inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit) = runBlocking{
     LifecycleBootService.payload = payload
-    val bootConfig = BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: BootConfig()
-    if(bootConfig.service != null)
-        return@runBlocking
-    bootConfig.init()
-    if(bootConfig.service == null) throw BootException()
-    val boot = Boot.getInstance().apply { clone(bootConfig) }
-        BootRepository.getInstance(this@startBoot).saveBoot(boot)
-        val intent = Intent(this@startBoot, Class.forName(boot.service!!))
+    if(Boot.getInstance().service == null) return@runBlocking
+    val config = BootConfig().apply { init() }
+    Boot.getInstance().clone(config)
+    val intent = Intent(this@startBoot, Class.forName(Boot.getInstance().service!!))
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         startForegroundService(intent)
     else
         startService(intent)
 }
 
-/* Change the Boot properties for the persistent foreground notificaiton*/
+/*update the persistent foreground notification's data*/
 inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit){
     val boot = BootConfig()
     boot.config()

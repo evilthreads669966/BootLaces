@@ -5,10 +5,8 @@ package com.candroid.bootlaces
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Boot holds all data related to a persistent background or foreground service.
+ * Boot contains the data needed to have a persistent foreground service
  * */
-
-/*IBoot and BootConfig were required because crossinline causes us to expose Boot outside the library and I don't want to expose internal sensitive data*/
 abstract class IBoot(open var service: String?, open var activity: String?, open var title: String?, open var content: String?, open var icon: Int?){
 
     open fun copy(service: String? = null, activity: String? = null, title: String? = null, content: String? = null, icon: Int?  = null){
