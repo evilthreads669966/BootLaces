@@ -14,9 +14,9 @@ import kotlinx.coroutines.runBlocking
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Register and unregister all BroadcastReceivers.
+ * Monitors system and local broadcasts.
  * */
-internal object BroadcastRegistry{
+internal object BroadcastMonitor{
     private val receiver: BroadcastReceiver
     private val shutdownReceiver: BroadcastReceiver
 

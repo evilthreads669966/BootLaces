@@ -40,7 +40,7 @@ import android.content.SharedPreferences
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Check whether your BootService is running in the background
+ * BootService lifecycle aware object
  **/
 object BootServiceState {
     private var state = States.STOPPED

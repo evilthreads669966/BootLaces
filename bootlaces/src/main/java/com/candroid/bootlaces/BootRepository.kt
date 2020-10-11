@@ -51,8 +51,7 @@ import java.io.IOException
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Saves your Boot when your phone turns off.
- * Loads your Boot when the phone turns on.
+ * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
 @PublishedApi
 internal class BootRepository(ctx: Context) {

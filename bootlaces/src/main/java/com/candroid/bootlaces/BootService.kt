@@ -15,8 +15,10 @@ package com.candroid.bootlaces
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
-import kotlinx.coroutines.*
+import android.util.Log
 
 /*
             (   (                ) (             (     (
@@ -46,30 +48,36 @@ import kotlinx.coroutines.*
  * Persistent foreground service
  **/
 abstract class BootService : Service() {
-    private lateinit var job: Job
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         BootServiceState.setRunning()
-        job = GlobalScope.launch(Dispatchers.Default) {
-            val notif = async { BootNotificationFactory.getInstance(this@BootService).createNotification() }
-            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif.await())
-        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startBootForeground()
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
-        BroadcastRegistry.register(this)
+        BroadcastMonitor.register(this)
     }
 
     override fun onDestroy() {
         BootServiceState.setStopped()
-        BroadcastRegistry.unregister(this)
-        job.cancel()
+        BroadcastMonitor.unregister(this)
         super.onDestroy()
     }
-}
 
+    @Throws(SecurityException::class)
+    fun startBootForeground(){
+        val notification = BootNotificationFactory.getInstance(this).createNotification() ?: throw SecurityException()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            Log.d("BOOTSERVICE", "${this.foregroundServiceType}")
+            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notification, foregroundServiceType)
+        }
+        else
+            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notification)
+    }
+}

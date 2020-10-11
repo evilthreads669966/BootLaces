@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.candroid.lacedboots">
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -11,7 +12,7 @@
         android:theme="@style/AppTheme">
         <service android:name=".LockService"
             android:directBootAware="true"
-            android:foregroundServiceType="dataSync"
+            android:foregroundServiceType="location"
             />
         <activity
             android:name=".LockScreenActivity"

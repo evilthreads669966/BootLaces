@@ -57,8 +57,8 @@ class LockService : LifecycleBootService(){
             val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
             ticker(500, 500, this.coroutineContext + Dispatchers.Default).consumeEach {
                 if(powerMgr.isInteractive)
-                    sendBroadcast(intent)
-                yield()
+                sendBroadcast(intent)
+                    yield()
             }
         }
     }
