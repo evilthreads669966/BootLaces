@@ -78,7 +78,7 @@ internal class BootRepository(ctx: Context) {
         private val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
     }
 
-    fun <T: IBoot>loadBoot(): Flow<T> = dataStore.data.catch { e ->
+    fun loadBoot(): Flow<BootConfig> = dataStore.data.catch { e ->
         when(e){
             is IOException -> emit(emptyPreferences())
             else -> Log.e(TAG, e.message!!)
@@ -90,11 +90,11 @@ internal class BootRepository(ctx: Context) {
             title = prefs[PREF_KEY_TITLE]
             content = prefs[PREF_KEY_CONTENT]
             icon = prefs[PREF_KEY_ICON]
-        } as T
+        }
     }
 
-    suspend fun <T: IBoot>saveBoot(boot: T?) = dataStore.edit { prefs ->
-        boot?.run {
+    suspend fun <T: IBoot>saveBoot(boot: T) = dataStore.edit { prefs ->
+        boot.run {
             service?.let { prefs[PREF_KEY_SERVICE] = it }
             activity?.let { prefs[PREF_KEY_ACTIVITY] = it }
             title?.let { prefs[PREF_KEY_TITLE] = it }

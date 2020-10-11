@@ -51,13 +51,11 @@ import kotlinx.coroutines.runBlocking
  * [BootReceiver] is responsible for starting [BootService] at boot time.
  **/
 internal class BootReceiver : BroadcastReceiver() {
-
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
-        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot<BootConfig>().firstOrNull() }
-        Boot.getInstance().apply { edit(boot.await()) }
-        if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
-            Boot.getInstance().run {
+        val bootConfig = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() }
+        Boot.getInstance().apply { clone(bootConfig.await()!!) }.run {
+            if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
                 if(Boot.getInstance().service != null){
                     intent?.setClassName(ctx!!, this.service!!)
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
