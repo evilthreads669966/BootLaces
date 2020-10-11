@@ -83,14 +83,16 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
     suspend fun createNotification(): Notification? {
-        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx).loadBoot().firstOrNull() ?: Boot()}.await()
+        Boot.getInstance().run {
             Configuration.createChannel(ctx)
             val builder = NotificationCompat.Builder(ctx, Configuration.CHANNEL_ID).apply {
-                setContentTitle(boot.title ?: Configuration.DEFAULT_TITLE)
-                setContentText(boot.content ?: Configuration.DEFAULT_CONTENT)
-                setSmallIcon(boot.icon ?: android.R.drawable.sym_def_app_icon)
-                if(boot.activity != null)
-                    setContentIntent(boot.activity!!)
+                Boot.getInstance().run {
+                    setContentTitle(title ?: Configuration.DEFAULT_TITLE)
+                    setContentText(content ?: Configuration.DEFAULT_CONTENT)
+                    setSmallIcon(icon ?: android.R.drawable.sym_def_app_icon)
+                    if (activity != null)
+                        setContentIntent(activity!!)
+                }
                 setShowWhen(false)
                 setAutoCancel(false)
                 setOngoing(true)
@@ -99,10 +101,12 @@ internal class BootNotificationFactory(val ctx: Context){
                     setChannelId(Configuration.CHANNEL_ID)
             }
             return builder.build()
+        }
     }
-
-    suspend fun updateBootNotification(boot: Boot) {
-        Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(ctx).saveBoot(boot) }
+    suspend fun updateBootNotification() {
+        Boot.getInstance().run {
+            Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(ctx).saveBoot(this@run) }
+        }
         val manager = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(Configuration.FOREGROUND_ID, createNotification())
     }

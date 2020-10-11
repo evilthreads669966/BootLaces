@@ -51,20 +51,9 @@ internal class NotificationProxy{
 
         override fun onReceive(ctx: Context?, intent: Intent?){
             if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false){
-                val boot = Boot()
-
-                if(intent!!.hasExtra(BootRepository.KEY_ACTIVITY))
-                    boot.activity = intent.getStringExtra(BootRepository.KEY_ACTIVITY)
-
-                if(intent.hasExtra(BootRepository.KEY_TITLE))
-                    boot.title = intent.getStringExtra(BootRepository.KEY_TITLE)
-
-                if(intent.hasExtra(BootRepository.KEY_CONTENT))
-                    boot.content = intent.getStringExtra(BootRepository.KEY_CONTENT)
-
-                if(intent.hasExtra(BootRepository.KEY_ICON))
-                    boot.icon = intent.getIntExtra(BootRepository.KEY_ICON, -1).takeIf { ic -> ic != -1 }
-                Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification(boot) }
+                Boot.getInstance().run {
+                    Scopes.BOOT_SCOPE.launch{ BootNotificationFactory.getInstance(ctx!!).updateBootNotification() }
+                }
             }
         }
     }

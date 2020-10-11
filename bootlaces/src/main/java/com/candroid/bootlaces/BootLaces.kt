@@ -16,10 +16,8 @@ package com.candroid.bootlaces
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -53,19 +51,19 @@ import kotlinx.coroutines.runBlocking
  **/
 @ExperimentalCoroutinesApi
 @Throws(BootException::class)
-inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: Boot.() -> Unit) = runBlocking{
+inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit){
     LifecycleBootService.payload = payload
-    //see if we already have the boot data in storage.
-    val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: Boot() }.await()
-    //check if startBoot has ever ran before since installing the app. If so we can go back
-    if(boot.service != null)
-        return@runBlocking
-    //add data to Boot and crash on purpose if service arg is null
-    boot.apply { init() }.takeIf { it.service == null }?.let{ return@runBlocking }
-    //save the notification data and service name to storage
-    Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(this@startBoot).saveBoot(boot) }
-    //start BootService
-    val intent = Intent(this@startBoot, Class.forName(boot.service!!))
+    val bootConfig = runBlocking { return@runBlocking BootRepository.getInstance(this@startBoot).loadBoot<BootConfig>().firstOrNull() }
+    if(bootConfig!!.service != null)
+        return
+    bootConfig.init()
+    if(bootConfig.service == null)
+        return
+    lateinit var intent: Intent
+    Boot.getInstance().apply { edit(bootConfig) }.run {
+        Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(this@startBoot).saveBoot(this@run) }
+        intent = Intent(this@startBoot, Class.forName(this.service!!))
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         startForegroundService(intent)
     else
@@ -73,14 +71,9 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
 }
 
 /* Change the Boot properties for the persistent foreground notificaiton*/
-inline fun updateBoot(ctx: Context, crossinline config: Boot.() -> Unit){
-    val boot = Boot().apply { config() }
-    val updateIntent = Intent().apply {
-        action = Actions.ACTION_UPDATE
-        putExtra(BootRepository.KEY_TITLE, boot.title)
-        putExtra(BootRepository.KEY_CONTENT, boot.content)
-        putExtra(BootRepository.KEY_ICON, boot.icon)
-        putExtra(BootRepository.KEY_ACTIVITY, boot.activity)
-    }
-    LocalBroadcastManager.getInstance(ctx).sendBroadcast(updateIntent)
+inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit) = runBlocking{
+    val boot = BootConfig()
+    boot.config()
+    Boot.getInstance().apply {  edit(boot) }.run {  }
+    LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
 }

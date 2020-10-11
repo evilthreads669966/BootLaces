@@ -54,14 +54,17 @@ internal class BootReceiver : BroadcastReceiver() {
 
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?) = runBlocking{
-        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() }
+        val boot = Scopes.BOOT_SCOPE.async { BootRepository.getInstance(ctx!!).loadBoot<BootConfig>().firstOrNull() }
+        Boot.getInstance().apply { edit(boot.await()) }
         if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false){
-            if(boot.await()?.service != null){
-                intent?.setClassName(ctx!!, boot.getCompleted()?.service!!)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    ctx!!.startForegroundService(intent)
-                else
-                    ctx!!.startService(intent)
+            Boot.getInstance().run {
+                if(Boot.getInstance().service != null){
+                    intent?.setClassName(ctx!!, this.service!!)
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        ctx!!.startForegroundService(intent)
+                    else
+                        ctx!!.startService(intent)
+                }
             }
         }
     }
