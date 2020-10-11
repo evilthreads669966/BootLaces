@@ -21,6 +21,8 @@ internal object BroadcastRegistry{
     private val shutdownReceiver: BroadcastReceiver
 
     init {
+        /*Receives broadcasts when Boot has changed its' state.
+        * Responsible for updating Boot foreground notification*/
         receiver = object : BroadcastReceiver(){
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false)
@@ -28,7 +30,7 @@ internal object BroadcastRegistry{
             }
         }
 
-        /*saves boot data to storage when the device begins to restart or shutdown*/
+        /*Saves Boot to storage when the device is powering off*/
         shutdownReceiver = object : BroadcastReceiver() {
             val TAG = this::class.java.name
             override fun onReceive(ctx: Context?, intent: Intent?) {
