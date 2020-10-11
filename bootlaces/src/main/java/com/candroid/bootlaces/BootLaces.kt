@@ -18,8 +18,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /*
@@ -53,10 +51,10 @@ import kotlinx.coroutines.runBlocking
 @Throws(BootException::class)
 inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit) = runBlocking{
     LifecycleBootService.payload = payload
-    if(Boot.getInstance().service == null) return@runBlocking
+    if(Boot.getInstance().service != null) return@runBlocking
     val config = BootConfig().apply { init() }
-    Boot.getInstance().clone(config)
-    val intent = Intent(this@startBoot, Class.forName(Boot.getInstance().service!!))
+    val service = Boot.getInstance().apply { clone(config) }.service ?: throw BootException()
+    val intent = Intent(this@startBoot, Class.forName(service))
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         startForegroundService(intent)
     else
