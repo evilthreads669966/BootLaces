@@ -51,19 +51,16 @@ import kotlinx.coroutines.runBlocking
  **/
 @ExperimentalCoroutinesApi
 @Throws(BootException::class)
-inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit){
+inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit) = runBlocking{
     LifecycleBootService.payload = payload
-    val bootConfig = runBlocking { return@runBlocking BootRepository.getInstance(this@startBoot).loadBoot<BootConfig>().firstOrNull() }
-    if(bootConfig!!.service != null)
-        return
+    val bootConfig = BootRepository.getInstance(this@startBoot).loadBoot().firstOrNull() ?: BootConfig()
+    if(bootConfig.service != null)
+        return@runBlocking
     bootConfig.init()
-    if(bootConfig.service == null)
-        return
-    lateinit var intent: Intent
-    Boot.getInstance().apply { edit(bootConfig) }.run {
-        Scopes.BOOT_SCOPE.launch { BootRepository.getInstance(this@startBoot).saveBoot(this@run) }
-        intent = Intent(this@startBoot, Class.forName(this.service!!))
-    }
+    if(bootConfig.service == null) throw BootException()
+    val boot = Boot.getInstance().apply { clone(bootConfig) }
+        BootRepository.getInstance(this@startBoot).saveBoot(boot)
+        val intent = Intent(this@startBoot, Class.forName(boot.service!!))
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         startForegroundService(intent)
     else
@@ -74,6 +71,6 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
 inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit){
     val boot = BootConfig()
     boot.config()
-    Boot.getInstance().run {  edit(boot) }
+    Boot.getInstance().clone(boot)
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
 }
