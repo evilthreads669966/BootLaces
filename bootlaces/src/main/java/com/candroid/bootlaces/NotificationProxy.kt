@@ -19,12 +19,19 @@ import kotlinx.coroutines.launch
  * Responsible for the persistent foreground notification of BootService
  * */
 internal class NotificationProxy{
-    private lateinit var receiver: UpdateReceiver
+    lateinit var receiver: BroadcastReceiver
+    init {
+        receiver = object : BroadcastReceiver(){
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false)
+                    Scopes.BOOT_SCOPE.launch { BootNotificationFactory.getInstance(ctx!!).updateBootNotification() }
+            }
+        }
+    }
 
     fun onCreate(ctx: Service){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val filter = IntentFilter(Actions.ACTION_UPDATE)
-            receiver = UpdateReceiver()
             LocalBroadcastManager.getInstance(ctx).registerReceiver(receiver, filter)
             Scopes.BOOT_SCOPE.launch { startBootNotification(ctx) }
         }
@@ -45,17 +52,6 @@ internal class NotificationProxy{
             return true
         }
         return false
-    }
-
-    inner class UpdateReceiver: BroadcastReceiver(){
-
-        override fun onReceive(ctx: Context?, intent: Intent?){
-            if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false){
-                Boot.getInstance().run {
-                    Scopes.BOOT_SCOPE.launch{ BootNotificationFactory.getInstance(ctx!!).updateBootNotification() }
-                }
-            }
-        }
     }
 }
 

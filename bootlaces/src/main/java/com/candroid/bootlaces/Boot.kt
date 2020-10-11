@@ -50,7 +50,6 @@ internal class Boot(service: String? = null, activity: String? = null, title: St
         }
     }
 
-
     override fun edit(service: String?, activity: String?, title: String?, content: String?, icon: Int?){
         service?.let { this.service = it }
         activity?.let { this.activity = it }

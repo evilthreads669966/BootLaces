@@ -71,9 +71,9 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
 }
 
 /* Change the Boot properties for the persistent foreground notificaiton*/
-inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit) = runBlocking{
+inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit){
     val boot = BootConfig()
     boot.config()
-    Boot.getInstance().apply {  edit(boot) }.run {  }
+    Boot.getInstance().run {  edit(boot) }
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
 }
