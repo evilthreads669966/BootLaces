@@ -45,7 +45,8 @@ import kotlinx.coroutines.runBlocking
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Initialize your Boot for starting BootService.
+ * Creates the first Boot and starts its' foreground service.
+ * Modify your Boot with updateBoot to change the foreground notification
  **/
 @ExperimentalCoroutinesApi
 @Throws(BootException::class)
@@ -63,8 +64,7 @@ inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  c
 
 /*update the persistent foreground notification's data*/
 inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit){
-    val boot = BootConfig()
-    boot.config()
-    Boot.getInstance().clone(boot)
+    val bootConfig = BootConfig().apply { config() }
+    Boot.getInstance().clone(bootConfig)
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
 }

@@ -14,13 +14,15 @@ import kotlinx.coroutines.runBlocking
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Register and unregister all BroadcastReceivers.
+ * Monitors system and local broadcasts.
  * */
-internal object BroadcastRegistry{
+internal object BroadcastMonitor{
     private val receiver: BroadcastReceiver
     private val shutdownReceiver: BroadcastReceiver
 
     init {
+        /*Receives broadcasts when Boot has changed its' state.
+        * Responsible for updating Boot foreground notification*/
         receiver = object : BroadcastReceiver(){
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false)
@@ -28,7 +30,7 @@ internal object BroadcastRegistry{
             }
         }
 
-        /*saves boot data to storage when the device begins to restart or shutdown*/
+        /*Saves Boot to storage when the device is powering off*/
         shutdownReceiver = object : BroadcastReceiver() {
             val TAG = this::class.java.name
             override fun onReceive(ctx: Context?, intent: Intent?) {

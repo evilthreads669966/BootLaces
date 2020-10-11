@@ -5,7 +5,7 @@ package com.candroid.bootlaces
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Boot contains the data needed to have a persistent foreground service
+ * Boot holds the configuration data for creating persistent foreground service
  * */
 abstract class IBoot(open var service: String?, open var activity: String?, open var title: String?, open var content: String?, open var icon: Int?){
 
