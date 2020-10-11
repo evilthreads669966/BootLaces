@@ -16,6 +16,7 @@ package com.candroid.bootlaces
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import kotlinx.coroutines.*
 
 /*
             (   (                ) (             (     (
@@ -45,12 +46,17 @@ import android.os.IBinder
  * Persistent foreground service
  **/
 abstract class BootService : Service() {
+    private lateinit var job: Job
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         BootServiceState.setRunning()
+        job = GlobalScope.launch(Dispatchers.Default) {
+            val notif = async { BootNotificationFactory.getInstance(this@BootService).createNotification() }
+            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notif.await())
+        }
         return START_STICKY
     }
 
@@ -62,6 +68,7 @@ abstract class BootService : Service() {
     override fun onDestroy() {
         BootServiceState.setStopped()
         BroadcastRegistry.unregister(this)
+        job.cancel()
         super.onDestroy()
     }
 }
