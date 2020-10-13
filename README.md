@@ -1,7 +1,7 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
-### Boot Laces is an Android library that turns your service persistent.
-#### A boot for turning your services into persistent foreground services.
+### Boot Laces is an Android library that turns your service persistent
+#### It take your background service and puts it into the foreground while making it persistent.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
