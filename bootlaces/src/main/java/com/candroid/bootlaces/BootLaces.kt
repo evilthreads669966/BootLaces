@@ -13,12 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -48,23 +50,24 @@ import kotlinx.coroutines.runBlocking
  * Creates the first Boot and starts its' foreground service.
  * Modify your Boot with updateBoot to change the foreground notification
  **/
-@ExperimentalCoroutinesApi
-@Throws(BootException::class)
-inline fun Context.startBoot(noinline payload: ( suspend () -> Unit)? = null,  crossinline init: BootConfig.() -> Unit) = runBlocking{
-    LifecycleBootService.payload = payload
-    if(Boot.getInstance().service != null) return@runBlocking
-    val config = BootConfig().apply { init() }
-    val service = Boot.getInstance().apply { clone(config) }.service ?: throw BootException()
-    val intent = Intent(this@startBoot, Class.forName(service))
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        startForegroundService(intent)
-    else
-        startService(intent)
-}
+class BootLaces @Inject constructor(val mgr: BootNotificationManager){
 
-/*update the persistent foreground notification's data*/
-inline fun updateBoot(ctx: Context, crossinline config: BootConfig.() -> Unit){
-    val bootConfig = BootConfig().apply { config() }
-    Boot.getInstance().clone(bootConfig)
-    LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
+    @ExperimentalCoroutinesApi
+    @Throws(BootException::class)
+    inline fun startBoot(ctx: Activity, noinline payload: ( suspend () -> Unit)? = null, crossinline init: IBoot.() -> Unit) = runBlocking{
+        LifecycleBootService.payload = payload
+        if(mgr.boot.service != null) return@runBlocking
+        val service = mgr.boot.apply { init() }.service ?: throw BootException()
+        val intent = Intent(ctx, Class.forName(service))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            ctx.startForegroundService(intent)
+        else
+            ctx.startService(intent)
+    }
+
+    /*update the persistent foreground notification's data*/
+    inline fun updateBoot(ctx: Context, crossinline config: IBoot.() -> Unit){
+        mgr.boot.apply { config() }
+        LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
+    }
 }

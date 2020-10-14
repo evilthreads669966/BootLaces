@@ -13,12 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -48,7 +49,8 @@ import android.util.Log
  * Persistent foreground service
  **/
 abstract class BootService : Service() {
-
+    @Inject lateinit var mgr: BootNotificationManager
+    @Inject lateinit var monitor: BroadcastMonitor
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -61,23 +63,22 @@ abstract class BootService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        BroadcastMonitor.register(this)
+        monitor.register(this)
     }
 
     override fun onDestroy() {
         BootServiceState.setStopped()
-        BroadcastMonitor.unregister(this)
+        monitor.unregister(this)
         super.onDestroy()
     }
 
     @Throws(SecurityException::class)
     fun startBootForeground(){
-        val notification = BootNotificationFactory.getInstance(this).createNotification() ?: throw SecurityException()
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             Log.d("BOOTSERVICE", "${this.foregroundServiceType}")
-            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notification, foregroundServiceType)
+            startForeground(BootNotificationManager.Configuration.FOREGROUND_ID, mgr.createNotification(), foregroundServiceType)
         }
         else
-            startForeground(BootNotificationFactory.Configuration.FOREGROUND_ID, notification)
+            startForeground(BootNotificationManager.Configuration.FOREGROUND_ID, mgr.createNotification())
     }
 }

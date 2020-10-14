@@ -14,14 +14,8 @@ limitations under the License.*/
 package com.candroid.lacedboots
 
 import android.content.Context
-import android.os.Build
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
-import com.candroid.bootlaces.startBoot
-import com.candroid.bootlaces.updateBoot
 import dagger.hilt.android.qualifiers.ActivityContext
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
@@ -49,10 +43,9 @@ import javax.inject.Inject
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: Context): LifecycleObserver {
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+/*    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun startService(){
-        ctx.startBoot{
+        bootlaces.startBoot(ctx as Activity){
             service = LockService::class.qualifiedName
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                 title = "I LOVE YOU"
@@ -65,8 +58,8 @@ class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: C
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun updateForegroundNotification(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            updateBoot(ctx){
+            bootlaces.updateBoot(ctx){
                 content = "Evil Threads love you ${ScreenVisibility.count()} times!"
             }
-    }
+    }*/
 }

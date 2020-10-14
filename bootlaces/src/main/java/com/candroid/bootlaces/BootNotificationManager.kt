@@ -20,11 +20,13 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.DEFAULT_FOREGROUND_CONTENT
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.DEFAULT_FOREGROUND_TITLE
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_CHANNEL_ID
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_GROUP_ID
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_ID
+import com.candroid.bootlaces.BootNotificationManager.Configuration.DEFAULT_FOREGROUND_CONTENT
+import com.candroid.bootlaces.BootNotificationManager.Configuration.DEFAULT_FOREGROUND_TITLE
+import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_CHANNEL_ID
+import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_GROUP_ID
+import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_ID
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -52,15 +54,7 @@ import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_I
  * @date 10/09/20
  *
  **/
-internal class BootNotificationFactory(val ctx: Context){
-
-    internal companion object{
-        private var INSTANCE: BootNotificationFactory? = null
-        fun getInstance(ctx: Context): BootNotificationFactory{
-            if(INSTANCE == null)
-                INSTANCE = BootNotificationFactory(ctx)
-            return INSTANCE!!
-        }
+class BootNotificationManager @Inject constructor(@ApplicationContext val ctx: Context, val boot: IBoot){
 
         private val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
             it.run {
@@ -78,7 +72,6 @@ internal class BootNotificationFactory(val ctx: Context){
                 setGroup(FOREGROUND_GROUP_ID)
             }
         }
-    }
 
     internal object Configuration{
         val DEFAULT_FOREGROUND_ICON = android.R.drawable.sym_def_app_icon
@@ -125,10 +118,10 @@ internal class BootNotificationFactory(val ctx: Context){
     }
 
 
-    fun createNotification(): Notification? {
+    fun createNotification(): Notification {
             Configuration.createForegroundChannel(ctx)
         val builder = NotificationCompat.Builder(ctx).apply {
-            Boot.getInstance().run {
+            boot.run {
                 setContentTitle(title ?: DEFAULT_FOREGROUND_TITLE)
                 setContentText(content ?: DEFAULT_FOREGROUND_CONTENT)
                 setSmallIcon(icon ?: Configuration.DEFAULT_FOREGROUND_ICON)

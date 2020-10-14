@@ -1,13 +1,14 @@
 package com.candroid.bootlaces
 
+import android.app.Notification
 import android.content.Intent
-import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_ID
+import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_ID
+import javax.inject.Inject
 
 /**
  * @author Chris Basinger
@@ -21,6 +22,8 @@ import com.candroid.bootlaces.BootNotificationFactory.Configuration.FOREGROUND_I
 abstract class LifecycleBootService: LifecycleService() {
     private val tag = this::class.java.name
     private val mDispatcher = ServiceLifecycleDispatcher(this)
+    @Inject lateinit var mgr: BootNotificationManager
+    @Inject lateinit var monitor: BroadcastMonitor
 
     @PublishedApi
     internal companion object{
@@ -44,7 +47,7 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         BootServiceState.setRunning()
-        BroadcastMonitor.register(this)
+        monitor.register(this)
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -59,19 +62,18 @@ abstract class LifecycleBootService: LifecycleService() {
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
-        BroadcastMonitor.unregister(this)
+        monitor.unregister(this)
         BootServiceState.setStopped()
         super.onDestroy()
     }
 
     @Throws(SecurityException::class)
    suspend fun startBootForeground(){
-        val notification = BootNotificationFactory.getInstance(this).createNotification() ?: throw SecurityException("No boot foreground notification created")
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
             Log.d("BOOTSERVICE", "${this.foregroundServiceType}")
-            startForeground(FOREGROUND_ID, notification, foregroundServiceType)
+            startForeground(FOREGROUND_ID, mgr.createNotification(), foregroundServiceType)
         }
         else
-            this.startForeground(FOREGROUND_ID, notification)
+            this.startForeground(FOREGROUND_ID, mgr.createNotification())
     }
 }

@@ -20,6 +20,7 @@ import android.os.Build
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -48,18 +49,17 @@ import kotlinx.coroutines.runBlocking
  *
  * Starts BootService after the phone turns on.
  **/
-internal class BootReceiver : BroadcastReceiver() {
+internal class BootReceiver() : BroadcastReceiver() {
+    @Inject lateinit var mgr: BootNotificationManager
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?) = runCatching {
         runBlocking {
-            val bootConfig = BootRepository.getInstance(ctx!!).loadBoot().firstOrNull() ?: throw BootException()
-            val boot = Boot.getInstance().apply { clone(bootConfig) }
             if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false) {
-                intent?.setClassName(ctx, boot.service!!)
+                intent?.setClassName(ctx!!, mgr.boot.service!!)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    ctx.startForegroundService(intent)
+                    ctx!!.startForegroundService(intent)
                 else
-                    ctx.startService(intent)
+                    ctx!!.startService(intent)
             }
         }
     }.getOrDefault(Unit)
