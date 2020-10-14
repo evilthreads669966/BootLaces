@@ -53,7 +53,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(){
     private val mOverlay_request_code = 666
-    @Inject private lateinit var mObserver: LifecycleObserver
+    @Inject lateinit var mObserver: LifecycleObserver
 
     override fun onStart() {
         super.onStart()

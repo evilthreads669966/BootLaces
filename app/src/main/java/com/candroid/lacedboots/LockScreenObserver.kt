@@ -48,7 +48,6 @@ import javax.inject.Inject
 */
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-@ActivityScoped
 class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: Context): LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -70,5 +69,4 @@ class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: C
                 content = "Evil Threads love you ${ScreenVisibility.count()} times!"
             }
     }
-
 }
