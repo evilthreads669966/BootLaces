@@ -17,14 +17,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.LifecycleBootService
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.yield
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -48,8 +52,9 @@ import kotlinx.coroutines.yield
 */
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class LockService : LifecycleBootService(){
-    private lateinit var rec: CloseDialogReceiver
+@AndroidEntryPoint
+class LockService() : LifecycleBootService(){
+    @Inject lateinit var rec: CloseDialogReceiver
 
     init {
         lifecycleScope.launchWhenCreated {
@@ -65,7 +70,6 @@ class LockService : LifecycleBootService(){
 
     override fun onCreate() {
         super.onCreate()
-        rec = CloseDialogReceiver()
         registerReceiver(rec, IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
     }
 

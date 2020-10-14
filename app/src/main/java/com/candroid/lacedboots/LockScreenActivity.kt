@@ -13,10 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import javax.inject.Inject
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -39,17 +50,18 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 */
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
+@AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(){
-    private lateinit var mObserver: LifecycleObserver
+    private val mOverlay_request_code = 666
+    @Inject private lateinit var mObserver: LifecycleObserver
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override fun onStart() {
+        super.onStart()
+        checkPermission()
     }
 
     override fun onResume() {
         super.onResume()
-        mObserver = LockScreenObserver(this)
         lifecycle.addObserver(mObserver)
     }
 
@@ -57,4 +69,14 @@ class LockScreenActivity: VisibilityActivity(){
         super.onPause()
         lifecycle.removeObserver(mObserver)
     }
+
+    private fun checkPermission() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
+                startActivityForResult(intent, mOverlay_request_code)
+            }
+        }
+    }
 }
+

@@ -13,19 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.content.Intent
-import android.net.Uri
+import android.content.Context
 import android.os.Build
-import android.provider.Settings
-import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.candroid.bootlaces.startBoot
 import com.candroid.bootlaces.updateBoot
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -49,8 +48,8 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 */
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
-    private val mOverlay_request_code = 666
+@ActivityScoped
+class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: Context): LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     private fun startService(){
@@ -62,11 +61,7 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
                 activity = LockScreenActivity::class.qualifiedName
             }
         }
-        ctx.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    private fun requestOverlay() = checkPermission()
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     private fun updateForegroundNotification(){
@@ -76,23 +71,4 @@ class LockScreenObserver(val ctx: AppCompatActivity): LifecycleObserver {
             }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    private fun kill() = ctx.kill()
-
-    private fun checkPermission() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            if (!Settings.canDrawOverlays(ctx)) {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${ctx.packageName}"))
-                ctx.startActivityForResult(intent, mOverlay_request_code)
-            }
-        }
-    }
-}
-
-private fun AppCompatActivity.kill(){
-    var overlay = true
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P)
-        overlay = Settings.canDrawOverlays(this)
-    if(overlay)
-        finishAndRemoveTask()
 }

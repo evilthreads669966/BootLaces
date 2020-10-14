@@ -14,6 +14,8 @@ limitations under the License.*/
 package com.candroid.lacedboots
 
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -34,7 +36,9 @@ import androidx.appcompat.app.AppCompatActivity
 ............\..............(
 ..............\.............\...
 */
-open class VisibilityActivity: AppCompatActivity(){
+@AndroidEntryPoint
+abstract class VisibilityActivity: AppCompatActivity(){
+
     override fun onResume() {
         super.onResume()
         ScreenVisibility.setVisible()
