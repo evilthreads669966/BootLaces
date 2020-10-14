@@ -70,5 +70,4 @@ class LockScreenObserver @Inject constructor(@ActivityContext private val ctx: C
                 content = "Evil Threads love you ${ScreenVisibility.count()} times!"
             }
     }
-
 }
