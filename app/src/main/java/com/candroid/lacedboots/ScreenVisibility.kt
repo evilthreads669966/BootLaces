@@ -12,6 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
+
+import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -32,6 +35,7 @@ package com.candroid.lacedboots
 ............\..............(
 ..............\.............\...
 */
+@Singleton
 object ScreenVisibility{
     private var mVisibility = Visibility.INVISIBLE
     private var mCount = 0

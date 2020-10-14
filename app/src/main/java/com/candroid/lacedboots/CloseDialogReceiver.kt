@@ -16,8 +16,11 @@ package com.candroid.lacedboots
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import javax.inject.Inject
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -40,8 +43,10 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 */
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class CloseDialogReceiver: BroadcastReceiver(){
+@ServiceScoped
+/*Hilt has a bug with broadcast receiver so it doesn't work. So broadast receiver and lockmanager are under service scope for now*/
+class CloseDialogReceiver @Inject constructor(private val lockManager: ILockManager): BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
-        App.INSTANCE.lockManager.takeIf { !it.isLocked() && it.isLockable(context!!) }?.lockScreen(context!!, intent)
+        lockManager.takeIf { !it.isLocked() && it.isLockable(context!!) }?.lockScreen(context!!, intent)
     }
 }
