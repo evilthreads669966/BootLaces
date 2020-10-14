@@ -9,12 +9,11 @@ import android.provider.Settings
 import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import javax.inject.Inject
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class LockManager @Inject constructor(): ILockManager {
-  
+@ServiceScoped
+class LockManager: ILockManager {
     override fun isLocked() = ScreenVisibility.isVisible()
 
     override fun isLockable(ctx: Context): Boolean{
@@ -36,6 +35,7 @@ class LockManager @Inject constructor(): ILockManager {
     }
 }
 
+@ServiceScoped
 interface ILockManager {
     fun isLocked(): Boolean
 
