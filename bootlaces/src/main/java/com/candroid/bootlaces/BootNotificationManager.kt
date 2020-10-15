@@ -27,6 +27,7 @@ import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_G
 import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_ID
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -54,6 +55,7 @@ import javax.inject.Inject
  * @date 10/09/20
  *
  **/
+@Singleton
 class BootNotificationManager @Inject constructor(@ApplicationContext val ctx: Context, val boot: IBoot){
 
         private val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {

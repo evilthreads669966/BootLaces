@@ -17,6 +17,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -49,6 +50,7 @@ import javax.inject.Inject
  *
  * Starts BootService after the phone turns on.
  **/
+@AndroidEntryPoint
 internal class BootReceiver() : BroadcastReceiver() {
     @Inject lateinit var mgr: BootNotificationManager
     @ExperimentalCoroutinesApi

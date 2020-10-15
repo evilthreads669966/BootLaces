@@ -41,11 +41,10 @@ object Core{
     @Provides
     @Singleton
     fun manager(@ApplicationContext ctx: Context, boot: IBoot) = BootNotificationManager(ctx, boot)
-
     @Provides
-    fun provideBoot(@ApplicationContext ctx: Context) = runBlocking { BootRepository(ctx).loadBoot().firstOrNull() } ?: Boot(null,null,null,null,null)
+    @Singleton
+    fun provideBoot(@ApplicationContext ctx: Context): IBoot = runBlocking { return@runBlocking BootRepository(ctx).loadBoot().firstOrNull() } ?: Boot(null,null,null,null,null)
 }
-
 
 @Module
 @InstallIn(ServiceComponent::class)

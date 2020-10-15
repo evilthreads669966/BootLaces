@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -55,6 +56,7 @@ import javax.inject.Inject
  *
  * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
+@Singleton
 class BootRepository @Inject constructor(@ApplicationContext val ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { File(ctx.applicationContext.filesDir, PREF_FILE_NAME).apply { createNewFile() } },
@@ -91,7 +93,7 @@ class BootRepository @Inject constructor(@ApplicationContext val ctx: Context) {
         }
     }
 
-    suspend fun <T: IBoot>saveBoot(boot: T) = dataStore.edit { prefs ->
+    suspend fun <T: IBoot> saveBoot(boot: T) = dataStore.edit { prefs ->
         boot.run {
             service?.let { prefs[PREF_KEY_SERVICE] = it }
             activity?.let { prefs[PREF_KEY_ACTIVITY] = it }

@@ -18,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -50,14 +51,15 @@ import javax.inject.Inject
  * Creates the first Boot and starts its' foreground service.
  * Modify your Boot with updateBoot to change the foreground notification
  **/
-class BootLaces @Inject constructor(val mgr: BootNotificationManager){
+@ActivityScoped
+class BootLaces @Inject constructor(val boot: IBoot){
 
     @ExperimentalCoroutinesApi
     @Throws(BootException::class)
     inline fun startBoot(ctx: Activity, noinline payload: ( suspend () -> Unit)? = null, crossinline init: IBoot.() -> Unit) = runBlocking{
         LifecycleBootService.payload = payload
-        if(mgr.boot.service != null) return@runBlocking
-        val service = mgr.boot.apply { init() }.service ?: throw BootException()
+        if(boot.service != null) return@runBlocking
+        val service = boot.apply { init() }.service ?: throw BootException()
         val intent = Intent(ctx, Class.forName(service))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
@@ -67,7 +69,7 @@ class BootLaces @Inject constructor(val mgr: BootNotificationManager){
 
     /*update the persistent foreground notification's data*/
     inline fun updateBoot(ctx: Context, crossinline config: IBoot.() -> Unit){
-        mgr.boot.apply { config() }
+        boot.apply { config() }
         LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
     }
 }

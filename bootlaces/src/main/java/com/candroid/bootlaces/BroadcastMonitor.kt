@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * @author Chris Basinger
@@ -16,6 +18,7 @@ import javax.inject.Inject
  *
  * Monitors system and local broadcasts.
  * */
+@Singleton
 class BroadcastMonitor @Inject constructor(val mgr: BootNotificationManager,val repo: BootRepository){
     private val receiver: BroadcastReceiver
     private val shutdownReceiver: BroadcastReceiver
