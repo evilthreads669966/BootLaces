@@ -56,7 +56,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(){
     private val mOverlay_request_code = 666
-    @Inject lateinit var mObserver: LifecycleObserver
     @Inject lateinit var bootlaces: BootLaces
     // TODO: 10/14/20
     //val model:VisibilityViewModel by viewModels()

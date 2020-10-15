@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(ApplicationComponent::class)
-object Core{
+object BootModule{
     @Provides
     @Singleton
     fun manager(@ApplicationContext ctx: Context, boot: IBoot) = BootNotificationManager(ctx, boot)
