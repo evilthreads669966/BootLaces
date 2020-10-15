@@ -1,13 +1,24 @@
 package com.candroid.bootlaces
 
-import android.app.Notification
 import android.content.Intent
 import android.os.Build
-import android.util.Log
+import androidx.datastore.DataStore
+import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_ID
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_ACTIVITY
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_CONTENT
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_ICON
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_SERVICE
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_TITLE
+import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
+import com.candroid.bootlaces.NotificationUtils.createNotification
+import com.candroid.bootlaces.NotificationUtils.updateBootNotification
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -20,10 +31,9 @@ import javax.inject.Inject
  * This payload is unrelated to Boot
  * */
 abstract class LifecycleBootService: LifecycleService() {
-    private val tag = this::class.java.name
     private val mDispatcher = ServiceLifecycleDispatcher(this)
-    @Inject lateinit var mgr: BootNotificationManager
-    @Inject lateinit var monitor: BroadcastMonitor
+    @Inject lateinit var dataStore: DataStore<Preferences>
+    @Inject lateinit var boot: Boot
 
     @PublishedApi
     internal companion object{
@@ -31,13 +41,18 @@ abstract class LifecycleBootService: LifecycleService() {
     }
 
     init {
-        if(payload != null)
-            lifecycleScope.launchWhenCreated {
-                payload!!.invoke()
+        lifecycleScope.launchWhenCreated {
+            launch { payload?.invoke() }
+            dataStore.data.flowOn(Dispatchers.Default).collect { prefs ->
+                boot.apply {
+                    service = prefs[PREF_KEY_SERVICE]
+                    activity = prefs[PREF_KEY_ACTIVITY]
+                    title = prefs[PREF_KEY_TITLE]
+                    content = prefs[PREF_KEY_CONTENT]
+                    icon = prefs[PREF_KEY_ICON]
+                }
+                launch { updateBootNotification(this@LifecycleBootService, boot) }
             }
-        lifecycleScope.launchWhenStarted {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                startBootForeground()
         }
     }
 
@@ -47,7 +62,6 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         BootServiceState.setRunning()
-        monitor.register(this)
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -57,23 +71,23 @@ abstract class LifecycleBootService: LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            lifecycleScope.launch { startBootForeground() }
         return START_STICKY
     }
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
-        monitor.unregister(this)
         BootServiceState.setStopped()
         super.onDestroy()
     }
 
     @Throws(SecurityException::class)
-   suspend fun startBootForeground(){
+    fun startBootForeground(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            Log.d("BOOTSERVICE", "${this.foregroundServiceType}")
-            startForeground(FOREGROUND_ID, mgr.createNotification(), foregroundServiceType)
+            startForeground(FOREGROUND_ID, createNotification(this, boot), foregroundServiceType)
         }
         else
-            this.startForeground(FOREGROUND_ID, mgr.createNotification())
+            this.startForeground(FOREGROUND_ID, createNotification(this, boot))
     }
 }

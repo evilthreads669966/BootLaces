@@ -12,6 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
+
+import androidx.datastore.preferences.preferencesKey
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -37,8 +40,18 @@ package com.candroid.bootlaces
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Local app broadcasts for Boot
+ * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
-object Actions{
-    val ACTION_UPDATE = "ACTION_UPDATE"
+object DataStoreKeys {
+        val KEY_TITLE = "KEY_TITLE"
+        val KEY_CONTENT = "KEY_CONTENT"
+        val KEY_ICON = "KEY_ICON"
+        val KEY_ACTIVITY = "KEY_ACTIVITY"
+        val KEY_SERVICE = "KEY_SERVICE"
+        val PREF_FILE_NAME = "boot.preferences_pb"
+        val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
+        val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)
+        val PREF_KEY_ICON = preferencesKey<Int>(KEY_ICON)
+        val PREF_KEY_SERVICE = preferencesKey<String>(KEY_SERVICE)
+        val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
 }

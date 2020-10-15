@@ -15,9 +15,5 @@ import dagger.hilt.android.scopes.ServiceScoped
 interface BackgroundModule{
     @Binds
     @ServiceScoped
-    abstract fun bindReceiver(receiver: CloseDialogReceiver): BroadcastReceiver
-
-    @Binds
-    @ServiceScoped
     abstract fun bindLockManager(manager: LockManager): ILockManager
 }

@@ -14,12 +14,14 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.datastore.DataStore
+import androidx.datastore.preferences.Preferences
+import androidx.datastore.preferences.edit
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -52,13 +54,17 @@ import javax.inject.Inject
  * Modify your Boot with updateBoot to change the foreground notification
  **/
 @ActivityScoped
-class BootLaces @Inject constructor(val boot: IBoot){
+class BootLaces @Inject constructor(val boot: Boot, val dataStore: DataStore<Preferences>) {
 
     @ExperimentalCoroutinesApi
     @Throws(BootException::class)
-    inline fun startBoot(ctx: Activity, noinline payload: ( suspend () -> Unit)? = null, crossinline init: IBoot.() -> Unit) = runBlocking{
+    inline fun startBoot(
+        ctx: Activity,
+        noinline payload: (suspend () -> Unit)? = null,
+        crossinline init: IBoot.() -> Unit
+    ) = runBlocking {
         LifecycleBootService.payload = payload
-        if(boot.service != null) return@runBlocking
+        if (boot.service != null && BootServiceState.isRunning()) return@runBlocking
         val service = boot.apply { init() }.service ?: throw BootException()
         val intent = Intent(ctx, Class.forName(service))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -68,8 +74,15 @@ class BootLaces @Inject constructor(val boot: IBoot){
     }
 
     /*update the persistent foreground notification's data*/
-    inline fun updateBoot(ctx: Context, crossinline config: IBoot.() -> Unit){
-        boot.apply { config() }
-        LocalBroadcastManager.getInstance(ctx).sendBroadcast(Intent(Actions.ACTION_UPDATE))
+    inline suspend fun updateBoot(crossinline config: IBoot.() -> Unit){
+        dataStore.edit { prefs ->
+            boot.apply { config() }.run {
+                service?.let { prefs[DataStoreKeys.PREF_KEY_SERVICE] = it }
+                activity?.let { prefs[DataStoreKeys.PREF_KEY_ACTIVITY] = it }
+                title?.let { prefs[DataStoreKeys.PREF_KEY_TITLE] = it }
+                content?.let { prefs[DataStoreKeys.PREF_KEY_CONTENT] = it }
+                icon?.let { prefs[DataStoreKeys.PREF_KEY_ICON] = it }
+            }
+        }
     }
 }

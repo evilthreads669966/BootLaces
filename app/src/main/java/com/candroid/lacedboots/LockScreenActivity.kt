@@ -13,22 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.WindowManager
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.BootLaces
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.qualifiers.ActivityContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /*
@@ -80,8 +73,12 @@ class LockScreenActivity: VisibilityActivity(){
             }
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            bootlaces.updateBoot(this){
-                content = "Evil Threads love you ${ScreenVisibility.count()} times!"
+            lifecycleScope.launch {
+                withContext(Dispatchers.Default) {
+                    bootlaces.updateBoot {
+                        content = "Evil Threads love you ${ScreenVisibility.count()} times!"
+                    }
+                }
             }
     }
 

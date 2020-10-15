@@ -20,13 +20,13 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.candroid.bootlaces.BootNotificationManager.Configuration.DEFAULT_FOREGROUND_CONTENT
-import com.candroid.bootlaces.BootNotificationManager.Configuration.DEFAULT_FOREGROUND_TITLE
-import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_CHANNEL_ID
-import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_GROUP_ID
-import com.candroid.bootlaces.BootNotificationManager.Configuration.FOREGROUND_ID
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
+import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT
+import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON
+import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_TITLE
+import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_CHANNEL_ID
+import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_GROUP_ID
+import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
+import com.candroid.bootlaces.NotificationUtils.Configuration.createForegroundChannel
 import javax.inject.Singleton
 
 /*
@@ -56,24 +56,24 @@ import javax.inject.Singleton
  *
  **/
 @Singleton
-class BootNotificationManager @Inject constructor(@ApplicationContext val ctx: Context, val boot: IBoot){
+object NotificationUtils{
 
-        private val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
-            it.run {
-                it.setShowWhen(false)
-                setAutoCancel(false)
-                setOngoing(true)
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                    setColorized(true)
-                    setColor(Color.TRANSPARENT)
-                }
-                setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    setChannelId(FOREGROUND_CHANNEL_ID)
-                }
-                setGroup(FOREGROUND_GROUP_ID)
+    private val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
+        it.run {
+            it.setShowWhen(false)
+            setAutoCancel(false)
+            setOngoing(true)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                setColorized(true)
+                setColor(Color.TRANSPARENT)
             }
+            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                setChannelId(FOREGROUND_CHANNEL_ID)
+            }
+            setGroup(FOREGROUND_GROUP_ID)
         }
+    }
 
     internal object Configuration{
         val DEFAULT_FOREGROUND_ICON = android.R.drawable.sym_def_app_icon
@@ -120,26 +120,27 @@ class BootNotificationManager @Inject constructor(@ApplicationContext val ctx: C
     }
 
 
-    fun createNotification(): Notification {
-            Configuration.createForegroundChannel(ctx)
+    fun createNotification(ctx: Context, boot: IBoot): Notification {
+        createForegroundChannel(ctx)
         val builder = NotificationCompat.Builder(ctx).apply {
             boot.run {
                 setContentTitle(title ?: DEFAULT_FOREGROUND_TITLE)
                 setContentText(content ?: DEFAULT_FOREGROUND_CONTENT)
-                setSmallIcon(icon ?: Configuration.DEFAULT_FOREGROUND_ICON)
+                setSmallIcon(icon ?: DEFAULT_FOREGROUND_ICON)
                 if (activity != null)
-                    setContentIntent(activity!!)
+                    this@apply.setContentIntent(ctx, activity!!)
             }
         }.extend(NOTIFICATION_TEMPLATE)
         return builder.build()
     }
 
-    fun updateBootNotification() {
+    fun <T: IBoot> updateBootNotification(ctx: Context, boot: T) {
         val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mgr.notify(FOREGROUND_ID, createNotification())
+        mgr.notify(FOREGROUND_ID, createNotification(ctx, boot))
+        mgr.notify(FOREGROUND_ID, createNotification(ctx, boot))
     }
 
-    private fun NotificationCompat.Builder.setContentIntent(activity: String) {
+    private fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             action = Intent.ACTION_VIEW

@@ -1,6 +1,6 @@
 package com.candroid.bootlaces
 
-import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * @author Chris Basinger
@@ -16,19 +16,10 @@ interface IBoot{
     var content: String?
     var icon: Int?
 
-    fun <T: IBoot>clone(other: T)
+    fun <T: IBoot> clone(other: T)
 }
-
-data class Boot (override var service: String?, override var activity: String?, override var title: String?, override var content: String?, override var icon: Int?): IBoot{
-
-/*    fun copy( service: String?, activity: String?, title: String?, content: String?, icon: Int?){
-        service?.let { this.service = it }
-        activity?.let { this.activity = it }
-        title?.let { this.title = it }
-        content?.let { this.content = it }
-        icon?.let { this.icon = it }
-    }*/
-
+@Singleton
+class Boot (override var service: String?, override var activity: String?, override var title: String?, override var content: String?, override var icon: Int?): IBoot{
     override fun <T: IBoot>clone(other: T){
         other.service?.let { this.service = it }
         other.activity?.let { this.activity = it }
