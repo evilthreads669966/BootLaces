@@ -20,8 +20,11 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.ViewModelProvider
+import com.candroid.bootlaces.BootLaces
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,20 +57,33 @@ import javax.inject.Inject
 class LockScreenActivity: VisibilityActivity(){
     private val mOverlay_request_code = 666
     @Inject lateinit var mObserver: LifecycleObserver
+    @Inject lateinit var bootlaces: BootLaces
+    // TODO: 10/14/20
+    //val model:VisibilityViewModel by viewModels()
 
     override fun onStart() {
         super.onStart()
         checkPermission()
     }
 
-    override fun onResume() {
-        super.onResume()
-        lifecycle.addObserver(mObserver)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
     }
 
-    override fun onPause() {
-        super.onPause()
-        lifecycle.removeObserver(mObserver)
+    override fun onResume() {
+        super.onResume()
+        bootlaces.startBoot(this){
+            service = LockService::class.qualifiedName
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                title = "I LOVE YOU"
+                content = "Evil Threads love you one time!"
+                activity = LockScreenActivity::class.qualifiedName
+            }
+        }
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            bootlaces.updateBoot(this){
+                content = "Evil Threads love you ${ScreenVisibility.count()} times!"
+            }
     }
 
     private fun checkPermission() {

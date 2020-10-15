@@ -36,7 +36,6 @@ import dagger.hilt.android.AndroidEntryPoint
 ............\..............(
 ..............\.............\...
 */
-@AndroidEntryPoint
 abstract class VisibilityActivity: AppCompatActivity(){
 
     override fun onResume() {

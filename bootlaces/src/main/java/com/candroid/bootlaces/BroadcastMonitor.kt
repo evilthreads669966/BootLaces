@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * @author Chris Basinger
@@ -16,17 +18,17 @@ import kotlinx.coroutines.runBlocking
  *
  * Monitors system and local broadcasts.
  * */
-internal object BroadcastMonitor{
+@Singleton
+class BroadcastMonitor @Inject constructor(val mgr: BootNotificationManager,val repo: BootRepository){
     private val receiver: BroadcastReceiver
     private val shutdownReceiver: BroadcastReceiver
-
     init {
         /*Receives broadcasts when Boot has changed its' state.
         * Responsible for updating Boot foreground notification*/
         receiver = object : BroadcastReceiver(){
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Actions.ACTION_UPDATE) ?: false)
-                    BootNotificationFactory.getInstance(ctx!!).updateBootNotification()
+                    mgr.updateBootNotification()
             }
         }
 
@@ -35,7 +37,7 @@ internal object BroadcastMonitor{
             val TAG = this::class.java.name
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action.equals(Intent.ACTION_SHUTDOWN))
-                    runBlocking { BootRepository.getInstance(ctx!!).saveBoot(Boot.getInstance()) }
+                    runBlocking { repo.saveBoot(mgr.boot) }
             }
         }
     }

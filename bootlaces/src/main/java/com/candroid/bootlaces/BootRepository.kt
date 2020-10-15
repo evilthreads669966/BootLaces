@@ -17,6 +17,7 @@ import android.content.Context
 import android.util.Log
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.*
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.File
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -53,22 +56,14 @@ import java.io.IOException
  *
  * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
-@PublishedApi
-internal class BootRepository(ctx: Context) {
+@Singleton
+class BootRepository @Inject constructor(@ApplicationContext val ctx: Context) {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create(
         produceFile = { File(ctx.applicationContext.filesDir, PREF_FILE_NAME).apply { createNewFile() } },
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     )
 
     companion object{
-        private var INSTANCE: BootRepository? = null
-
-        fun getInstance(ctx: Context): BootRepository{
-            if(INSTANCE == null)
-                INSTANCE = BootRepository(ctx)
-            return INSTANCE!!
-        }
-
         val TAG = this::class.java.simpleName
         val KEY_TITLE = "KEY_TITLE"
         val KEY_CONTENT = "KEY_CONTENT"
@@ -83,13 +78,13 @@ internal class BootRepository(ctx: Context) {
         private val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
     }
 
-    fun loadBoot(): Flow<BootConfig> = dataStore.data.catch { e ->
+    fun loadBoot(): Flow<IBoot> = dataStore.data.catch { e ->
         when(e){
             is IOException -> emit(emptyPreferences())
             else -> Log.e(TAG, e.message!!)
         }
     }.map { prefs ->
-        BootConfig().apply {
+        Boot(null,null,null,null, null).apply {
             service = prefs[PREF_KEY_SERVICE]
             activity = prefs[PREF_KEY_ACTIVITY]
             title = prefs[PREF_KEY_TITLE]
@@ -98,7 +93,7 @@ internal class BootRepository(ctx: Context) {
         }
     }
 
-    suspend fun <T: IBoot>saveBoot(boot: T) = dataStore.edit { prefs ->
+    suspend fun <T: IBoot> saveBoot(boot: T) = dataStore.edit { prefs ->
         boot.run {
             service?.let { prefs[PREF_KEY_SERVICE] = it }
             activity?.let { prefs[PREF_KEY_ACTIVITY] = it }
