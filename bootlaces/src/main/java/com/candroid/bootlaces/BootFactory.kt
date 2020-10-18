@@ -12,6 +12,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
+
+import androidx.datastore.DataStore
+import androidx.datastore.preferences.MutablePreferences
+import androidx.datastore.preferences.Preferences
+import com.candroid.bootlaces.api.SimpleFactory
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
+import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -30,7 +41,7 @@ package com.candroid.bootlaces
 .........\.................'...../
 ..........''...\.......... _.·´
 ............\..............(
-..............\.............\...
+..............\.............\...re
 */
 /**
  * @author Chris Basinger
@@ -38,5 +49,12 @@ package com.candroid.bootlaces
  * @date 10/16/20
  *
  **/
-/*Exception to be thrown when no service is provided*/
-class BootException: Exception("No boot service was found. Unable to start boot service. Please pass the name of your BootService to startBoot")
+/*
+*/
+class BootFactory @Inject constructor(val store: DataStore<Preferences>): SimpleFactory<IBoot, DataStore<Preferences>> {
+    override fun new()= Boot(null,null,null,null,null)
+
+    override fun create(): IBoot {
+        return runBlocking { return@runBlocking  store.data.firstOrNull()?.let { prefs -> new().mapBootToMutPrefs(prefs as MutablePreferences) } ?: Boot(null,null,null,null,null) }
+    }
+}

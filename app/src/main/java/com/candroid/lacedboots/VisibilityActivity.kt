@@ -14,6 +14,8 @@ limitations under the License.*/
 package com.candroid.lacedboots
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import dagger.hilt.android.AndroidEntryPoint
 
 /*
