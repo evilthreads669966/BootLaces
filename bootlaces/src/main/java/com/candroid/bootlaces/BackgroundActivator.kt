@@ -54,17 +54,7 @@ import javax.inject.Inject
 @ActivityScoped
 class BackgroundActivator @Inject constructor(@ActivityContext private val ctx: Context, val info: IBoot, val datastore: DataStore<Preferences>, ) : IBackgroundActivator<IBoot> {
 
-    override suspend inline fun updateForegroundService(crossinline config: suspend IBoot.() -> Unit){
-        datastore.edit { prefs ->
-            info.apply { config() }.run {
-                service?.let { prefs[DataStoreKeys.PREF_KEY_SERVICE] = it }
-                activity?.let { prefs[DataStoreKeys.PREF_KEY_ACTIVITY] = it }
-                title?.let { prefs[DataStoreKeys.PREF_KEY_TITLE] = it }
-                content?.let { prefs[DataStoreKeys.PREF_KEY_CONTENT] = it }
-                icon?.let { prefs[DataStoreKeys.PREF_KEY_ICON] = it }
-            }
-        }
-    }
+    override suspend inline fun updateForegroundService(crossinline config: suspend IBoot.() -> Unit){ datastore.edit { info.apply { config() }.mapBootToMutPrefs(it) } }
 
     override suspend fun activate(payload: (suspend () -> Unit)?, init: suspend IBoot.() -> Unit) = runBlocking {
         //LifecycleBootService.payload = payload
