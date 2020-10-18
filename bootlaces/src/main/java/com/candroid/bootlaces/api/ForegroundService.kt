@@ -19,9 +19,7 @@ import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.candroid.bootlaces.IBoot
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -52,26 +50,26 @@ import kotlinx.coroutines.flow.map
  * @date 10/16/20
  *
  **/
-interface BootServiceManager<out T: IBoot>{
-    suspend fun initialize(payload: (suspend () -> Unit)? = null, init: suspend T.() -> Unit)
+interface IBackgroundActivator<out T: IBoot>{
+    suspend fun activate(payload: (suspend () -> Unit)? = null, init: suspend T.() -> Unit)
 
-    suspend  fun updateForegroundNotification(config: suspend T.() -> Unit)
+    suspend  fun updateForegroundService(config: suspend T.() -> Unit)
 }
 
 
-interface ForegroundNotificationService<out T: Notification,in S: IBoot> {
+interface IForegroundActivator<out T: Notification> {
     val events: Flow<Preferences>
 
     val scope: CoroutineScope
 
-    fun startForeground(info: S)
+    fun startForeground()
 
-    fun  create(info: S): T
+    fun  createForeground(): T
 
-    fun update(info: S)
+    fun updateForeground()
 }
 
-inline suspend fun <T : Notification, S : IBoot> ForegroundNotificationService<T, S>.subscribe(info: IBoot, crossinline subscribe: suspend (Flow<Preferences>) -> Unit) {
+inline suspend fun <T : Notification, S : IBoot> IForegroundActivator<T>.subscribe(info: IBoot, crossinline subscribe: suspend (Flow<Preferences>) -> Unit) {
     subscribe(events)
 }
 

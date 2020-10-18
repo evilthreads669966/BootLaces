@@ -2,12 +2,9 @@ package com.candroid.bootlaces
 
 import android.content.Intent
 import android.os.Build
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
@@ -31,9 +28,7 @@ import javax.inject.Provider
 abstract class BootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
-    @Inject lateinit var dataStore: DataStore<Preferences>
-    @Inject lateinit var boot: IBoot
-    lateinit var foregroundService: ForegroundNotificationServiceImpl
+    lateinit var activator: ForegroundActivator
 
     @PublishedApi
     internal companion object{
@@ -43,10 +38,10 @@ abstract class BootService: LifecycleService() {
     init {
         lifecycleScope.launchWhenCreated {
             if(payload != null) launch { payload?.invoke() }
-            foregroundService.subscribe(boot){ flow ->
+            activator.activateCommunication{ flow ->
                 flow.flowOn(Dispatchers.Default)
-                    .flatMapMerge { flow{ emit(boot.mapPrefsToBoot(it)) } }
-                    .collectLatest { b -> foregroundService.update(b) }
+                    .flatMapMerge { flow{ emit(activator.info.mapPrefsToBoot(it)) } }
+                    .collectLatest { b -> activator.updateForeground() }
             }
         }
     }
@@ -57,7 +52,7 @@ abstract class BootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         BootServiceState.setRunning()
-        foregroundService = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getService()
+        activator = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -68,23 +63,14 @@ abstract class BootService: LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            lifecycleScope.launch { startBootForeground() }
+            lifecycleScope.launch { activator.activateForeground() }
         return START_STICKY
     }
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
         BootServiceState.setStopped()
-        foregroundService.scope.also { it.coroutineContext.cancelChildren() }.cancel()
+        activator.scope.also { it.coroutineContext.cancelChildren() }.cancel()
         super.onDestroy()
-    }
-
-    @Throws(SecurityException::class)
-    fun startBootForeground(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            foregroundService.startForeground(boot)
-        }
-        else
-            this.startForeground(FOREGROUND_ID, foregroundService.create(boot))
     }
 }

@@ -22,7 +22,7 @@ import androidx.core.app.NotificationCompat
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import com.candroid.bootlaces.NotificationUtils.setContentIntent
-import com.candroid.bootlaces.api.ForegroundNotificationService
+import com.candroid.bootlaces.api.IForegroundActivator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -54,25 +54,25 @@ import javax.inject.Inject
  * @date 10/16/20
  *
  **/
-class ForegroundNotificationServiceImpl @Inject constructor(override val scope: CoroutineScope, val ctx: Service, dataStore: DataStore<Preferences>) : ForegroundNotificationService<Notification,IBoot> {
+class ForegroundActivator @Inject constructor(override val scope: CoroutineScope, val info: IBoot, val ctx: Service, dataStore: DataStore<Preferences>) : IForegroundActivator<Notification> {
 
     override val events: Flow<Preferences> = dataStore.data
 
-    inline suspend fun subscribe(info: IBoot, crossinline subscribe: suspend (Flow<Preferences>) -> Unit){ scope.launch { subscribe(events) } }
+    inline suspend fun activateCommunication(crossinline subscribe: suspend (Flow<Preferences>) -> Unit){ scope.launch { subscribe(events) } }
 
-    override fun startForeground(info: IBoot) {
+    override fun startForeground() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, create(info), ctx.foregroundServiceType) }
+            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground(), ctx.foregroundServiceType) }
         else
-            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, create(info))
+            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
     }
 
-    override fun update(info: IBoot) {
+    override fun updateForeground() {
         val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mgr.notify(NotificationUtils.Configuration.FOREGROUND_ID, create(info))
+        mgr.notify(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
     }
 
-    override fun create(info: IBoot): Notification {
+    override fun createForeground(): Notification {
         NotificationUtils.Configuration.createForegroundChannel(ctx)
         val builder = NotificationCompat.Builder(ctx).apply {
             info.run {
@@ -83,5 +83,14 @@ class ForegroundNotificationServiceImpl @Inject constructor(override val scope: 
                     this@apply.setContentIntent(ctx, activity!!) }
         }.extend(NotificationUtils.NOTIFICATION_TEMPLATE)
         return builder.build()
+    }
+
+    @Throws(SecurityException::class)
+    fun activateForeground(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            startForeground()
+        }
+        else
+            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
     }
 }
