@@ -19,7 +19,6 @@ import androidx.datastore.preferences.MutablePreferences
 import androidx.datastore.preferences.Preferences
 import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_SERVICE
 import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
-import com.candroid.bootlaces.NotificationUtils.createNotification
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
