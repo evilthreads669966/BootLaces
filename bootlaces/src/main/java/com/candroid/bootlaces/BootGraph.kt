@@ -37,7 +37,7 @@ abstract class BootReceiverModule{
 @InstallIn(SingletonComponent::class)
 object BootReceiverModuleImpl {
     @Singleton
-    @Provides fun provideScope() = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
     @Singleton
     @Provides fun provideBoot(factory: BootFactory): IBoot = factory.create()
     @Singleton
