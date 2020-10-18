@@ -7,19 +7,15 @@ import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_ACTIVITY
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_CONTENT
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_ICON
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_SERVICE
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_TITLE
 import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
-import com.candroid.bootlaces.NotificationUtils.createNotification
-import com.candroid.bootlaces.NotificationUtils.updateBootNotification
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import dagger.hilt.EntryPoints
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * @author Chris Basinger
@@ -30,10 +26,14 @@ import javax.inject.Inject
  * LifecycleBootService has ability to pass a function to onCreate off the main threads at runtime.
  * This payload is unrelated to Boot
  * */
-abstract class LifecycleBootService: LifecycleService() {
+@FlowPreview
+@ForegroundScope
+abstract class BootService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
+    @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var dataStore: DataStore<Preferences>
-    @Inject lateinit var boot: Boot
+    @Inject lateinit var boot: IBoot
+    lateinit var foregroundService: ForegroundNotificationServiceImpl
 
     @PublishedApi
     internal companion object{
@@ -42,16 +42,11 @@ abstract class LifecycleBootService: LifecycleService() {
 
     init {
         lifecycleScope.launchWhenCreated {
-            launch { payload?.invoke() }
-            dataStore.data.flowOn(Dispatchers.Default).collect { prefs ->
-                boot.apply {
-                    service = prefs[PREF_KEY_SERVICE]
-                    activity = prefs[PREF_KEY_ACTIVITY]
-                    title = prefs[PREF_KEY_TITLE]
-                    content = prefs[PREF_KEY_CONTENT]
-                    icon = prefs[PREF_KEY_ICON]
-                }
-                launch { updateBootNotification(this@LifecycleBootService, boot) }
+            if(payload != null) launch { payload?.invoke() }
+            foregroundService.subscribe(boot){ flow ->
+                flow.flowOn(Dispatchers.Default)
+                    .flatMapMerge { flow{ emit(boot.mapPrefsToBoot(it)) } }
+                    .collectLatest { b -> foregroundService.update(b) }
             }
         }
     }
@@ -62,6 +57,7 @@ abstract class LifecycleBootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         BootServiceState.setRunning()
+        foregroundService = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getService()
     }
 
     override fun onStart(intent: Intent?, startId: Int) {
@@ -79,15 +75,16 @@ abstract class LifecycleBootService: LifecycleService() {
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
         BootServiceState.setStopped()
+        foregroundService.scope.also { it.coroutineContext.cancelChildren() }.cancel()
         super.onDestroy()
     }
 
     @Throws(SecurityException::class)
     fun startBootForeground(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            startForeground(FOREGROUND_ID, createNotification(this, boot), foregroundServiceType)
+            foregroundService.startForeground(boot)
         }
         else
-            this.startForeground(FOREGROUND_ID, createNotification(this, boot))
+            this.startForeground(FOREGROUND_ID, foregroundService.create(boot))
     }
 }

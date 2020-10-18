@@ -16,12 +16,16 @@ package com.candroid.lacedboots
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.Settings
-import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.BootLaces
+import androidx.lifecycle.*
+import com.candroid.bootlaces.BootFactory
+import com.candroid.bootlaces.BootServiceManagerImpl
+import com.candroid.bootlaces.IBoot
+import com.candroid.bootlaces.api.BootServiceManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /*
@@ -47,39 +51,37 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LockScreenActivity: VisibilityActivity(){
+class LockScreenActivity: VisibilityActivity(), LifecycleOwner{
     private val mOverlay_request_code = 666
-    @Inject lateinit var bootlaces: BootLaces
+    @Inject lateinit var mgr: BootServiceManagerImpl
     // TODO: 10/14/20
     //val model:VisibilityViewModel by viewModels()
 
-    override fun onStart() {
-        super.onStart()
-        checkPermission()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        bootlaces.startBoot(this){
-            service = LockService::class.qualifiedName
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                title = "I LOVE YOU"
-                content = "Evil Threads love you one time!"
-                activity = LockScreenActivity::class.qualifiedName
-            }
-        }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            lifecycleScope.launch {
-                withContext(Dispatchers.Default) {
-                    bootlaces.updateBoot {
-                        content = "Evil Threads love you ${ScreenVisibility.count()} times!"
+    init {
+        lifecycleScope.launch {
+            lifecycle.whenStateAtLeast(Lifecycle.State.STARTED) {
+                checkPermission()
+                mgr.initialize {
+                    service = LockService::class.qualifiedName
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        title = "I LOVE YOU"
+                        content = "Evil Threads love you one time!"
+                        activity = LockScreenActivity::class.qualifiedName
                     }
                 }
+                lifecycle.addObserver(object : DefaultLifecycleObserver {
+                    override fun onResume(owner: LifecycleOwner) {
+                        super.onResume(owner)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                            owner.lifecycleScope.launch {
+                                mgr.updateForegroundNotification{
+                                    content = "Evil Threads love you ${ScreenVisibility.count()} times!"
+                                }
+                            }
+                    }
+                })
             }
+        }
     }
 
     private fun checkPermission() {
@@ -91,4 +93,3 @@ class LockScreenActivity: VisibilityActivity(){
         }
     }
 }
-

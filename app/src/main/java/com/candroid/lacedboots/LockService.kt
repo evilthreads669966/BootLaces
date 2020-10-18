@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
-import androidx.lifecycle.LifecycleService
+import androidx.datastore.DataStore
+import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.LifecycleBootService
+import com.candroid.bootlaces.IBoot
+import com.candroid.bootlaces.BootService
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -54,16 +54,15 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LockService() : LifecycleBootService(){
+class LockService : BootService(){
     @Inject lateinit var rec: CloseDialogReceiver
-
     init {
         lifecycleScope.launchWhenCreated {
             val powerMgr = getSystemService(Context.POWER_SERVICE) as PowerManager
             val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
             ticker(500, 500, this.coroutineContext + Dispatchers.Default).consumeEach {
                 if(powerMgr.isInteractive)
-                  //  sendBroadcast(intent)
+                  //sendBroadcast(intent)
                 yield()
             }
         }

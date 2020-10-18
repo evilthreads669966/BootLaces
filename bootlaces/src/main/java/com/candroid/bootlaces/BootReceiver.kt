@@ -1,3 +1,4 @@
+
 /*Copyright 2019 Chris Basinger
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +18,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
 /*
@@ -52,28 +50,22 @@ import javax.inject.Inject
  * Starts BootService after the phone turns on.
  **/
 @AndroidEntryPoint
-class BootReceiver : HiltBugReceiver() {
-    @Inject lateinit var dataStore: DataStore<Preferences>
-    @Inject lateinit var scope: CoroutineScope
+class BootReceiver : HiltBugReceiver<Boot>(){
+   @Inject lateinit var boot: IBoot
 
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
-            if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false) {
-                runBlocking {
-                    scope.launch {
-                        val service = dataStore.data.firstOrNull()?.get(DataStoreKeys.PREF_KEY_SERVICE) ?: return@launch
-                        intent?.setClassName(ctx!!, service)
-                    }.join()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        ctx!!.startForegroundService(intent)
-                    else
-                        ctx!!.startService(intent)
-                }
-            }
+        if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false) {
+            intent?.setClassName(ctx!!, boot.service ?: return)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                ctx!!.startForegroundService(intent)
+            else
+                ctx!!.startService(intent)
+        }
     }
 }
 /*fixes bug in Hilt*/
-open class HiltBugReceiver : BroadcastReceiver(){
+open class HiltBugReceiver<T: IBoot> : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {}
 }

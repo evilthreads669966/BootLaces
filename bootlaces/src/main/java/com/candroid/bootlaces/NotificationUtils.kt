@@ -55,10 +55,9 @@ import javax.inject.Singleton
  * @date 10/09/20
  *
  **/
-@Singleton
 object NotificationUtils{
 
-    private val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
+    internal val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
         it.run {
             it.setShowWhen(false)
             setAutoCancel(false)
@@ -119,28 +118,7 @@ object NotificationUtils{
         }
     }
 
-
-    fun createNotification(ctx: Context, boot: IBoot): Notification {
-        createForegroundChannel(ctx)
-        val builder = NotificationCompat.Builder(ctx).apply {
-            boot.run {
-                setContentTitle(title ?: DEFAULT_FOREGROUND_TITLE)
-                setContentText(content ?: DEFAULT_FOREGROUND_CONTENT)
-                setSmallIcon(icon ?: DEFAULT_FOREGROUND_ICON)
-                if (activity != null)
-                    this@apply.setContentIntent(ctx, activity!!)
-            }
-        }.extend(NOTIFICATION_TEMPLATE)
-        return builder.build()
-    }
-
-    fun <T: IBoot> updateBootNotification(ctx: Context, boot: T) {
-        val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mgr.notify(FOREGROUND_ID, createNotification(ctx, boot))
-        mgr.notify(FOREGROUND_ID, createNotification(ctx, boot))
-    }
-
-    private fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
+    internal fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             action = Intent.ACTION_VIEW

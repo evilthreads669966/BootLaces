@@ -14,6 +14,7 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import androidx.datastore.preferences.preferencesKey
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -43,11 +44,11 @@ import androidx.datastore.preferences.preferencesKey
  * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
 object DataStoreKeys {
-        val KEY_TITLE = "KEY_TITLE"
-        val KEY_CONTENT = "KEY_CONTENT"
-        val KEY_ICON = "KEY_ICON"
-        val KEY_ACTIVITY = "KEY_ACTIVITY"
-        val KEY_SERVICE = "KEY_SERVICE"
+        private val KEY_TITLE = "KEY_TITLE"
+        private val KEY_CONTENT = "KEY_CONTENT"
+        private val KEY_ICON = "KEY_ICON"
+        private val KEY_ACTIVITY = "KEY_ACTIVITY"
+        private val KEY_SERVICE = "KEY_SERVICE"
         val PREF_FILE_NAME = "boot.preferences_pb"
         val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
         val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)

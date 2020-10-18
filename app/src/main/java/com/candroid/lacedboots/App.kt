@@ -17,6 +17,7 @@ import android.app.Application
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import dagger.hilt.android.HiltAndroidApp
+import dagger.internal.DaggerCollections
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
@@ -49,5 +50,6 @@ class App: Application(){
     override fun onCreate() {
         super.onCreate()
         LockJobService.schedule(this)
+
     }
 }
