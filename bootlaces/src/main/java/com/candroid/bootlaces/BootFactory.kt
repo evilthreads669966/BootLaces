@@ -52,9 +52,12 @@ import javax.inject.Singleton
 /*
 */
 class BootFactory @Inject constructor(val store: DataStore<Preferences>): SimpleFactory<IBoot, DataStore<Preferences>> {
-    override fun new()= Boot(null,null,null,null,null)
+    override fun new() = Boot(null, null, null, null, null)
 
     override fun create(): IBoot {
-        return runBlocking { return@runBlocking  store.data.firstOrNull()?.let { prefs -> new().mapBootToMutPrefs(prefs as MutablePreferences) } ?: Boot(null,null,null,null,null) }
+        return runBlocking {
+            return@runBlocking store.data.firstOrNull()
+                ?.let { prefs -> new().mapBootToMutPrefs(prefs as MutablePreferences) } ?: new()
+        }
     }
 }

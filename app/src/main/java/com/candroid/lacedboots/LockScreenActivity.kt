@@ -18,10 +18,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.lifecycle.*
-import com.candroid.bootlaces.BootFactory
-import com.candroid.bootlaces.BootServiceManagerImpl
-import com.candroid.bootlaces.IBoot
-import com.candroid.bootlaces.api.BootServiceManager
+import com.candroid.bootlaces.BackgroundActivator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -53,7 +50,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(), LifecycleOwner{
     private val mOverlay_request_code = 666
-    @Inject lateinit var mgr: BootServiceManagerImpl
+    @Inject lateinit var mgr: BackgroundActivator
     // TODO: 10/14/20
     //val model:VisibilityViewModel by viewModels()
 
@@ -61,7 +58,7 @@ class LockScreenActivity: VisibilityActivity(), LifecycleOwner{
         lifecycleScope.launch {
             lifecycle.whenStateAtLeast(Lifecycle.State.STARTED) {
                 checkPermission()
-                mgr.initialize {
+                mgr.activate {
                     service = LockService::class.qualifiedName
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         title = "I LOVE YOU"
@@ -74,7 +71,7 @@ class LockScreenActivity: VisibilityActivity(), LifecycleOwner{
                         super.onResume(owner)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                             owner.lifecycleScope.launch {
-                                mgr.updateForegroundNotification{
+                                mgr.updateForegroundService{
                                     content = "Evil Threads love you ${ScreenVisibility.count()} times!"
                                 }
                             }

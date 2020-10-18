@@ -11,7 +11,6 @@ import dagger.Provides
 import dagger.hilt.DefineComponent
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -27,21 +26,16 @@ import javax.inject.Singleton
 @Retention(value = AnnotationRetention.RUNTIME)
 annotation class ForegroundScope
 
-@Scope
-@MustBeDocumented
-@Retention(value = AnnotationRetention.RUNTIME)
-annotation class ReceiverScope
-
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class BroadcastReceiverModule{
+abstract class BootReceiverModule{
     @Singleton
     @Binds abstract fun bindFactory(factory: BootFactory): SimpleFactory<IBoot,DataStore<Preferences>>
 }
 
 @Module
-@InstallIn(ApplicationComponent::class)
-object BroadcastReceiverImpl {
+@InstallIn(SingletonComponent::class)
+object BootReceiverModuleImpl {
     @Singleton
     @Provides fun provideScope() = CoroutineScope(Dispatchers.IO + SupervisorJob())
     @Singleton
@@ -59,12 +53,13 @@ object BroadcastReceiverImpl {
         )
     }
 }
+
 @ForegroundScope
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
 interface ForegroundEntryPoint{
     @ForegroundScope
-    fun getService(): ForegroundNotificationServiceImpl
+    fun getActivator(): ForegroundActivator
 }
 
 @DefineComponent(parent = ServiceComponent::class)

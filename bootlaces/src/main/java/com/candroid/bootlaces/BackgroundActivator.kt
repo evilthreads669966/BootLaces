@@ -19,7 +19,7 @@ import android.os.Build
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
-import com.candroid.bootlaces.api.BootServiceManager
+import com.candroid.bootlaces.api.IBackgroundActivator
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.runBlocking
@@ -52,9 +52,9 @@ import javax.inject.Inject
  *
  **/
 @ActivityScoped
-class BootServiceManagerImpl @Inject constructor(@ActivityContext private val ctx: Context, val info: IBoot, val datastore: DataStore<Preferences>, ) : BootServiceManager<IBoot> {
+class BackgroundActivator @Inject constructor(@ActivityContext private val ctx: Context, val info: IBoot, val datastore: DataStore<Preferences>, ) : IBackgroundActivator<IBoot> {
 
-    override suspend inline fun updateForegroundNotification(crossinline config: suspend IBoot.() -> Unit){
+    override suspend inline fun updateForegroundService(crossinline config: suspend IBoot.() -> Unit){
         datastore.edit { prefs ->
             info.apply { config() }.run {
                 service?.let { prefs[DataStoreKeys.PREF_KEY_SERVICE] = it }
@@ -66,7 +66,7 @@ class BootServiceManagerImpl @Inject constructor(@ActivityContext private val ct
         }
     }
 
-    override suspend fun initialize(payload: (suspend () -> Unit)?, init: suspend IBoot.() -> Unit) = runBlocking {
+    override suspend fun activate(payload: (suspend () -> Unit)?, init: suspend IBoot.() -> Unit) = runBlocking {
         //LifecycleBootService.payload = payload
         if (info.service != null && BootServiceState.isRunning()) return@runBlocking
         val service = info.apply { init() }.service ?: throw BootException()
