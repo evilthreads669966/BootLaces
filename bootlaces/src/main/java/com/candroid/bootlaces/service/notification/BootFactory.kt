@@ -11,16 +11,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
+package com.candroid.bootlaces.service.notification
 
-import android.app.NotificationManager
-import android.content.Context
+import androidx.datastore.DataStore
 import androidx.datastore.preferences.MutablePreferences
 import androidx.datastore.preferences.Preferences
-import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_SERVICE
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
-import kotlinx.coroutines.CoroutineScope
-import javax.inject.Singleton
+import com.candroid.bootlaces.api.SimpleFactory
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -40,7 +39,7 @@ import javax.inject.Singleton
 .........\.................'...../
 ..........''...\.......... _.·´
 ............\..............(
-..............\.............\...
+..............\.............\...re
 */
 /**
  * @author Chris Basinger
@@ -48,19 +47,15 @@ import javax.inject.Singleton
  * @date 10/16/20
  *
  **/
+/*
+*/
+class BootFactory @Inject constructor(val store: DataStore<Preferences>): SimpleFactory<IBoot, DataStore<Preferences>> {
+    override fun new() = Boot(null, null, null, null, null)
 
-suspend fun <T: IBoot, R: Preferences> T.mapPrefsToBoot(prefs: R): T = this.apply {
-    service = prefs[DataStoreKeys.PREF_KEY_SERVICE]
-    activity = prefs[DataStoreKeys.PREF_KEY_ACTIVITY]
-    title = prefs[DataStoreKeys.PREF_KEY_TITLE]
-    content = prefs[DataStoreKeys.PREF_KEY_CONTENT]
-    icon = prefs[DataStoreKeys.PREF_KEY_ICON]
-}
-
-suspend fun <T: IBoot,R: MutablePreferences> T.mapBootToMutPrefs(prefs: R): T = this.apply {
-    service?.let { prefs[PREF_KEY_SERVICE] = it }
-    activity?.let { prefs[DataStoreKeys.PREF_KEY_ACTIVITY] = it }
-    title?.let { prefs[DataStoreKeys.PREF_KEY_TITLE] = it }
-    content?.let { prefs[DataStoreKeys.PREF_KEY_CONTENT] = it }
-    icon?.let { prefs[DataStoreKeys.PREF_KEY_ICON] = it }
+    override fun create(): IBoot {
+        return runBlocking {
+            return@runBlocking store.data.firstOrNull()
+                ?.let { prefs -> new().mapBootToMutPrefs(prefs as MutablePreferences) } ?: new()
+        }
+    }
 }

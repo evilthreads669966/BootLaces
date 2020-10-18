@@ -18,7 +18,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.lifecycle.*
-import com.candroid.bootlaces.BackgroundActivator
+import com.candroid.bootlaces.activators.BackgroundActivator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi

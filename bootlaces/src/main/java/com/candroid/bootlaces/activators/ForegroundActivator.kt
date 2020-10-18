@@ -11,7 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
+package com.candroid.bootlaces.activators
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -21,12 +21,18 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
-import com.candroid.bootlaces.NotificationUtils.setContentIntent
+import com.candroid.bootlaces.ForegroundComponent
+import com.candroid.bootlaces.ForegroundEntryPoint
+import com.candroid.bootlaces.service.notification.IBoot
+import com.candroid.bootlaces.service.notification.NotificationUtils
+import com.candroid.bootlaces.service.notification.NotificationUtils.setContentIntent
 import com.candroid.bootlaces.api.IForegroundActivator
+import dagger.hilt.EntryPoints
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 /*
             (   (                ) (             (     (
@@ -55,6 +61,10 @@ import javax.inject.Inject
  *
  **/
 class ForegroundActivator @Inject constructor(override val scope: CoroutineScope, val info: IBoot, val ctx: Service, dataStore: DataStore<Preferences>) : IForegroundActivator<Notification> {
+
+    companion object{
+        fun Provider<ForegroundComponent.Builder>.startActivator() = EntryPoints.get(this.get().build(), ForegroundEntryPoint::class.java).getActivator()
+    }
 
     override val events: Flow<Preferences> = dataStore.data
 

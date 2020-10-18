@@ -5,6 +5,9 @@ import androidx.datastore.DataStore
 import androidx.datastore.preferences.PreferenceDataStoreFactory
 import androidx.datastore.preferences.Preferences
 import com.candroid.bootlaces.api.SimpleFactory
+import com.candroid.bootlaces.activators.ForegroundActivator
+import com.candroid.bootlaces.service.notification.BootFactory
+import com.candroid.bootlaces.service.notification.IBoot
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

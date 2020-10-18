@@ -1,6 +1,5 @@
 /*Copyright 2019 Chris Basinger
 
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -12,9 +11,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
+package com.candroid.bootlaces.service.notification
 
-import javax.inject.Singleton
+import androidx.datastore.preferences.MutablePreferences
+import androidx.datastore.preferences.Preferences
+import com.candroid.bootlaces.DataStoreKeys
+import com.candroid.bootlaces.DataStoreKeys.PREF_KEY_SERVICE
 
 /*
             (   (                ) (             (     (
@@ -39,24 +41,22 @@ import javax.inject.Singleton
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/09/20
+ * @date 10/16/20
  *
- * BootService lifecycle aware object
  **/
-object BootServiceState {
-    private var state = States.STOPPED
 
-    fun isRunning() = state == States.STARTED
-
-    fun isStopped() = state == States.STOPPED
-
-    internal fun setRunning(){
-        state = States.STARTED
-    }
-
-    internal fun setStopped(){
-        state = States.STOPPED
-    }
+suspend fun <T: IBoot, R: Preferences> T.mapPrefsToBoot(prefs: R): T = this.apply {
+    service = prefs[DataStoreKeys.PREF_KEY_SERVICE]
+    activity = prefs[DataStoreKeys.PREF_KEY_ACTIVITY]
+    title = prefs[DataStoreKeys.PREF_KEY_TITLE]
+    content = prefs[DataStoreKeys.PREF_KEY_CONTENT]
+    icon = prefs[DataStoreKeys.PREF_KEY_ICON]
 }
 
-private enum class States { STARTED, STOPPED }
+suspend fun <T: IBoot,R: MutablePreferences> T.mapBootToMutPrefs(prefs: R): T = this.apply {
+    service?.let { prefs[PREF_KEY_SERVICE] = it }
+    activity?.let { prefs[DataStoreKeys.PREF_KEY_ACTIVITY] = it }
+    title?.let { prefs[DataStoreKeys.PREF_KEY_TITLE] = it }
+    content?.let { prefs[DataStoreKeys.PREF_KEY_CONTENT] = it }
+    icon?.let { prefs[DataStoreKeys.PREF_KEY_ICON] = it }
+}

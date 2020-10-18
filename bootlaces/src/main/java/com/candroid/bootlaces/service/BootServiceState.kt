@@ -1,5 +1,6 @@
 /*Copyright 2019 Chris Basinger
 
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -11,17 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
-
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.MutablePreferences
-import androidx.datastore.preferences.Preferences
-import com.candroid.bootlaces.api.SimpleFactory
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
-import javax.inject.Singleton
+package com.candroid.bootlaces.service
 
 /*
             (   (                ) (             (     (
@@ -41,23 +32,29 @@ import javax.inject.Singleton
 .........\.................'...../
 ..........''...\.......... _.·´
 ............\..............(
-..............\.............\...re
+..............\.............\...
 */
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/16/20
+ * @date 10/09/20
  *
+ * BootService lifecycle aware object
  **/
-/*
-*/
-class BootFactory @Inject constructor(val store: DataStore<Preferences>): SimpleFactory<IBoot, DataStore<Preferences>> {
-    override fun new() = Boot(null, null, null, null, null)
+object BootServiceState {
+    private var state = States.STOPPED
 
-    override fun create(): IBoot {
-        return runBlocking {
-            return@runBlocking store.data.firstOrNull()
-                ?.let { prefs -> new().mapBootToMutPrefs(prefs as MutablePreferences) } ?: new()
-        }
+    fun isRunning() = state == States.STARTED
+
+    fun isStopped() = state == States.STOPPED
+
+    internal fun setRunning(){
+        state = States.STARTED
+    }
+
+    internal fun setStopped(){
+        state = States.STOPPED
     }
 }
+
+private enum class States { STARTED, STOPPED }

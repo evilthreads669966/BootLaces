@@ -11,7 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
+package com.candroid.bootlaces.service.notification
 
 import android.app.*
 import android.content.Context
@@ -20,14 +20,8 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_TITLE
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_CHANNEL_ID
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_GROUP_ID
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
-import com.candroid.bootlaces.NotificationUtils.Configuration.createForegroundChannel
-import javax.inject.Singleton
+import com.candroid.bootlaces.service.notification.NotificationUtils.Configuration.FOREGROUND_CHANNEL_ID
+import com.candroid.bootlaces.service.notification.NotificationUtils.Configuration.FOREGROUND_GROUP_ID
 
 /*
             (   (                ) (             (     (
@@ -98,7 +92,7 @@ object NotificationUtils{
                     }
                     val channel = NotificationChannel(FOREGROUND_CHANNEL_ID, FOREGROUND_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
                         group = FOREGROUND_GROUP_ID
-                        description = this@Configuration.FOREGROUND_CHANNEL_DESCRIPTION
+                        description = FOREGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
                         setShowBadge(false)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)

@@ -1,11 +1,15 @@
-package com.candroid.bootlaces
+package com.candroid.bootlaces.service
 
 import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
-import dagger.hilt.EntryPoints
+import com.candroid.bootlaces.ForegroundComponent
+import com.candroid.bootlaces.ForegroundScope
+import com.candroid.bootlaces.activators.ForegroundActivator
+import com.candroid.bootlaces.activators.ForegroundActivator.Companion.startActivator
+import com.candroid.bootlaces.service.notification.mapPrefsToBoot
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapMerge
@@ -52,7 +56,7 @@ abstract class BootService: LifecycleService() {
         mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         BootServiceState.setRunning()
-        activator = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
+        activator = provider.startActivator()
     }
 
     override fun onStart(intent: Intent?, startId: Int) {

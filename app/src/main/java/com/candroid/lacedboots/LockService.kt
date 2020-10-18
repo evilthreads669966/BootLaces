@@ -17,11 +17,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.IBoot
-import com.candroid.bootlaces.BootService
+import com.candroid.bootlaces.service.BootService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

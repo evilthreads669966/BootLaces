@@ -1,4 +1,4 @@
-package com.candroid.bootlaces
+package com.candroid.bootlaces.service.notification
 
 import javax.inject.Singleton
 
@@ -17,4 +17,5 @@ interface IBoot {
     var icon: Int?
 }
 @Singleton
-class Boot(override var service: String?, override var activity: String?, override var title: String?, override var content: String?, override var icon: Int?): IBoot
+class Boot(override var service: String?, override var activity: String?, override var title: String?, override var content: String?, override var icon: Int?):
+    IBoot

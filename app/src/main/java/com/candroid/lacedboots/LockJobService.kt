@@ -21,7 +21,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.candroid.bootlaces.BootServiceState
+import com.candroid.bootlaces.service.BootServiceState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.ticker

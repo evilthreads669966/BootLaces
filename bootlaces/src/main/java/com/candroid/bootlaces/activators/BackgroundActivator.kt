@@ -11,7 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.bootlaces
+package com.candroid.bootlaces.activators
 
 import android.content.Context
 import android.content.Intent
@@ -19,7 +19,11 @@ import android.os.Build
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
+import com.candroid.bootlaces.BootException
+import com.candroid.bootlaces.DataStoreKeys
 import com.candroid.bootlaces.api.IBackgroundActivator
+import com.candroid.bootlaces.service.BootServiceState
+import com.candroid.bootlaces.service.notification.IBoot
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.runBlocking
