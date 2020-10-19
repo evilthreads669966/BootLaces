@@ -62,6 +62,7 @@ class LockJobService: JobService(){
 
     override fun onStopJob(params: JobParameters?) = true
 
+    @InternalCoroutinesApi
     override fun onStartJob(params: JobParameters?): Boolean {
         GlobalScope.launch {
             ticker(2000, 10000, this.coroutineContext + Dispatchers.Default).consumeEach {

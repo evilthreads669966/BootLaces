@@ -13,16 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces.api
 
-import android.app.Activity
 import android.app.Notification
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
-import androidx.lifecycle.LifecycleCoroutineScope
-import com.candroid.bootlaces.IBoot
+import com.candroid.bootlaces.FlowWorker
+import com.candroid.bootlaces.ForegroundTypes
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 /*
             (   (                ) (             (     (
@@ -50,49 +44,15 @@ import kotlinx.coroutines.flow.map
  * @date 10/16/20
  *
  **/
-interface IBackgroundActivator<out T: IBoot>{
-    suspend fun activate(payload: (suspend () -> Unit)? = null, init: suspend T.() -> Unit)
-
-    suspend  fun updateForegroundService(config: suspend T.() -> Unit)
-}
-
 
 interface IForegroundActivator<out T: Notification> {
-    val events: Flow<Preferences>
-
     val scope: CoroutineScope
 
-    fun startForeground()
+    fun  create(type: ForegroundTypes, worker: FlowWorker?): T
 
-    fun  createForeground(): T
+    fun activate()
 
-    fun updateForeground()
-}
+    fun deactivate()
 
-inline suspend fun <T : Notification, S : IBoot> IForegroundActivator<T>.subscribe(info: IBoot, crossinline subscribe: suspend (Flow<Preferences>) -> Unit) {
-    subscribe(events)
-}
-
-interface EventBus<out T,in S>{
-    val bus: T
-    suspend fun emit(info: S)
-    interface EventBusConsumer{
-        suspend fun LifecycleCoroutineScope.subscribe()
-    }
-}
-
-
-interface IBootLaces<out T: IBoot,out R: DataStore<Preferences>> {
-    val scope: CoroutineScope
-    val boot: T
-    val dataStore: R
-
-    suspend fun updateBoot(config: T.() -> Unit): Unit
-
-    suspend fun startBoot(ctx: Activity, payload: (suspend () -> Unit)?, init: T.() -> Unit): Boolean
-}
-
-interface SimpleFactory<out T,in R>{
-    fun new(): T
-    fun create(): T
+    fun update(type: ForegroundTypes, worker: FlowWorker?)
 }

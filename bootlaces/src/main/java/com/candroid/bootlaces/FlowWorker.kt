@@ -1,5 +1,6 @@
 /*Copyright 2019 Chris Basinger
 
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -12,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
+
+import android.content.Context
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -35,8 +39,10 @@ package com.candroid.bootlaces
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/16/20
+ * @date 10/18/20
  *
  **/
-/*Exception to be thrown when no service is provided*/
-class BootException: Exception("No boot service was found. Unable to start boot service. Please pass the name of your BootService to startBoot")
+abstract class FlowWorker(val id: Int,){
+     var complete = false
+     abstract suspend fun doWork(ctx: Context)
+}

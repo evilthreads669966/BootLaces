@@ -17,18 +17,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
 import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.IBoot
-import com.candroid.bootlaces.BootService
+import com.candroid.bootlaces.BackgroundWorker
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.ticker
-import kotlinx.coroutines.yield
 import javax.inject.Inject
 
 /*
@@ -51,10 +45,11 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LockService : BootService(){
+class LockService : BackgroundWorker(){
     @Inject lateinit var rec: CloseDialogReceiver
     init {
         lifecycleScope.launchWhenCreated {
@@ -62,12 +57,13 @@ class LockService : BootService(){
             val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
             ticker(500, 500, this.coroutineContext + Dispatchers.Default).consumeEach {
                 if(powerMgr.isInteractive)
-                  sendBroadcast(intent)
+                 // sendBroadcast(intent)
                 yield()
             }
         }
     }
 
+    @InternalCoroutinesApi
     override fun onCreate() {
         super.onCreate()
         registerReceiver(rec, IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))

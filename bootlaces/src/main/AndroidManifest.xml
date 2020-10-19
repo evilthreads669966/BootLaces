@@ -2,8 +2,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application>
-        <receiver android:name=".BootReceiver" android:exported="true" android:directBootAware="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+        <receiver android:name=".BootReceiver" android:exported="true" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>

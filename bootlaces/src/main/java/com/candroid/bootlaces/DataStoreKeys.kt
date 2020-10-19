@@ -41,18 +41,9 @@ import javax.inject.Singleton
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Load Boot and save Boot. Persists Boot's configuration data to a file.
  **/
 object DataStoreKeys {
-        private val KEY_TITLE = "KEY_TITLE"
-        private val KEY_CONTENT = "KEY_CONTENT"
-        private val KEY_ICON = "KEY_ICON"
-        private val KEY_ACTIVITY = "KEY_ACTIVITY"
-        private val KEY_SERVICE = "KEY_SERVICE"
+        val KEY_SERVICE = "KEY_SERVICE"
         val PREF_FILE_NAME = "boot.preferences_pb"
-        val PREF_KEY_TITLE = preferencesKey<String>(KEY_TITLE)
-        val PREF_KEY_CONTENT = preferencesKey<String>(KEY_CONTENT)
-        val PREF_KEY_ICON = preferencesKey<Int>(KEY_ICON)
         val PREF_KEY_SERVICE = preferencesKey<String>(KEY_SERVICE)
-        val PREF_KEY_ACTIVITY = preferencesKey<String>(KEY_ACTIVITY)
 }

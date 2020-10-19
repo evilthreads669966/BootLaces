@@ -19,13 +19,9 @@ import android.app.Service
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
-import com.candroid.bootlaces.NotificationUtils.setContentIntent
+import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.api.IForegroundActivator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /*
@@ -53,44 +49,77 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
+ * activates foreground in [BackgroundWorker]
  **/
-class ForegroundActivator @Inject constructor(override val scope: CoroutineScope, val info: IBoot, val ctx: Service, dataStore: DataStore<Preferences>) : IForegroundActivator<Notification> {
+class ForegroundActivator @Inject constructor(override val scope: CoroutineScope, val ctx: Service) : IForegroundActivator<Notification> {
 
-    override val events: Flow<Preferences> = dataStore.data
+     override fun update(type: ForegroundTypes, worker: FlowWorker?) {
+          val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+          if(type == ForegroundTypes.FOREGROUND)
+               mgr.notify(NotificationUtils.Configuration.FOREGROUND_ID, create(type, null))
+          else
+               if(worker != null)
+                    mgr.notify(worker.id.toString(), NotificationUtils.Configuration.FOREGROUND_ID + worker.id, create(type, worker))
+     }
 
-    inline suspend fun activateCommunication(crossinline subscribe: suspend (Flow<Preferences>) -> Unit){ scope.launch { subscribe(events) } }
+     override fun create(type: ForegroundTypes, worker: FlowWorker?): Notification {
+          NotificationUtils.Configuration.createForegroundChannel(ctx)
+          val builder = NotificationCompat.Builder(ctx).apply {
+               when(type){
+                    ForegroundTypes.BACKGROUND -> {
+                         setContentTitle("Worker ${worker?.id}")
+                         setContentText(NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT)
+                         setSmallIcon(NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON, 4)
+                         setProgress(100, 0, true)
+                         setContentInfo("Processing Data")
+                         setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                    }
+                    ForegroundTypes.BACKGROUND_COMPLETE -> {
+                         setContentTitle("Worker ${worker?.id}")
+                         setContentText(NotificationUtils.Configuration.DEFAULT_FOREGROUND_COMPLETE_CONTENT)
+                         setSmallIcon(NotificationUtils.Configuration.DEFAULT_FOREGROUND_COMPLETE_ICON, 4)
+                         setContentInfo("Processing Data")
+                         setTimeoutAfter(30000)
+                         setAutoCancel(true)
+                         setCategory(NotificationCompat.CATEGORY_STATUS)
+                    }
+                    ForegroundTypes.FOREGROUND -> {
+                         setContentTitle(NotificationUtils.Configuration.DEFAULT_FOREGROUND_TITLE)
+                         setContentText(NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT)
+                         setSmallIcon(NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON, 4)
+                         setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                         setOngoing(true)
+                         setOnlyAlertOnce(true)
+                         setNotificationSilent()
+                         setShowWhen(false)
+                         setCategory(NotificationCompat.CATEGORY_SERVICE)
+                    }
+                    else -> {}
+               }
+          }.extend(NotificationUtils.NOTIFICATION_TEMPLATE_BACKGROUND_WORK)
+          return builder.build()
+     }
 
-    override fun startForeground() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground(), ctx.foregroundServiceType) }
-        else
-            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
-    }
+     @Throws(SecurityException::class)
+     override fun activate(){
+          if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+               BootServiceState.setForeground()
+               if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                    ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, create(ForegroundTypes.FOREGROUND,null), ctx.foregroundServiceType) }
+               else
+                    ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, create(ForegroundTypes.FOREGROUND, null))
+          }
+     }
 
-    override fun updateForeground() {
-        val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mgr.notify(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
-    }
+     override fun deactivate(){
+          ServiceCompat.stopForeground(ctx,ServiceCompat.STOP_FOREGROUND_DETACH)
+          /*val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+          if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              mgr.deleteNotificationChannel(NotificationUtils.Configuration.FOREGROUND_CHANNEL_ID)*/
+          BootServiceState.setBackground()
+     }
+}
 
-    override fun createForeground(): Notification {
-        NotificationUtils.Configuration.createForegroundChannel(ctx)
-        val builder = NotificationCompat.Builder(ctx).apply {
-            info.run {
-                setContentTitle(title ?: NotificationUtils.Configuration.DEFAULT_FOREGROUND_TITLE)
-                setContentText(content ?: NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT)
-                setSmallIcon(icon ?: NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON)
-                if (activity != null)
-                    this@apply.setContentIntent(ctx, activity!!) }
-        }.extend(NotificationUtils.NOTIFICATION_TEMPLATE)
-        return builder.build()
-    }
-
-    @Throws(SecurityException::class)
-    fun activateForeground(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            startForeground()
-        }
-        else
-            ctx.startForeground(NotificationUtils.Configuration.FOREGROUND_ID, createForeground())
-    }
+enum class ForegroundTypes{
+     BACKGROUND, BACKGROUND_COMPLETE, FOREGROUND
 }

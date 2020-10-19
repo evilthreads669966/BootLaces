@@ -20,14 +20,8 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_CONTENT
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_ICON
-import com.candroid.bootlaces.NotificationUtils.Configuration.DEFAULT_FOREGROUND_TITLE
 import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_CHANNEL_ID
 import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_GROUP_ID
-import com.candroid.bootlaces.NotificationUtils.Configuration.FOREGROUND_ID
-import com.candroid.bootlaces.NotificationUtils.Configuration.createForegroundChannel
-import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -57,11 +51,12 @@ import javax.inject.Singleton
  **/
 object NotificationUtils{
 
-    internal val NOTIFICATION_TEMPLATE = NotificationCompat.Extender {
+    internal val NOTIFICATION_TEMPLATE_BACKGROUND_WORK = NotificationCompat.Extender {
         it.run {
-            it.setShowWhen(false)
+            it.setShowWhen(true)
+            setPriority(NotificationCompat.PRIORITY_HIGH)
+            setStyle(NotificationCompat.BigTextStyle())
             setAutoCancel(false)
-            setOngoing(true)
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                 setColorized(true)
                 setColor(Color.TRANSPARENT)
@@ -71,20 +66,25 @@ object NotificationUtils{
                 setChannelId(FOREGROUND_CHANNEL_ID)
             }
             setGroup(FOREGROUND_GROUP_ID)
+            setDefaults(NotificationCompat.DEFAULT_ALL)
         }
     }
 
     internal object Configuration{
-        val DEFAULT_FOREGROUND_ICON = android.R.drawable.sym_def_app_icon
-        val FOREGROUND_CHANNEL_DESCRIPTION = "EVIL CHANNEL 666"
-        val FOREGROUND_GROUP_DESCRIPTION = "EVIL GROUP 666"
-        val FOREGROUND_GROUP_NAME = "EVIL GROUP"
+        val FOREGROUND_CHANNEL_DESCRIPTION = "Foreground Work"
+        val FOREGROUND_GROUP_DESCRIPTION = "For temporary tasks"
+        val FOREGROUND_GROUP_NAME = "Foreground Processing"
         val FOREGROUND_GROUP_ID = "666"
         val FOREGROUND_ID = 666
-        val FOREGROUND_CHANNEL_ID = "EVIL SERVICE"
-        val FOREGROUND_CHANNEL_NAME= "EVIL CHANNEL"
-        val DEFAULT_FOREGROUND_TITLE = "EVIL TITLE"
-        val DEFAULT_FOREGROUND_CONTENT = "EVIL CONTENT"
+        val FOREGROUND_CHANNEL_ID = "foreground"
+        val FOREGROUND_CHANNEL_NAME= "Foreground Work"
+        val WORKER_GROUP_NAME = "background workers"
+        val DEFAULT_FOREGROUND_TITLE = "Background Processing"
+        val DEFAULT_FOREGROUND_CONTENT = "Work in progress"
+        val DEFAULT_FOREGROUND_COMPLETE_TITLE = "Finished Processing"
+        val DEFAULT_FOREGROUND_COMPLETE_CONTENT = "Work complete"
+        val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_download
+        val DEFAULT_FOREGROUND_COMPLETE_ICON = android.R.drawable.stat_sys_download_done
 
         fun createForegroundChannel(ctx: Context): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -96,13 +96,14 @@ object NotificationUtils{
                             mgr.getNotificationChannelGroup(FOREGROUND_GROUP_ID)
                         }
                     }
-                    val channel = NotificationChannel(FOREGROUND_CHANNEL_ID, FOREGROUND_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    val channel = NotificationChannel(FOREGROUND_CHANNEL_ID, FOREGROUND_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
                         group = FOREGROUND_GROUP_ID
                         description = this@Configuration.FOREGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
-                        setShowBadge(false)
+                        setShowBadge(true)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                             setAllowBubbles(false)
+
                     }
                     mgr.createNotificationChannel(channel)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

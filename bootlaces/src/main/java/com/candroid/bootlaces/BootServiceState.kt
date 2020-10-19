@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import javax.inject.Singleton
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 
 /*
             (   (                ) (             (     (
@@ -41,22 +43,28 @@ import javax.inject.Singleton
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * BootService lifecycle aware object
  **/
-object BootServiceState {
-    private var state = States.STOPPED
+object BootServiceState: LifecycleObserver {
+    private var state = States.INITIALIZED
 
-    fun isRunning() = state == States.STARTED
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun setBackground() {
+        state = States.BACKGROUND
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun setStopped() {
+        state = States.STOPPED
+    }
+
+    fun isStarted() = state == States.BACKGROUND || state == States.FOREGROUND
 
     fun isStopped() = state == States.STOPPED
 
-    internal fun setRunning(){
-        state = States.STARTED
-    }
-
-    internal fun setStopped(){
-        state = States.STOPPED
+    fun isForeground() = state == States.FOREGROUND
+    fun setForeground() {
+        state = States.FOREGROUND
     }
 }
 
-private enum class States { STARTED, STOPPED }
+private enum class States { INITIALIZED, BACKGROUND, FOREGROUND, STOPPED }

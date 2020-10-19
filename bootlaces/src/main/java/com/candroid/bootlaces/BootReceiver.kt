@@ -18,8 +18,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.datastore.DataStore
+import androidx.datastore.preferences.Preferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /*
@@ -47,25 +51,28 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Starts BootService after the phone turns on.
+ * Activates [BackgroundWorker]
  **/
 @AndroidEntryPoint
-class BootReceiver : HiltBugReceiver<Boot>(){
-   @Inject lateinit var boot: IBoot
+class BootReceiver : HiltBugReceiver(){
+   @Inject lateinit var store: DataStore<Preferences>
 
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
-        if(BootServiceState.isStopped() && intent?.action?.contains("BOOT") ?: false) {
-            intent?.setClassName(ctx!!, boot.service ?: return)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                ctx!!.startForegroundService(intent)
-            else
-                ctx!!.startService(intent)
+        if(!BootServiceState.isStarted() && intent?.action?.contains("BOOT") ?: false) {
+            runBlocking {
+                val service = store.data.firstOrNull()?.get(DataStoreKeys.PREF_KEY_SERVICE) ?: return@runBlocking
+                intent?.setClassName(ctx!!, service)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    ctx!!.startForegroundService(intent)
+                else
+                    ctx!!.startService(intent)
+            }
         }
     }
 }
 /*fixes bug in Hilt*/
-open class HiltBugReceiver<T: IBoot> : BroadcastReceiver(){
+open class HiltBugReceiver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {}
 }

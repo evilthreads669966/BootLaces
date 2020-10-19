@@ -17,12 +17,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.lifecycle.*
+import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenStateAtLeast
 import com.candroid.bootlaces.BackgroundActivator
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /*
@@ -45,41 +46,56 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LockScreenActivity: VisibilityActivity(), LifecycleOwner{
+class LockScreenActivity: VisibilityActivity(){
     private val mOverlay_request_code = 666
+    @InternalCoroutinesApi
     @Inject lateinit var mgr: BackgroundActivator
-    // TODO: 10/14/20
-    //val model:VisibilityViewModel by viewModels()
 
     init {
         lifecycleScope.launch {
             lifecycle.whenStateAtLeast(Lifecycle.State.STARTED) {
-                checkPermission()
-                mgr.activate {
-                    service = LockService::class.qualifiedName
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        title = "I LOVE YOU"
-                        content = "Evil Threads love you one time!"
-                        activity = LockScreenActivity::class.qualifiedName
-                    }
-                }
-                lifecycle.addObserver(object : DefaultLifecycleObserver {
-                    override fun onResume(owner: LifecycleOwner) {
-                        super.onResume(owner)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                            owner.lifecycleScope.launch {
-                                mgr.updateForegroundService{
-                                    content = "Evil Threads love you ${ScreenVisibility.count()} times!"
-                                }
-                            }
-                    }
-                })
+                mgr.activate(LockService::class.java.name)
+            }
+        }
+        lifecycleScope.launchWhenResumed {
+            mgr.scheduleWorker(1){
+                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
+                Log.d("FLOW WORKER", "${System.currentTimeMillis()}")
+                delay(1000)
+            }
+            mgr.scheduleWorker(2){
+                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
+                Log.d("OTHER FLOW WORKER", "${System.currentTimeMillis()}")
+                delay(5000)
+                Log.d("OTHER FLOW WORKER", "${System.currentTimeMillis()}")
+            }
+            mgr.scheduleWorker(3){
+                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
+                Log.d("OTHER FLOW WORKER 3", "${System.currentTimeMillis()}")
+                delay(5000)
+                Log.d("OTHER FLOW WORKER 3", "${System.currentTimeMillis()}")
+            }
+            mgr.scheduleWorker(4){
+                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
+                Log.d("OTHER FLOW WORKER 4", "${System.currentTimeMillis()}")
+                delay(5000)
+            }
+            mgr.scheduleWorker(5){
+                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
+                Log.d("WORKER 5", "${System.currentTimeMillis()}")
+                delay(5000)
             }
         }
     }
+
+/*    override fun onStart() {
+        super.onStart()
+        checkPermission()
+    }*/
 
     private fun checkPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {

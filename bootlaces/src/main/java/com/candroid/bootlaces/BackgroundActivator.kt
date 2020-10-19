@@ -19,9 +19,10 @@ import android.os.Build
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
-import com.candroid.bootlaces.api.IBackgroundActivator
-import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -50,17 +51,26 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
+ * activates [BackgroundWorker]
  **/
+@InternalCoroutinesApi
 @ActivityScoped
-class BackgroundActivator @Inject constructor(@ActivityContext private val ctx: Context, val info: IBoot, val datastore: DataStore<Preferences>, ) : IBackgroundActivator<IBoot> {
+class BackgroundActivator @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>, val channel: Channel<FlowWorker>) {
 
-    override suspend inline fun updateForegroundService(crossinline config: suspend IBoot.() -> Unit){ datastore.edit { info.apply { config() }.mapBootToMutPrefs(it) } }
+    inline suspend fun scheduleWorker(id: Int, crossinline work: suspend (Context) -> Unit){
+        val worker = object : FlowWorker(id) {
+            override suspend fun doWork(ctx: Context) {
+                work(ctx)
+                complete = true
+            }
+        }
+        channel.send(worker)
+    }
 
-    override suspend fun activate(payload: (suspend () -> Unit)?, init: suspend IBoot.() -> Unit) = runBlocking {
-        //LifecycleBootService.payload = payload
-        if (info.service != null && BootServiceState.isRunning()) return@runBlocking
-        val service = info.apply { init() }.service ?: throw BootException()
-        val intent = Intent(ctx, Class.forName(service))
+    suspend fun activate(serviceName: String){
+        if (BootServiceState.isStarted()) return
+        val intent = Intent(ctx, Class.forName(serviceName))
+        runBlocking { dataStore.edit { it[DataStoreKeys.PREF_KEY_SERVICE] = serviceName } }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else

@@ -8,6 +8,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
@@ -27,6 +28,7 @@ class LockManager @Inject constructor(): ILockManager {
                 && (ctx.getSystemService(Context.POWER_SERVICE) as PowerManager).isInteractive
     }
 
+    @InternalCoroutinesApi
     override fun lockScreen(ctx: Context, intent: Intent?) {
         val activityIntent = (intent ?: Intent()).apply {
             setClass(ctx, LockScreenActivity::class.java)
