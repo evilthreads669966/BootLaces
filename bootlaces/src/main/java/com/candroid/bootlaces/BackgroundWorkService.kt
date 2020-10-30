@@ -63,6 +63,7 @@ abstract class BackgroundWorkService: LifecycleService() {
         if(BootServiceState.isForeground())
             ServiceCompat.stopForeground(this,ServiceCompat.STOP_FOREGROUND_REMOVE)
         foreground.scope.also { it.coroutineContext.cancelChildren() }.cancel()
+        channel.close()
         receivers.forEach { unregisterReceiver(it) }
         lifecycle.removeObserver(BootServiceState)
         stopSelfResult(startId)

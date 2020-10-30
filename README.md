@@ -1,6 +1,9 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
-### Boot Laces is an Android library that turns your service persistent
+### Boot Laces is an Android library that provides you with a reactive background service framework for managing work.
+### It allows you to schedule work perstistent and one time work that includes an optional broadcast receiver.
+### When work is scheduled with an elegant notification system that automatically handles foreground and work progress.
+### Your service becomes persistent when you schedule persistent work allowing for your service to only start at boot when needed
 #### It take your background service and puts it into the foreground while making it persistent.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
@@ -23,10 +26,10 @@ dependencies {
 ```
 3. Add the Hilt plugin to your project's build.gradle dependencies
 ```gradle
-    dependencies {
-        ...
-        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
-    }
+dependencies {
+    ...
+    classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+}
 ```
 4. Annotate your subclass of Application class
 ```kotlin
@@ -35,10 +38,10 @@ class App: Application()
 ```
 5. Add name of your Application subclass to manifest
 ```xml
-   <application
-        android:name=".App"
-       ...
-       >
+<application
+    android:name=".App"
+    ...
+>
 ```
 6. Subclass BackgroundWorkService but no need to override anything
 ```kotlin
@@ -48,11 +51,11 @@ class MyService : BackgroundWorkService()
   - android:foregroundServiceType has multiple values you can pass in depending on the type off service you're developing.
     - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
 ```xml
-	<service
-        android:name=".MyService"
-        android:directBootAware="true"
-        android:foregroundServiceType="dataSync"
-    />
+<service
+    android:name=".MyService"
+    android:directBootAware="true"
+    android:foregroundServiceType="dataSync"
+/>
 ```
 8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive and passing true for hasReceiver along with an action.
 ```kotlin
@@ -68,23 +71,24 @@ class MyWorker: Worker(666,"Locking the screen", hasReceiver = true, action = In
 ```
 9. Inject your WorkScheduler into your activity
 ```kotlin
-    @Inject lateinit var scheduler: WorkScheduler
+@Inject lateinit var scheduler: WorkScheduler
 ```
 10. Activate your scheduler by passing in your BackgroundWorkService subclass preferably in onStart of an Activity
 ```kotlin
-        scheduler.activate(LockService::class.java.name)
+scheduler.activate(LockService::class.java.name)
 ```
 11. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
 ```kotlin
-    //persistent worker
-    scheduler.schedulePersistent(MyWorker())
-    //one time worker
-    scheduler.scheduleOneTime(MyWorker())
+//persistent worker
+scheduler.schedulePersistent(MyWorker())
+//one time worker
+scheduler.scheduleOneTime(MyWorker())
 ```
 ## Important To Know
 - You can schedule as many workers as you want both persistent and one time workers.
-- Whenever one or more workers are running a foreground notification will be pinned until all workers complete.
+- Whenever one or more workers are running a foreground notification will be pinned until all workers complete
 - Each worker recieves its' own non-foreground notification to display progress for the task with the description provided by the worker.
+-
 ## Ask a Question?
 - Use [Github issues](https://github.com/evilthreads669966/bootlaces/issues)
 - Send an email to evilthreads669966@gmail.com
