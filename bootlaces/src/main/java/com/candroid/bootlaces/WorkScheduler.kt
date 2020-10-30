@@ -27,6 +27,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import kotlin.random.Random
@@ -64,26 +65,26 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
+        database.insert(work)
         val componentName = ComponentName(ctx, BootReceiver::class.java)
         val state = ctx.packageManager.getComponentEnabledSetting(componentName)
         if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
             ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-        database.insert(work)
     }
 
     suspend fun scheduleOneTime(worker: Worker){
-        val work = Work( Random.nextInt(1000), worker::class.java.name)
+        val work = Work( worker.id, worker::class.java.name)
         channel.send(work)
     }
 
     fun activate(serviceName: String){
         if (BootServiceState.isStarted()) return
         val intent = Intent(ctx, Class.forName(serviceName))
-        runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else
             ctx.startService(intent)
+        runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
     }
 }
 
