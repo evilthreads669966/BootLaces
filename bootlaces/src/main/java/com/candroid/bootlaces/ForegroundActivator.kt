@@ -94,9 +94,13 @@ class ForegroundActivator @Inject constructor(val ctx: Service, val scope: Corou
           notificationMgr.notify(BACKGROUND_CHANNEL_ID, id, builder.build())
      }
 
-     fun notifyForeground(): Notification {
+     fun notifyForeground() {
           notificationUtils.createForegroundChannel(ctx)
-          return builder.extend(notificationUtils.NOTIFICATION_TEMPLATE_FOREGROUND).build()
+          val notification = builder.extend(notificationUtils.NOTIFICATION_TEMPLATE_FOREGROUND).build()
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+               ctx.startForeground(FOREGROUND_ID, notification, ctx.foregroundServiceType)
+          } else
+               ctx.startForeground(FOREGROUND_ID,notification)
      }
 
      @Throws(SecurityException::class)
@@ -105,10 +109,7 @@ class ForegroundActivator @Inject constructor(val ctx: Service, val scope: Corou
                return
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                BootServiceState.setForeground()
-               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    ctx.startForeground(FOREGROUND_ID, notifyForeground(), ctx.foregroundServiceType)
-               } else
-                    ctx.startForeground(FOREGROUND_ID,notifyForeground())
+               notifyForeground()
           }
      }
 
