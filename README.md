@@ -20,6 +20,7 @@ dependencies {
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
+```
 3. Add the Hilt plugin to your project's build.gradle dependencies
 ```gradle
     dependencies {
