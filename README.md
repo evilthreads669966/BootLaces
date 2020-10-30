@@ -1,9 +1,10 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
 ### Boot Laces is an Android library that provides you with a reactive background service framework for managing work.
-### It allows you to schedule work perstistent and one time work that includes an optional broadcast receiver.
+### It allows you to schedule work perstistent and one time work that includes an optional broadcast receiver that is ran in the foreground.
 ### When work is scheduled it is synchronized with an elegant notification system that automatically handles foreground and work progress.
 ### Your service becomes persistent when you schedule persistent work allowing for your service to only start at boot when needed
+### A background service that is only brought to the foreground when there is work to be done.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
