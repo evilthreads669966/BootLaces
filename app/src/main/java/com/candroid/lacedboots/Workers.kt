@@ -18,7 +18,7 @@ class OneTimeWorker: Worker(66,"One time work") {
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class ScreenLockerJob: Worker(666,"Locking the screen", hasReceiver = true, action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
+class ScreenLockerJob: Worker(666,"Locking the screen", action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
     override suspend fun doWork(ctx: Context) {
         val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
         while(true){

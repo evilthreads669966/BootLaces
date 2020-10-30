@@ -34,7 +34,7 @@ abstract class BackgroundWorkService: LifecycleService() {
     private var startId: Int = 0
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var channel: Channel<Work>
-    internal lateinit var foreground: ForegroundActivator
+    private lateinit var foreground: ForegroundActivator
     val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
 
@@ -70,7 +70,6 @@ abstract class BackgroundWorkService: LifecycleService() {
         super.onDestroy()
     }
     suspend fun handleWorkers(){
-
         foreground.scope.launch {
             ticker(5000,3000).consumeEach {
                 if(isActive){
@@ -101,7 +100,7 @@ abstract class BackgroundWorkService: LifecycleService() {
         if(workers.contains(worker))
             return
         workers.add(worker)
-        if( worker.hasReceiver && worker.action != null){
+        if(worker.action != null){
             val receiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     worker.onReceive(context!!, intent!!)

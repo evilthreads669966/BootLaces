@@ -52,8 +52,7 @@ import kotlinx.coroutines.runBlocking
  * @date 10/18/20
  *
  **/
-abstract class Worker(val id: Int, val description: String, val hasReceiver: Boolean = false, val action: String? = null){
-     var complete = false
+abstract class Worker(val id: Int, val description: String, val action: String? = null){
      suspend abstract fun doWork(ctx: Context)
 
      open fun onReceive(ctx: Context, intent: Intent) = Unit
