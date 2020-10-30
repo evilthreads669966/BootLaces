@@ -67,7 +67,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
         val componentName = ComponentName(ctx, BootReceiver::class.java)
         val state = ctx.packageManager.getComponentEnabledSetting(componentName)
         if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-        ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+            ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         database.insert(work)
     }
 
