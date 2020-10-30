@@ -119,7 +119,7 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
         it.run {
             setContentInfo("Processing Data in background")
             setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            it.setShowWhen(true)
+            setShowWhen(true)
             setPriority(NotificationCompat.PRIORITY_HIGH)
             setAllowSystemGeneratedContextualActions(true)
             setStyle(NotificationCompat.DecoratedCustomViewStyle())
