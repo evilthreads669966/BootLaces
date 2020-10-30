@@ -69,7 +69,7 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
         val FOREGROUND_CHANNEL_NAME = "Foreground Work"
         val DEFAULT_FOREGROUND_TITLE = "Background Processing"
         val DEFAULT_FOREGROUND_CONTENT = "Work in progress"
-        val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_download
+        val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_upload
         val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
         val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
         val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
