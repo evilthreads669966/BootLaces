@@ -72,13 +72,13 @@ class MyWorker: Worker(666,"Locking the screen", hasReceiver = true, action = In
 10. Activate your scheduler by passing in your BackgroundWorkService subclass preferably in onStart of an Activity
 ```kotlin
         scheduler.activate(LockService::class.java.name)
-}
+```
 11. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
 ```kotlin
     //persistent worker
-    scheduler.schedulePersistent(ScreenLockerJob())
+    scheduler.schedulePersistent(MyWorker())
     //one time worker
-    scheduler.scheduleOneTime(OneTimeWorker())
+    scheduler.scheduleOneTime(MyWorker())
 ```
 ## Important To Know
 - You can schedule as many workers as you want both persistent and one time workers.
