@@ -36,7 +36,7 @@ abstract class BackgroundWorkService: LifecycleService() {
     @Inject lateinit var channel: Channel<Work>
     internal lateinit var foreground: ForegroundActivator
     val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
-    val receivers = mutableListOf<BroadcastReceiver>()
+    val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
 
     init {
         lifecycle.addObserver(BootServiceState)
@@ -108,6 +108,7 @@ abstract class BackgroundWorkService: LifecycleService() {
             }
             val filter = IntentFilter(worker.action)
             registerReceiver(receiver,filter)
+            receivers.add(receiver)
         }
         if(!BootServiceState.isForeground())
             foreground.activate()
