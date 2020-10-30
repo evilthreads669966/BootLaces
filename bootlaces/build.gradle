@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'kotlinx-serialization'
 
 android {
     compileSdkVersion 30
@@ -17,8 +18,21 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = "1.8"
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    hilt {
+        enableTransformForLocalTests = true
     }
 }
 
@@ -29,12 +43,32 @@ dependencies {
     implementation "androidx.core:core-ktx:$core_ktx_version"
     implementation "androidx.lifecycle:lifecycle-service:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha01"
-    implementation "com.google.dagger:hilt-android:2.29.1-alpha"
-    kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
+    implementation "androidx.datastore:datastore-preferences:1.0.0-alpha02"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+    // For instrumentation tests
+    androidTestImplementation  "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+    // For local unit tests
+    testImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kaptTest "com.google.dagger:hilt-android-compiler:$hilt_version"
+    testImplementation "org.robolectric:robolectric:4.4"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    //kaptAndroidTest "androidx.hilt:hilt-compiler:$hilt_version"
+/*
+    implementation "androidx.lifecycle:lifecycle-extensions:$archLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$archLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$archLifecycleVersion "*/
+
 }
 
-kapt {
+kapt {1
     correctErrorTypes true
-    generateStubs = true
+    useBuildCache = false
 }
+

@@ -13,18 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
+import kotlin.random.Random
 
 /*
             (   (                ) (             (     (
@@ -51,29 +56,36 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
- * activates [BackgroundWorker]
+ * activates [BackgroundWorkService]
  **/
 @InternalCoroutinesApi
 @ActivityScoped
-class BackgroundActivator @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>, val channel: Channel<FlowWorker>) {
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>,val database: WorkerDao, val channel: Channel<Work>) {
 
-    inline suspend fun scheduleWorker(id: Int, crossinline work: suspend (Context) -> Unit){
-        val worker = object : FlowWorker(id) {
-            override suspend fun doWork(ctx: Context) {
-                work(ctx)
-                complete = true
-            }
-        }
-        channel.send(worker)
+    suspend fun schedulePersistent(worker: Worker){
+        val work = Work( Random.nextInt(1000), worker::class.java.name)
+        val componentName = ComponentName(ctx, BootReceiver::class.java)
+        val state = ctx.packageManager.getComponentEnabledSetting(componentName)
+        if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+        ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        database.insert(work)
     }
 
-    suspend fun activate(serviceName: String){
+    suspend fun scheduleOneTime(worker: Worker){
+        val work = Work( Random.nextInt(1000), worker::class.java.name)
+        channel.send(work)
+    }
+
+    fun activate(serviceName: String){
         if (BootServiceState.isStarted()) return
         val intent = Intent(ctx, Class.forName(serviceName))
-        runBlocking { dataStore.edit { it[DataStoreKeys.PREF_KEY_SERVICE] = serviceName } }
+        runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else
             ctx.startService(intent)
     }
 }
+
+@Entity
+data class Work(@PrimaryKey(autoGenerate = true) val id: Int, val job: String)

@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.preferencesKey
 import javax.inject.Singleton
 
@@ -42,8 +43,10 @@ import javax.inject.Singleton
  * @date 10/09/20
  *
  **/
-object DataStoreKeys {
-        val KEY_SERVICE = "KEY_SERVICE"
-        val PREF_FILE_NAME = "boot.preferences_pb"
-        val PREF_KEY_SERVICE = preferencesKey<String>(KEY_SERVICE)
+object StoreKeys {
+        val KEY_SERVICE: String = "KEY_SERVICE"
+
+        val PREF_KEY: Preferences.Key<String> = preferencesKey(KEY_SERVICE)
+
+        val FILE_NAME = "service_config.preferences_pb"
 }

@@ -1,5 +1,6 @@
 /*Copyright 2019 Chris Basinger
 
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -11,15 +12,19 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
-package com.candroid.lacedboots
+package com.candroid.bootlaces
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import dagger.hilt.android.scopes.ServiceScoped
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import javax.inject.Inject
+import android.content.IntentFilter
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /*
             (   (                ) (             (     (
@@ -41,12 +46,21 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
-@ServiceScoped
-/*Hilt has a bug with broadcast receiver so it doesn't work. So broadast receiver and lockmanager are under service scope for now*/
-class CloseDialogReceiver @Inject constructor(private val lockManager: ILockManager): BroadcastReceiver(){
-    override fun onReceive(context: Context?, intent: Intent?) {
-        lockManager.takeIf { !it.isLocked() && it.isLockable(context!!) }?.lockScreen(context!!, intent)
-    }
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/18/20
+ *
+ **/
+abstract class Worker(val id: Int, val description: String, val hasReceiver: Boolean = false, val action: String? = null){
+     var complete = false
+     suspend abstract fun doWork(ctx: Context)
+
+     open fun onReceive(ctx: Context, intent: Intent) = Unit
+
+     override fun equals(other: Any?): Boolean {
+          return this.id == (other as Worker).id
+     }
+
+     override fun hashCode(): Int = id.hashCode()
 }

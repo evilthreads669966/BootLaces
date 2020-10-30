@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Activates [BackgroundWorker]
+ * Activates [BackgroundWorkService]
  **/
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
@@ -62,7 +62,7 @@ class BootReceiver : HiltBugReceiver(){
         super.onReceive(ctx, intent)
         if(!BootServiceState.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             runBlocking {
-                val service = store.data.firstOrNull()?.get(DataStoreKeys.PREF_KEY_SERVICE) ?: return@runBlocking
+                val service = store.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: return@runBlocking
                 intent?.setClassName(ctx!!, service)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     ctx!!.startForegroundService(intent)

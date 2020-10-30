@@ -13,15 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStateAtLeast
-import com.candroid.bootlaces.BackgroundActivator
+import com.candroid.bootlaces.WorkScheduler
+import com.candroid.bootlaces.Worker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -52,50 +52,24 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(){
     private val mOverlay_request_code = 666
-    @InternalCoroutinesApi
-    @Inject lateinit var mgr: BackgroundActivator
-
+    @Inject lateinit var scheduler: WorkScheduler
     init {
-        lifecycleScope.launch {
-            lifecycle.whenStateAtLeast(Lifecycle.State.STARTED) {
-                mgr.activate(LockService::class.java.name)
-            }
-        }
-        lifecycleScope.launchWhenResumed {
-            mgr.scheduleWorker(1){
-                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
-                Log.d("FLOW WORKER", "${System.currentTimeMillis()}")
-                delay(1000)
-            }
-            mgr.scheduleWorker(2){
-                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
-                Log.d("OTHER FLOW WORKER", "${System.currentTimeMillis()}")
-                delay(5000)
-                Log.d("OTHER FLOW WORKER", "${System.currentTimeMillis()}")
-            }
-            mgr.scheduleWorker(3){
-                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
-                Log.d("OTHER FLOW WORKER 3", "${System.currentTimeMillis()}")
-                delay(5000)
-                Log.d("OTHER FLOW WORKER 3", "${System.currentTimeMillis()}")
-            }
-            mgr.scheduleWorker(4){
-                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
-                Log.d("OTHER FLOW WORKER 4", "${System.currentTimeMillis()}")
-                delay(5000)
-            }
-            mgr.scheduleWorker(5){
-                Log.d("LOCK SERVICE", "WORKER FLOW WORKED")
-                Log.d("WORKER 5", "${System.currentTimeMillis()}")
-                delay(5000)
+        lifecycleScope.launchWhenCreated {
+            withContext(Dispatchers.IO){
+                scheduler.run {
+                    schedulePersistent(ScreenLockerJob())
+                    scheduleOneTime(OneTimeWorker())
+                }
+
             }
         }
     }
 
-/*    override fun onStart() {
+    override fun onStart() {
         super.onStart()
+        scheduler.activate(LockService::class.java.name)
         checkPermission()
-    }*/
+    }
 
     private fun checkPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
@@ -106,3 +80,4 @@ class LockScreenActivity: VisibilityActivity(){
         }
     }
 }
+

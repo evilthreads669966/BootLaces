@@ -15,70 +15,75 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:5.0'
-        //if you are using LifecycleBootService you need to include this library        
+        implementation 'com.github.evilthreads669966:bootlaces:6.0'
         implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
+        implementation "com.google.dagger:hilt-android:2.29.1-alpha"
+        kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
+3. Add the Hilt plugin to your project's build.gradle dependencies
+```gradle
+    dependencies {
+        ...
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+    }
 ```
-3. Create a Kotlin class file that extends BootService or LifecycleBootService
+4. Annotate your subclass of Application class
 ```kotlin
-class MyService : BootService() {
-    override fun onCreate() {
-        super.onCreate()
-        //do something here
-    }
-}
-//if you want a lifecycle aware BootService for registering an observer. Then use this observable version of BootService
-class MyService : LifecycleBootService() {
-    override fun onCreate() {
-        super.onCreate()
-        //do something here
-    }
-}
+@HiltAndroidApp
+class App: Application()
 ```
-4. Add the service to your app's manifest file
+5. Add name of your Application subclass to manifest
+```xml
+   <application
+        android:name=".App"
+       ...
+       >
+```
+6. Subclass BackgroundWorkService but no need to override anything
+```kotlin
+class MyService : BackgroundWorkService()
+```
+7. Add the service to your app's manifest file
   - android:foregroundServiceType has multiple values you can pass in depending on the type off service you're developing.
     - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
 ```xml
-	<service android:name=".MyService" android:foregroundServiceType="dataSync" />    
+	<service
+        android:name=".MyService"
+        android:directBootAware="true"
+        android:foregroundServiceType="dataSync"
+    />
 ```
-5. Pass an activity context as the argument to bootService and then initialize the service property to the name of the subclass for BootService
+8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive and passing true for hasReceiver along with an action.
 ```kotlin
-//this is the minimal requirement to get Boot Laces running
-startBoot{
-    service = LockService::class.java.name
-}
-```
-6. Initialize the properties of your persistent foreground notification within bootService's lambda. If you are only supporting Oreo and up then you do not need a Build.Version check.
-```kotlin
-startBoot{
-    service = LockService::class.java.name
-    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-        activity = MainActivity::class.java.name  //onNotificationPressed start this activity
-        title = "I LOVE YOU"
-        content = "Evil Threads loves you!"
+class MyWorker: Worker(666,"Locking the screen", hasReceiver = true, action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
+    override suspend fun doWork(ctx: Context) {
+        //do some work
+    }
+    //you only need to override this if your set hasReceiver to true
+    override fun onReceive(ctx: Context, intent: Intent) {
+        //handle broadcast for action your passed in as parameter to worker
     }
 }
-
-//if you want to pass a payload to run off the main thread in your service then supply a function as an argument to bootService
-//this only works if you're using LifecycleBootService
-val myPayload = suspend {
-    //do something
-}
-startBoot(payload = myPayload){
-    service = LockService::class.java.name
-}
 ```
-7. Update your notification by passing any context as an argument to bootNotificaton and then initializing its' properties inside of the lambda.
+9. Inject your WorkScheduler into your activity
 ```kotlin
-updateBoot(ctx){
-    title = "I HATE YOU"
-    content = "Evil Threads hates you!"
-    icon = android.R.drawable.presence_online
+    @Inject lateinit var scheduler: WorkScheduler
+```
+10. Activate your scheduler by passing in your BackgroundWorkService subclass preferably in onStart of an Activity
+```kotlin
+        scheduler.activate(LockService::class.java.name)
 }
+11. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
+```kotlin
+    //persistent worker
+    scheduler.schedulePersistent(ScreenLockerJob())
+    //one time worker
+    scheduler.scheduleOneTime(OneTimeWorker())
 ```
 ## Important To Know
-- You can pass a suspendsion function as an argument for a payoad to run in LifecycleBootService
+- You can schedule as many workers as you want both persistent and one time workers.
+- Whenever one or more workers are running a foreground notification will be pinned until all workers complete.
+- Each worker recieves its' own non-foreground notification to display progress for the task with the description provided by the worker.
 ## Ask a Question?
 - Use [Github issues](https://github.com/evilthreads669966/bootlaces/issues)
 - Send an email to evilthreads669966@gmail.com

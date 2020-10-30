@@ -13,17 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.PowerManager
-import androidx.lifecycle.lifecycleScope
-import com.candroid.bootlaces.BackgroundWorker
+import com.candroid.bootlaces.BackgroundWorkService
+import com.candroid.bootlaces.ForegroundScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.ticker
-import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -45,32 +38,8 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
+
 @InternalCoroutinesApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
+@ForegroundScope
 @AndroidEntryPoint
-class LockService : BackgroundWorker(){
-    @Inject lateinit var rec: CloseDialogReceiver
-    init {
-        lifecycleScope.launchWhenCreated {
-            val powerMgr = getSystemService(Context.POWER_SERVICE) as PowerManager
-            val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-            ticker(500, 500, this.coroutineContext + Dispatchers.Default).consumeEach {
-                if(powerMgr.isInteractive)
-                 // sendBroadcast(intent)
-                yield()
-            }
-        }
-    }
-
-    @InternalCoroutinesApi
-    override fun onCreate() {
-        super.onCreate()
-        registerReceiver(rec, IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(rec)
-    }
-}
+class LockService : BackgroundWorkService()

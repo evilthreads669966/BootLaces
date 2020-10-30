@@ -14,8 +14,8 @@ import javax.inject.Inject
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class LockManager @Inject constructor(): ILockManager {
-  
+object LockManager: ILockManager {
+
     override fun isLocked() = ScreenVisibility.isVisible()
 
     override fun isLockable(ctx: Context): Boolean{

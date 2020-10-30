@@ -44,12 +44,4 @@ import javax.inject.Inject
 */
 
 @HiltAndroidApp
-class App: Application(){
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
-    override fun onCreate() {
-        super.onCreate()
-        LockJobService.schedule(this)
-
-    }
-}
+class App: Application()
