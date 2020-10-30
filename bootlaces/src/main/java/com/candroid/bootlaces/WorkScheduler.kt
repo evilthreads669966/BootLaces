@@ -63,7 +63,7 @@ import kotlin.random.Random
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>,val database: WorkerDao, val channel: Channel<Work>) {
 
     suspend fun schedulePersistent(worker: Worker){
-        val work = Work( Random.nextInt(1000), worker::class.java.name)
+        val work = Work( worker.id, worker::class.java.name)
         val componentName = ComponentName(ctx, BootReceiver::class.java)
         val state = ctx.packageManager.getComponentEnabledSetting(componentName)
         if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
@@ -88,4 +88,4 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 }
 
 @Entity
-data class Work(@PrimaryKey(autoGenerate = true) val id: Int, val job: String)
+data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val job: String)
