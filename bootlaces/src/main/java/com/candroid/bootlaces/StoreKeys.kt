@@ -15,7 +15,6 @@ package com.candroid.bootlaces
 
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.preferencesKey
-import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (

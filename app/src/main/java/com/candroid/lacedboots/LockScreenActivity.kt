@@ -13,15 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.PowerManager
 import android.provider.Settings
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
-import com.candroid.bootlaces.Worker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -60,7 +57,6 @@ class LockScreenActivity: VisibilityActivity(){
                     schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
                 }
-
             }
         }
     }
@@ -80,4 +76,3 @@ class LockScreenActivity: VisibilityActivity(){
         }
     }
 }
-

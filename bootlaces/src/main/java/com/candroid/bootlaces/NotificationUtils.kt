@@ -27,7 +27,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -77,10 +76,8 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
         val BACKGROUND_FINISHED_DEFAULT_TITLE = "Background Service Finished"
         val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished work"
         val BACKGROUND_FINISHED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download_done
-        val BACKGROUND_CHANNEL_DESCRIPTION =
-            "Displays notifications for events regarding background work."
-        val BACKGROUND_CHANNEL_GROUP_DESCRIPTION =
-            "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
+        val BACKGROUND_CHANNEL_DESCRIPTION = "Displays notifications for events regarding background work."
+        val BACKGROUND_CHANNEL_GROUP_DESCRIPTION = "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
         val BACKGROUND_CHANNEL_GROUP_NAME = "Background Service"
         val BACKGROUND_CHANNEL_GROUP_ID = "999"
         val BACKGROUND_NOTIFICATION_GROUP_ID = "888"
@@ -164,16 +161,12 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
                     val audioAttributes = AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT).build()
-                    setSound(
-                        RingtoneManager.getActualDefaultRingtoneUri(
-                            ctx,
-                            RingtoneManager.TYPE_NOTIFICATION
-                        ), audioAttributes
+                    setSound(RingtoneManager.getActualDefaultRingtoneUri(ctx, RingtoneManager.TYPE_NOTIFICATION), audioAttributes
                     )
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     createForegroundChannelGroup(channel)
-                this.mgr.createNotificationChannel(channel!!)
+                this.mgr.createNotificationChannel(channel)
                 return true
             }
         }
@@ -186,7 +179,7 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
             NotificationChannelGroup(FOREGROUND_CHANNEL_GROUP_ID, FOREGROUND_CHANNEL_GROUP_NAME)
         mgr.createNotificationChannelGroup(foregroundGroup)
         channel!!.group = foregroundGroup.id
-        foregroundGroup?.apply {
+        foregroundGroup.apply {
             channels.add(channel)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 description = FOREGROUND_CHANNEL_GROUP_DESCRIPTION
@@ -212,16 +205,11 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
                     val audioAttributes = AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT).build()
-                    setSound(
-                        RingtoneManager.getActualDefaultRingtoneUri(
-                            ctx,
-                            RingtoneManager.TYPE_NOTIFICATION
-                        ), audioAttributes
-                    )
+                    setSound(RingtoneManager.getActualDefaultRingtoneUri(ctx, RingtoneManager.TYPE_NOTIFICATION), audioAttributes)
                 }
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     createBackgroundChannelGroup(channel)
-                mgr.createNotificationChannel(channel!!)
+                mgr.createNotificationChannel(channel)
                 return true
             }
         }
@@ -230,11 +218,10 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createBackgroundChannelGroup(channel: NotificationChannel?) {
-        val backgroundGroup =
-            NotificationChannelGroup(BACKGROUND_CHANNEL_GROUP_ID, BACKGROUND_CHANNEL_GROUP_NAME)
+        val backgroundGroup = NotificationChannelGroup(BACKGROUND_CHANNEL_GROUP_ID, BACKGROUND_CHANNEL_GROUP_NAME)
         mgr.createNotificationChannelGroup(backgroundGroup)
         channel!!.group = backgroundGroup.id
-        backgroundGroup?.apply {
+        backgroundGroup.apply {
             channels.add(channel)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 description = BACKGROUND_CHANNEL_GROUP_DESCRIPTION

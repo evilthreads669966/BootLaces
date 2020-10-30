@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.Notification
 import android.app.Service
 import android.os.Build
 import androidx.core.app.NotificationCompat
