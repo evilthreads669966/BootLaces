@@ -57,9 +57,9 @@ class MyService : BackgroundWorkService()
     android:foregroundServiceType="dataSync"
 />
 ```
-8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive and passing true for hasReceiver along with an action.
+8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
 ```kotlin
-class MyWorker: Worker(666,"Locking the screen", hasReceiver = true, action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
+class MyWorker: Worker(666,"Locking the screen", action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
     override suspend fun doWork(ctx: Context) {
         //do some work
     }
