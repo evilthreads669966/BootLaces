@@ -35,8 +35,8 @@ abstract class BackgroundWorkService: LifecycleService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var channel: Channel<Work>
     private lateinit var foreground: ForegroundActivator
-    val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
-    val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
+    private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
+    private val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
 
     init {
         lifecycle.addObserver(BootServiceState)
@@ -95,7 +95,7 @@ abstract class BackgroundWorkService: LifecycleService() {
     }
 
     @InternalCoroutinesApi
-    suspend fun handleWork(coroutineScope: CoroutineScope, work: Work){
+    private suspend fun handleWork(coroutineScope: CoroutineScope, work: Work){
         val worker = Class.forName(work.job).newInstance() as Worker
         if(workers.contains(worker))
             return
