@@ -15,7 +15,6 @@ package com.candroid.bootlaces
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.datastore.DataStore
@@ -77,7 +76,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 
     fun activate(serviceName: String){
         if (BootServiceState.isStarted()) return
-        val intent = Intent(ctx, Class.forName(serviceName))
+        val intent = IntentFactory.createBackgroundServiceIntent(ctx, serviceName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else

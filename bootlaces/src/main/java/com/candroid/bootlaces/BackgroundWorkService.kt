@@ -139,16 +139,10 @@ abstract class BackgroundWorkService: LifecycleService() {
         if(!BootServiceState.isForeground())
             foreground.activate()
         coroutineScope.launch(Dispatchers.Default){
-            val intent = Intent().apply {
-                setClass(this@BackgroundWorkService, WorkNotificationService::class.java)
-                putExtra(WorkNotificationService.KEY_TYPE, WorkNotificationService.TYPE_BACKGROUND_STARTED)
-                putExtra(WorkNotificationService.KEY_ID, work.id)
-                putExtra(WorkNotificationService.KEY_DESCRIPTION, worker.description)
-            }
+            val intent = IntentFactory.createWorkNotificationIntent(worker)
             WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             worker.doWork(this@BackgroundWorkService)
-            intent.removeExtra(WorkNotificationService.KEY_TYPE)
-            intent.putExtra(WorkNotificationService.KEY_TYPE, WorkNotificationService.TYPE_BACKGROUND_FINISHED)
+            intent.setAction(Actions.ACTION_FINISH)
             WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             workers.remove(worker)
             workerCount--
