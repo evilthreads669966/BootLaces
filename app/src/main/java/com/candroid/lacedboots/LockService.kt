@@ -38,7 +38,12 @@ import kotlinx.coroutines.InternalCoroutinesApi
 ............\..............(
 ..............\.............\...
 */
-
+/**
+ * @author Chris Basinger
+ * @email evilthreads669966@gmail.com
+ * @date 10/31/20
+ *
+ **/
 @InternalCoroutinesApi
 @ForegroundScope
 @AndroidEntryPoint
