@@ -81,28 +81,26 @@ class WorkNotificationService: JobIntentService(){
         private val BACKGROUND_CHANNEL_NAME = "Background Service"
 
         private val TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
-            it.run {
-                setContentInfo("Processing Data in background")
-                setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                setShowWhen(true)
-                setPriority(NotificationCompat.PRIORITY_HIGH)
-                setAllowSystemGeneratedContextualActions(true)
-                setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                setAutoCancel(false)
-                setOnlyAlertOnce(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    setColorized(true)
-                    setColor(Color.TRANSPARENT)
-                }
-                setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    setChannelId(BACKGROUND_CHANNEL_ID)
-                }
-                setGroup(BACKGROUND_CHANNEL_GROUP_ID)
-                setGroupSummary(false)
-                setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_ALL)
-                setDefaults(NotificationCompat.DEFAULT_ALL)
+            it.setContentInfo("Processing Data in background")
+            it.setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            it.setShowWhen(true)
+            it.setPriority(NotificationCompat.PRIORITY_HIGH)
+            it.setAllowSystemGeneratedContextualActions(true)
+            it.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            it.setAutoCancel(false)
+            it.setOnlyAlertOnce(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                it.setColorized(true)
+                it.setColor(Color.TRANSPARENT)
             }
+            it.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                it.setChannelId(BACKGROUND_CHANNEL_ID)
+            }
+            it.setGroup(BACKGROUND_CHANNEL_GROUP_ID)
+            it.setGroupSummary(false)
+            it.setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_ALL)
+            it.setDefaults(NotificationCompat.DEFAULT_ALL)
         }
         private val TEMPLATE_START = NotificationCompat.Extender {
             it.extend(TEMPLATE_BACKGROUND)
@@ -136,7 +134,7 @@ class WorkNotificationService: JobIntentService(){
 
     private fun createNotification(action: Actions, description: String? = "Doing work in the backround"): Notification {
         createBackgroundChannel(this)
-        builder.apply {
+        return builder.apply {
             when (action) {
                 Actions.ACTION_START -> {
                     this.extend(TEMPLATE_START)
@@ -149,8 +147,7 @@ class WorkNotificationService: JobIntentService(){
                 }
                 else -> { throw RemoteViews.ActionException("Invalid action for notification service") }
             }
-        }
-        return builder.build()
+        }.build()
     }
 
     fun createBackgroundChannel(ctx: Context): Boolean {
