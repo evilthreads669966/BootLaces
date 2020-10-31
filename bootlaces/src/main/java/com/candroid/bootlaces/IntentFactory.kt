@@ -42,7 +42,7 @@ import android.content.Intent
  *
  * creates intents
  **/
-object IntentFactory{
+internal object IntentFactory{
     fun createWorkNotificationIntent(worker: Worker): Intent {
         return Intent().apply {
             setAction(Actions.ACTION_START)
