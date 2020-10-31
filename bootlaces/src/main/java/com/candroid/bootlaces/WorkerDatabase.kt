@@ -44,7 +44,7 @@ import androidx.room.RoomDatabase
  *
  **/
 @Database(entities = arrayOf(Work::class), version = 1, exportSchema = false)
-abstract class WorkerDatabase: RoomDatabase(){
+internal abstract class WorkerDatabase: RoomDatabase(){
     companion object{
         fun getInstance(ctx: Context): WorkerDatabase{
             return Room.databaseBuilder(ctx, WorkerDatabase::class.java, "worker_database").build()

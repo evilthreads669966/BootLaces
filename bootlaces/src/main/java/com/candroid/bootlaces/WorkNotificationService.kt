@@ -87,7 +87,7 @@ class WorkNotificationService: JobIntentService(){
         private val BACKGROUND_CHANNEL_ID = "background"
         private val BACKGROUND_CHANNEL_NAME = "Background Service"
 
-        val TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
+        private val TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
             it.run {
                 setContentInfo("Processing Data in background")
                 setCategory(NotificationCompat.CATEGORY_PROGRESS)
@@ -111,12 +111,12 @@ class WorkNotificationService: JobIntentService(){
                 setDefaults(NotificationCompat.DEFAULT_ALL)
             }
         }
-        val TEMPLATE_START = NotificationCompat.Extender {
+        private val TEMPLATE_START = NotificationCompat.Extender {
             it.extend(TEMPLATE_BACKGROUND)
             it.setProgress(100, 0, true)
             it.setSmallIcon(BACKGROUND_STARTED_DEFAULT_SMALL_ICON)
         }
-        val TEMPLATE_FINISH = NotificationCompat.Extender {
+        private val TEMPLATE_FINISH = NotificationCompat.Extender {
             it.extend(TEMPLATE_BACKGROUND)
             it.setContentText("Finished")
             it.setProgress(100, 100, false)
@@ -127,7 +127,7 @@ class WorkNotificationService: JobIntentService(){
 
     override fun onHandleWork(intent: Intent) {
         var description: String? = null
-        var action: String? = null
+        var action: Actions? = null
         var id: Int? = null
         val extras = intent.extras
         extras?.run {
@@ -136,12 +136,12 @@ class WorkNotificationService: JobIntentService(){
             if(containsKey(KEY_ID))
                 id = getInt(KEY_ID)
         }
-        action = intent.action
-        val notification = createNotification(action!!, description)
+        action = Actions.valueOf(intent.action?: throw IllegalArgumentException("No action provided for notification service"))
+        val notification = createNotification(action, description)
         mgr(this).notify(BACKGROUND_CHANNEL_ID, id!!, notification)
     }
 
-    private fun createNotification(action: String, description: String? = "Doing work in the backround"): Notification {
+    private fun createNotification(action: Actions, description: String? = "Doing work in the backround"): Notification {
         createBackgroundChannel(this)
         builder(this).apply {
             when (action) {

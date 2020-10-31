@@ -28,6 +28,7 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.properties.Delegates
@@ -74,6 +75,7 @@ abstract class BackgroundWorkService: LifecycleService() {
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
         if(newValue == 0) foreground.deactivate()
     }
+
     init {
         lifecycle.addObserver(BootServiceState)
         lifecycleScope.launchWhenCreated { handleWorkers() }
@@ -142,7 +144,7 @@ abstract class BackgroundWorkService: LifecycleService() {
             val intent = IntentFactory.createWorkNotificationIntent(worker)
             WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             worker.doWork(this@BackgroundWorkService)
-            intent.setAction(Actions.ACTION_FINISH)
+            intent.setAction(Actions.ACTION_FINISH.action)
             WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             workers.remove(worker)
             workerCount--
