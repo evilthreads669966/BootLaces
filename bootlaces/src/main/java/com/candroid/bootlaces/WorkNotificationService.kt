@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
@@ -70,10 +71,7 @@ class WorkNotificationService: JobIntentService(){
         val ID_JOB = 666
         fun enqueue(ctx: Context, id: Int, intent: Intent) = enqueueWork(ctx, WorkNotificationService::class.java, id, intent)
         val KEY_DESCRIPTION = "KEY_DESCRIPTION"
-        val KEY_TYPE = "KEY_TYPE"
         val KEY_ID = "KEY_ID"
-        val TYPE_BACKGROUND_STARTED = "TYPE_BACKGROUND_STARTED"
-        val TYPE_BACKGROUND_FINISHED = "TYPE_BACKGROUND_FINISHED"
         private val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
         private val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
         private val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
@@ -89,7 +87,7 @@ class WorkNotificationService: JobIntentService(){
         private val BACKGROUND_CHANNEL_ID = "background"
         private val BACKGROUND_CHANNEL_NAME = "Background Service"
 
-        val NOTIFICATION_TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
+        val TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
             it.run {
                 setContentInfo("Processing Data in background")
                 setCategory(NotificationCompat.CATEGORY_PROGRESS)
@@ -113,47 +111,50 @@ class WorkNotificationService: JobIntentService(){
                 setDefaults(NotificationCompat.DEFAULT_ALL)
             }
         }
+        val TEMPLATE_START = NotificationCompat.Extender {
+            it.extend(TEMPLATE_BACKGROUND)
+            it.setProgress(100, 0, true)
+            it.setSmallIcon(BACKGROUND_STARTED_DEFAULT_SMALL_ICON)
+        }
+        val TEMPLATE_FINISH = NotificationCompat.Extender {
+            it.extend(TEMPLATE_BACKGROUND)
+            it.setContentText("Finished")
+            it.setProgress(100, 100, false)
+            it.setSmallIcon(BACKGROUND_FINISHED_DEFAULT_SMALL_ICON)
+            it.setTimeoutAfter(15000)
+        }
     }
 
     override fun onHandleWork(intent: Intent) {
         var description: String? = null
-        var type: String? = null
+        var action: String? = null
         var id: Int? = null
         val extras = intent.extras
         extras?.run {
             if(containsKey(KEY_DESCRIPTION))
                 description = getString(KEY_DESCRIPTION)
-            if(containsKey(KEY_TYPE))
-                type = getString(KEY_TYPE)
             if(containsKey(KEY_ID))
                 id = getInt(KEY_ID)
         }
-        val notification = createNotification(type!!, description)
+        action = intent.action
+        val notification = createNotification(action!!, description)
         mgr(this).notify(BACKGROUND_CHANNEL_ID, id!!, notification)
     }
 
-    fun createNotification(type: String,description: String? = "Doing work in the backround"): Notification {
+    private fun createNotification(action: String, description: String? = "Doing work in the backround"): Notification {
         createBackgroundChannel(this)
         builder(this).apply {
-            when (type) {
-                TYPE_BACKGROUND_STARTED -> {
-                    setProgress(100, 0, true)
+            when (action) {
+                Actions.ACTION_START -> {
+                    this.extend(TEMPLATE_START)
                     setContentTitle(description ?: BACKGROUND_STARTED_DEFAULT_TITLE)
                     setContentText(description ?: BACKGROUND_STARTED_DEFAULT_CONTENT)
-                    setSmallIcon(BACKGROUND_STARTED_DEFAULT_SMALL_ICON)
-                    setProgress(100, 0, true)
-                    this.extend(NOTIFICATION_TEMPLATE_BACKGROUND)
                 }
-                TYPE_BACKGROUND_FINISHED -> {
-                    setProgress(100, 100, false)
+                Actions.ACTION_FINISH -> {
+                    this.extend(TEMPLATE_FINISH)
                     setContentTitle(description ?: BACKGROUND_FINISHED_DEFAULT_TITLE)
-                    setContentText("Finished")
-                    setSmallIcon(BACKGROUND_FINISHED_DEFAULT_SMALL_ICON)
-                    setTimeoutAfter(15000)
-                    this.extend(NOTIFICATION_TEMPLATE_BACKGROUND)
                 }
-                else -> {
-                }
+                else -> { throw RemoteViews.ActionException("Invalid action for notification service") }
             }
         }
         return builder(this).build()

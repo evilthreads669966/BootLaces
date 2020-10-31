@@ -21,7 +21,6 @@ import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.NotificationUtils.Companion.FOREGROUND_ID
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 /*
             (   (                ) (             (     (
@@ -53,7 +52,6 @@ import kotlin.properties.Delegates
 @ForegroundScope
 class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val notificationMgr: NotificationManagerCompat, val notificationUtils: NotificationUtils, val database: WorkerDao){
      @Inject lateinit var builder: NotificationCompat.Builder
-
      fun notifyForeground() {
           notificationUtils.createForegroundChannel(ctx)
           val notification = builder.extend(notificationUtils.NOTIFICATION_TEMPLATE_FOREGROUND).build()
