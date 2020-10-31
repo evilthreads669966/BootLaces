@@ -83,7 +83,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
         }.build()
     }
 
-    private fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
+    private fun NotificationCompat.Builder.setContentIntent(activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             action = Intent.ACTION_VIEW
@@ -91,7 +91,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
         setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
     }
 
-    object ForegroundNotification{
+    internal object ForegroundNotification{
         val FOREGROUND_CHANNEL_DESCRIPTION = "Foreground Work"
         val FOREGROUND_CHANNEL_GROUP_DESCRIPTION = "For temporary tasks"
         val FOREGROUND_CHANNEL_GROUP_NAME = "Foreground Processing"
@@ -181,21 +181,19 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
         }
     }
 
-    object WorkNotification {
-        val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
-        val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
-        val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
-        val BACKGROUND_FINISHED_DEFAULT_TITLE = "Background Service Finished"
-        val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished"
-        val BACKGROUND_FINISHED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download_done
-        val BACKGROUND_CHANNEL_DESCRIPTION =
-            "Displays notifications for events regarding background work."
-        val BACKGROUND_CHANNEL_GROUP_DESCRIPTION =
-            "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
-        val BACKGROUND_CHANNEL_GROUP_NAME = "Background Service"
-        val BACKGROUND_CHANNEL_GROUP_ID = "999"
-        val BACKGROUND_CHANNEL_ID = "background"
-        val BACKGROUND_CHANNEL_NAME = "Background Service"
+    internal object WorkNotification {
+        const val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
+        const val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
+        const val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
+        const val BACKGROUND_FINISHED_DEFAULT_TITLE = "Background Service Finished"
+        const val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished"
+        const val BACKGROUND_FINISHED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download_done
+        const val BACKGROUND_CHANNEL_DESCRIPTION = "Displays notifications for events regarding background work."
+        const val BACKGROUND_CHANNEL_GROUP_DESCRIPTION = "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
+        const val BACKGROUND_CHANNEL_GROUP_NAME = "Background Service"
+        const val BACKGROUND_CHANNEL_GROUP_ID = "999"
+        const val BACKGROUND_CHANNEL_ID = "background"
+        const val BACKGROUND_CHANNEL_NAME = "Background Service"
         val TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
             it.setContentInfo("Processing Data in background")
             it.setCategory(NotificationCompat.CATEGORY_PROGRESS)

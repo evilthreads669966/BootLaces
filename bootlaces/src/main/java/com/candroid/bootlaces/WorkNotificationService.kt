@@ -52,10 +52,10 @@ import javax.inject.Inject
 class WorkNotificationService: JobIntentService(){
     @Inject lateinit var factory: NotificationFactory
     companion object{
-        val ID_JOB = 666
         fun enqueue(ctx: Context, id: Int, intent: Intent) = enqueueWork(ctx, WorkNotificationService::class.java, id, intent)
-        val KEY_DESCRIPTION = "KEY_DESCRIPTION"
-        val KEY_ID = "KEY_ID"
+        const val ID_JOB = 666
+        const val KEY_DESCRIPTION = "KEY_DESCRIPTION"
+        const val KEY_ID = "KEY_ID"
     }
 
     override fun onHandleWork(intent: Intent) {

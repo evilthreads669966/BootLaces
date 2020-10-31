@@ -48,7 +48,9 @@ import javax.inject.Inject
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
 class LockScreenActivity: VisibilityActivity(){
-    private val mOverlay_request_code = 666
+    companion object{
+        private const val mOverlay_request_code = 666
+    }
     @Inject lateinit var scheduler: WorkScheduler
     init {
         lifecycleScope.launchWhenCreated {
