@@ -28,6 +28,7 @@ import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_STARTED_DEF
 import com.candroid.bootlaces.NotificationUtils.Companion.FOREGROUND_ID
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 /*
             (   (                ) (             (     (
@@ -59,7 +60,9 @@ import javax.inject.Inject
 @ForegroundScope
 class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val notificationMgr: NotificationManagerCompat, val notificationUtils: NotificationUtils, val database: WorkerDao){
      @Inject lateinit var builder: NotificationCompat.Builder
-     var workerCount: Int = 0
+     var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
+          if(newValue == 0) deactivate()
+     }
      var lastCompletionTime: Long? = null
 
      suspend fun notifyBackground(type: ForegroundTypes, id: Int, description: String? = "Doing work in the backround") {

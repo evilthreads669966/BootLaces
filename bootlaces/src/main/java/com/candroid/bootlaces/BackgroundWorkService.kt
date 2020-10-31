@@ -27,6 +27,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
@@ -104,19 +105,7 @@ abstract class BackgroundWorkService: LifecycleService() {
 
     suspend fun handleWorkers(){
         foreground.scope.launch {
-            ticker(5000,3000).consumeEach {
-                if(isActive){
-                    if(foreground.workerCount == 0 && foreground.lastCompletionTime != null){
-                        val time = System.currentTimeMillis() - foreground.lastCompletionTime!!
-                        if(time > 10000){
-                            foreground.deactivate()
-                        }
-                    }
-                }
-            }
-        }
-        foreground.scope.launch {
-            foreground.database.getAll().collect { work ->
+            foreground.database.getAll().filterNotNull().collect { work ->
                 handleWork(this, work)
             }
         }
