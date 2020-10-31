@@ -105,7 +105,7 @@ abstract class BackgroundWorkService: LifecycleService() {
 
     suspend fun handleWorkers(){
         foreground.scope.launch {
-            foreground.database.getAll().collect { work ->
+            foreground.database.getAll().filterNotNull().collect { work ->
                 handleWork(this, work)
             }
         }
