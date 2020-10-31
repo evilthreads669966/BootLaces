@@ -28,6 +28,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -54,20 +57,12 @@ import androidx.core.app.NotificationManagerCompat
  * @date 10/31/20
  *
  **/
+@AndroidEntryPoint
+@ForegroundScope
 class WorkNotificationService: JobIntentService(){
+    @Inject lateinit var mgr: NotificationManagerCompat
+    @Inject lateinit var builder: NotificationCompat.Builder
     companion object{
-        private var builder: NotificationCompat.Builder? = null
-        private fun builder(ctx: Context): NotificationCompat.Builder{
-            if(builder == null)
-                builder = NotificationCompat.Builder(ctx)
-            return builder!!
-        }
-        private var mgr: NotificationManagerCompat? = null
-        private fun mgr(ctx: Context): NotificationManagerCompat{
-            if(mgr == null)
-                mgr = NotificationManagerCompat.from(ctx)
-            return mgr!!
-        }
         val ID_JOB = 666
         fun enqueue(ctx: Context, id: Int, intent: Intent) = enqueueWork(ctx, WorkNotificationService::class.java, id, intent)
         val KEY_DESCRIPTION = "KEY_DESCRIPTION"
@@ -138,12 +133,12 @@ class WorkNotificationService: JobIntentService(){
         }
         action = Actions.valueOf(intent.action?: throw IllegalArgumentException("No action provided for notification service"))
         val notification = createNotification(action, description)
-        mgr(this).notify(BACKGROUND_CHANNEL_ID, id!!, notification)
+        mgr.notify(BACKGROUND_CHANNEL_ID, id!!, notification)
     }
 
     private fun createNotification(action: Actions, description: String? = "Doing work in the backround"): Notification {
         createBackgroundChannel(this)
-        builder(this).apply {
+        builder.apply {
             when (action) {
                 Actions.ACTION_START -> {
                     this.extend(TEMPLATE_START)
@@ -157,12 +152,12 @@ class WorkNotificationService: JobIntentService(){
                 else -> { throw RemoteViews.ActionException("Invalid action for notification service") }
             }
         }
-        return builder(this).build()
+        return builder.build()
     }
 
     fun createBackgroundChannel(ctx: Context): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            var channel: NotificationChannel? = mgr(this).getNotificationChannel(BACKGROUND_CHANNEL_ID)
+            var channel: NotificationChannel? = mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)
             if (channel == null) {
                 channel = NotificationChannel(BACKGROUND_CHANNEL_ID, BACKGROUND_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
                 (channel as NotificationChannel).apply {
@@ -181,7 +176,7 @@ class WorkNotificationService: JobIntentService(){
                 }
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     createBackgroundChannelGroup(channel)
-                mgr(this).createNotificationChannel(channel)
+                mgr.createNotificationChannel(channel)
                 return true
             }
         }
@@ -191,7 +186,7 @@ class WorkNotificationService: JobIntentService(){
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createBackgroundChannelGroup(channel: NotificationChannel?) {
         val backgroundGroup = NotificationChannelGroup(BACKGROUND_CHANNEL_GROUP_ID, BACKGROUND_CHANNEL_GROUP_NAME)
-        mgr(this).createNotificationChannelGroup(backgroundGroup)
+        mgr.createNotificationChannelGroup(backgroundGroup)
         channel!!.group = backgroundGroup.id
         backgroundGroup.apply {
             channels.add(channel)

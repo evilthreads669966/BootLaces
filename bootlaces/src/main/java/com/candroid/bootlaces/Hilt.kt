@@ -84,9 +84,6 @@ object BroadcastReceiverModule {
     fun provideChannel() = Channel<Work>()
     @Singleton
     @Provides
-    fun notificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
-    @Singleton
-    @Provides
     fun provideDatabase(@ApplicationContext ctx: Context): WorkerDao = WorkerDatabase.getInstance(ctx).workerDao()
 }
 
@@ -105,6 +102,8 @@ object ForegroundModule{
     @Provides fun notificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
     @ForegroundScope
     @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    @ForegroundScope
+    @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
 @DefineComponent(parent = ServiceComponent::class)

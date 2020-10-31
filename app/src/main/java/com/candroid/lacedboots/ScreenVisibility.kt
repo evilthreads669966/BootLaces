@@ -40,15 +40,12 @@ object ScreenVisibility{
     private var mVisibility = Visibility.INVISIBLE
     private var mCount = 0
 
-    fun count() = mCount
-
     fun isVisible() = mVisibility == Visibility.VISIBLE
 
     fun isInvisible() = mVisibility == Visibility.INVISIBLE
 
     fun setVisible(){
         mVisibility = Visibility.VISIBLE
-        mCount++
     }
 
     fun setInvisible(){
