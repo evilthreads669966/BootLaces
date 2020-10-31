@@ -39,7 +39,7 @@ package com.candroid.bootlaces
  *
  * local actions
  **/
-internal object Actions{
-    val ACTION_START = "ACTION_START"
-    val ACTION_FINISH = "ACTION_FINISH"
+internal enum class Actions(val action: String){
+    ACTION_START("ACTION_START"),
+    ACTION_FINISH("ACTION_FINISH")
 }

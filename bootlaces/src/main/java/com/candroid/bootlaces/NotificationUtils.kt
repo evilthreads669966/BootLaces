@@ -120,8 +120,7 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
                     val audioAttributes = AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT).build()
-                    setSound(RingtoneManager.getActualDefaultRingtoneUri(ctx, RingtoneManager.TYPE_NOTIFICATION), audioAttributes
-                    )
+                    setSound(RingtoneManager.getActualDefaultRingtoneUri(ctx, RingtoneManager.TYPE_NOTIFICATION), audioAttributes)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     createForegroundChannelGroup(channel)
@@ -145,9 +144,6 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
             }
         }
     }
-
-
-
 
     internal fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
