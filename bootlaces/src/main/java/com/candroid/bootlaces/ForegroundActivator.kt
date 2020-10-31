@@ -15,10 +15,8 @@ package com.candroid.bootlaces
 
 import android.app.Service
 import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
-import com.candroid.bootlaces.NotificationUtils.Companion.FOREGROUND_ID
+import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -50,11 +48,9 @@ import javax.inject.Inject
  * activates foreground in [BackgroundWorkService]
  **/
 @ForegroundScope
-class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val notificationMgr: NotificationManagerCompat, val notificationUtils: NotificationUtils, val database: WorkerDao){
-     @Inject lateinit var builder: NotificationCompat.Builder
+class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkerDao){
      fun notifyForeground() {
-          notificationUtils.createForegroundChannel(ctx)
-          val notification = builder.extend(notificationUtils.NOTIFICATION_TEMPLATE_FOREGROUND).build()
+          val notification = factory.createForegroundNotification()
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                ctx.startForeground(FOREGROUND_ID, notification, ctx.foregroundServiceType)
           } else
