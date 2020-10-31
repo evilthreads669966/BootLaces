@@ -18,13 +18,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_CHANNEL_ID
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_FINISHED_DEFAULT_CONTENT
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_FINISHED_DEFAULT_SMALL_ICON
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_FINISHED_DEFAULT_TITLE
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_STARTED_DEFAULT_CONTENT
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_STARTED_DEFAULT_SMALL_ICON
-import com.candroid.bootlaces.NotificationUtils.Companion.BACKGROUND_STARTED_DEFAULT_TITLE
 import com.candroid.bootlaces.NotificationUtils.Companion.FOREGROUND_ID
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -60,41 +53,6 @@ import kotlin.properties.Delegates
 @ForegroundScope
 class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val notificationMgr: NotificationManagerCompat, val notificationUtils: NotificationUtils, val database: WorkerDao){
      @Inject lateinit var builder: NotificationCompat.Builder
-     var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
-          if(newValue == 0) deactivate()
-     }
-     var lastCompletionTime: Long? = null
-
-     suspend fun notifyBackground(type: ForegroundTypes, id: Int, description: String? = "Doing work in the backround") {
-          notificationUtils.createBackgroundChannel(ctx)
-          builder.apply {
-               when (type) {
-                    ForegroundTypes.BACKGROUND_STARTED -> {
-                         setProgress(100, 0, true)
-                         setContentTitle(description ?: BACKGROUND_STARTED_DEFAULT_TITLE)
-                         setContentText(description ?: BACKGROUND_STARTED_DEFAULT_CONTENT)
-                         setSmallIcon(BACKGROUND_STARTED_DEFAULT_SMALL_ICON)
-                         setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                         setProgress(100, 0, true)
-                         this.extend(notificationUtils.NOTIFICATION_TEMPLATE_BACKGROUND)
-                         workerCount++
-                    }
-                    ForegroundTypes.BACKGROUND_FINISHED -> {
-                         setProgress(100, 100, false)
-                         setContentTitle("Finished - ${description ?: BACKGROUND_FINISHED_DEFAULT_TITLE}")
-                         setContentTitle("Finished - ${description ?: BACKGROUND_FINISHED_DEFAULT_CONTENT}")
-                         setSmallIcon(BACKGROUND_FINISHED_DEFAULT_SMALL_ICON)
-                         setTimeoutAfter(45000)
-                         this.extend(notificationUtils.NOTIFICATION_TEMPLATE_BACKGROUND)
-                         workerCount--
-                         lastCompletionTime = System.currentTimeMillis()
-                    }
-                    else -> {
-                    }
-               }
-          }
-          notificationMgr.notify(BACKGROUND_CHANNEL_ID, id, builder.build())
-     }
 
      fun notifyForeground() {
           notificationUtils.createForegroundChannel(ctx)
@@ -106,7 +64,7 @@ class ForegroundActivator @Inject constructor(val ctx: Service, val scope: Corou
      }
 
      @Throws(SecurityException::class)
-     suspend fun activate() {
+     fun activate() {
           if(BootServiceState.isForeground())
                return
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -118,9 +76,5 @@ class ForegroundActivator @Inject constructor(val ctx: Service, val scope: Corou
      fun deactivate() {
           ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
           BootServiceState.setBackground()
-     }
-
-     enum class ForegroundTypes {
-          BACKGROUND_STARTED, BACKGROUND_FINISHED, FOREGROUND
      }
 }
