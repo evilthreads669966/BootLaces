@@ -1,7 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.candroid.bootlaces" android:installLocation="internalOnly">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application>
+        <service
+            android:name=".WorkNotificationService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"
+            android:enabled="true" />
         <receiver android:name=".BootReceiver" android:enabled="false" android:exported="true" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

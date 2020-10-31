@@ -25,12 +25,13 @@ import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -70,7 +71,9 @@ abstract class BackgroundWorkService: LifecycleService() {
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
-
+    private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
+        if(newValue == 0) foreground.deactivate()
+    }
     init {
         lifecycle.addObserver(BootServiceState)
         lifecycleScope.launchWhenCreated { handleWorkers() }
@@ -122,6 +125,7 @@ abstract class BackgroundWorkService: LifecycleService() {
         if(workers.contains(worker))
             return
         workers.add(worker)
+        workerCount++
         if(worker.action != null){
             val receiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
@@ -135,10 +139,19 @@ abstract class BackgroundWorkService: LifecycleService() {
         if(!BootServiceState.isForeground())
             foreground.activate()
         coroutineScope.launch(Dispatchers.Default){
-            foreground.notifyBackground(ForegroundActivator.ForegroundTypes.BACKGROUND_STARTED, work.id, worker.description)
+            val intent = Intent().apply {
+                setClass(this@BackgroundWorkService, WorkNotificationService::class.java)
+                putExtra(WorkNotificationService.KEY_TYPE, WorkNotificationService.TYPE_BACKGROUND_STARTED)
+                putExtra(WorkNotificationService.KEY_ID, work.id)
+                putExtra(WorkNotificationService.KEY_DESCRIPTION, worker.description)
+            }
+            WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             worker.doWork(this@BackgroundWorkService)
-            foreground.notifyBackground(ForegroundActivator.ForegroundTypes.BACKGROUND_FINISHED, work.id, worker.description)
+            intent.removeExtra(WorkNotificationService.KEY_TYPE)
+            intent.putExtra(WorkNotificationService.KEY_TYPE, WorkNotificationService.TYPE_BACKGROUND_FINISHED)
+            WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
             workers.remove(worker)
+            workerCount--
         }
     }
 }

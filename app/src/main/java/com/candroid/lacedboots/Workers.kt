@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 
 class OneTimeWorker: Worker(66,"One time work") {
     override suspend fun doWork(ctx: Context) {
-        for(i in 1..30)
+        for(i in 1..10)
             delay(1000)
     }
 }

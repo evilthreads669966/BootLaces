@@ -70,22 +70,6 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
         val DEFAULT_FOREGROUND_TITLE = "Background Processing"
         val DEFAULT_FOREGROUND_CONTENT = "Work in progress"
         val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_upload
-        val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
-        val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
-        val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
-        val BACKGROUND_FINISHED_DEFAULT_TITLE = "Background Service Finished"
-        val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished work"
-        val BACKGROUND_FINISHED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download_done
-        val BACKGROUND_CHANNEL_DESCRIPTION = "Displays notifications for events regarding background work."
-        val BACKGROUND_CHANNEL_GROUP_DESCRIPTION = "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
-        val BACKGROUND_CHANNEL_GROUP_NAME = "Background Service"
-        val BACKGROUND_CHANNEL_GROUP_ID = "999"
-        val BACKGROUND_NOTIFICATION_GROUP_ID = "888"
-        val BACKGROUND_ID = 66
-        val BACKGROUND_CHANNEL_ID = "background"
-        val BACKGROUND_CHANNEL_NAME = "Background Service"
-
-
     }
     val NOTIFICATION_TEMPLATE_FOREGROUND = NotificationCompat.Extender() {
         it.run {
@@ -109,31 +93,6 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
                 setChannelId(FOREGROUND_CHANNEL_ID)
             }
             setGroup(FOREGROUND_NOTIFICATION_GROUP_ID)
-            setGroupSummary(false)
-            setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_ALL)
-            setDefaults(NotificationCompat.DEFAULT_ALL)
-        }
-    }
-
-    val NOTIFICATION_TEMPLATE_BACKGROUND = NotificationCompat.Extender() {
-        it.run {
-            setContentInfo("Processing Data in background")
-            setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            setShowWhen(true)
-            setPriority(NotificationCompat.PRIORITY_HIGH)
-            setAllowSystemGeneratedContextualActions(true)
-            setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            setAutoCancel(false)
-            setOnlyAlertOnce(true)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                setColorized(true)
-                setColor(Color.TRANSPARENT)
-            }
-            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                setChannelId(BACKGROUND_CHANNEL_ID)
-            }
-            setGroup(BACKGROUND_NOTIFICATION_GROUP_ID)
             setGroupSummary(false)
             setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_ALL)
             setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -188,46 +147,7 @@ class NotificationUtils @Inject constructor( val mgr: NotificationManagerCompat)
     }
 
 
-    fun createBackgroundChannel(ctx: Context): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            var channel: NotificationChannel? = mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)
-            if (channel == null) {
-                channel = NotificationChannel(BACKGROUND_CHANNEL_ID, BACKGROUND_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
-                (channel as NotificationChannel).apply {
-                    description = BACKGROUND_CHANNEL_DESCRIPTION
-                    lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
-                    setShowBadge(false)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
-                        setAllowBubbles(false)
-                    enableLights(false)
-                    enableVibration(false)
-                    lightColor = ctx.resources.getColor(android.R.color.holo_green_dark)
-                    val audioAttributes = AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT).build()
-                    setSound(RingtoneManager.getActualDefaultRingtoneUri(ctx, RingtoneManager.TYPE_NOTIFICATION), audioAttributes)
-                }
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    createBackgroundChannelGroup(channel)
-                mgr.createNotificationChannel(channel)
-                return true
-            }
-        }
-        return false
-    }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createBackgroundChannelGroup(channel: NotificationChannel?) {
-        val backgroundGroup = NotificationChannelGroup(BACKGROUND_CHANNEL_GROUP_ID, BACKGROUND_CHANNEL_GROUP_NAME)
-        mgr.createNotificationChannelGroup(backgroundGroup)
-        channel!!.group = backgroundGroup.id
-        backgroundGroup.apply {
-            channels.add(channel)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                description = BACKGROUND_CHANNEL_GROUP_DESCRIPTION
-            }
-        }
-    }
 
     internal fun NotificationCompat.Builder.setContentIntent(ctx: Context, activity: String) {
         val intent = Intent(ctx, Class.forName(activity)).apply {
