@@ -92,18 +92,18 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
     }
 
     internal object ForegroundNotification{
-        val FOREGROUND_CHANNEL_DESCRIPTION = "Foreground Work"
-        val FOREGROUND_CHANNEL_GROUP_DESCRIPTION = "For temporary tasks"
-        val FOREGROUND_CHANNEL_GROUP_NAME = "Foreground Processing"
-        val FOREGROUND_CHANNEL_GROUP_ID = "666"
-        val FOREGROUND_NOTIFICATION_GROUP_ID = "666"
-        val FOREGROUND_DEFAULT_SMALL_ICON = android.R.drawable.sym_def_app_icon
-        val FOREGROUND_ID = 666
-        val FOREGROUND_CHANNEL_ID = "foreground"
-        val FOREGROUND_CHANNEL_NAME = "Foreground Work"
-        val DEFAULT_FOREGROUND_TITLE = "Background Processing"
-        val DEFAULT_FOREGROUND_CONTENT = "Work in progress"
-        val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_upload
+        const val FOREGROUND_CHANNEL_DESCRIPTION = "Foreground Work"
+        const val FOREGROUND_CHANNEL_GROUP_DESCRIPTION = "For temporary tasks"
+        const val FOREGROUND_CHANNEL_GROUP_NAME = "Foreground Processing"
+        const val FOREGROUND_CHANNEL_GROUP_ID = "666"
+        const val FOREGROUND_NOTIFICATION_GROUP_ID = "666"
+        const val FOREGROUND_DEFAULT_SMALL_ICON = android.R.drawable.sym_def_app_icon
+        const val FOREGROUND_ID = 666
+        const val FOREGROUND_CHANNEL_ID = "foreground"
+        const val FOREGROUND_CHANNEL_NAME = "Foreground Work"
+        const val DEFAULT_FOREGROUND_TITLE = "Background Processing"
+        const val DEFAULT_FOREGROUND_CONTENT = "Work in progress"
+        const val DEFAULT_FOREGROUND_ICON = android.R.drawable.stat_sys_upload
         val NOTIFICATION_TEMPLATE_FOREGROUND = NotificationCompat.Extender() {
             it.run {
                 setContentTitle(DEFAULT_FOREGROUND_TITLE)
