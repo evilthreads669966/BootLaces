@@ -234,11 +234,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
                 var channel: NotificationChannel? =
                     mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)
                 if (channel == null) {
-                    channel = NotificationChannel(
-                        BACKGROUND_CHANNEL_ID,
-                        BACKGROUND_CHANNEL_NAME,
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    )
+                    channel = NotificationChannel(BACKGROUND_CHANNEL_ID,BACKGROUND_CHANNEL_NAME,NotificationManager.IMPORTANCE_DEFAULT)
                     (channel as NotificationChannel).apply {
                         description = BACKGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
