@@ -71,14 +71,12 @@ class WorkNotificationService: JobIntentService(){
         private val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
         private val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
         private val BACKGROUND_FINISHED_DEFAULT_TITLE = "Background Service Finished"
-        private val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished work"
+        private val BACKGROUND_FINISHED_DEFAULT_CONTENT = "Finished"
         private val BACKGROUND_FINISHED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download_done
         private val BACKGROUND_CHANNEL_DESCRIPTION = "Displays notifications for events regarding background work."
         private val BACKGROUND_CHANNEL_GROUP_DESCRIPTION = "Displays notifications for events regarding background work being executed in the background of the device while the app is not open."
         private val BACKGROUND_CHANNEL_GROUP_NAME = "Background Service"
         private val BACKGROUND_CHANNEL_GROUP_ID = "999"
-        private val BACKGROUND_NOTIFICATION_GROUP_ID = "888"
-        private val BACKGROUND_ID = 66
         private val BACKGROUND_CHANNEL_ID = "background"
         private val BACKGROUND_CHANNEL_NAME = "Background Service"
 
@@ -98,9 +96,9 @@ class WorkNotificationService: JobIntentService(){
                 }
                 setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    setChannelId(NotificationUtils.FOREGROUND_CHANNEL_ID)
+                    setChannelId(BACKGROUND_CHANNEL_ID)
                 }
-                setGroup(NotificationUtils.FOREGROUND_CHANNEL_GROUP_ID)
+                setGroup(BACKGROUND_CHANNEL_GROUP_ID)
                 setGroupSummary(false)
                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_ALL)
                 setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -113,7 +111,7 @@ class WorkNotificationService: JobIntentService(){
         }
         private val TEMPLATE_FINISH = NotificationCompat.Extender {
             it.extend(TEMPLATE_BACKGROUND)
-            it.setContentText("Finished")
+            it.setContentText(BACKGROUND_FINISHED_DEFAULT_CONTENT)
             it.setProgress(100, 100, false)
             it.setSmallIcon(BACKGROUND_FINISHED_DEFAULT_SMALL_ICON)
             it.setTimeoutAfter(15000)

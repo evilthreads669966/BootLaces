@@ -14,7 +14,6 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.DataStore
@@ -37,6 +36,7 @@ import kotlinx.coroutines.channels.Channel
 import java.io.File
 import javax.inject.Scope
 import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
