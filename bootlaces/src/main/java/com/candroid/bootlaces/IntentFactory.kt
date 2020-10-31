@@ -51,9 +51,5 @@ internal object IntentFactory{
         }
     }
 
-    fun createBackgroundServiceIntent(ctx: Context, serviceName: String): Intent {
-        return Intent().apply {
-            setClassName(ctx, serviceName)
-        }
-    }
+    fun createBackgroundServiceIntent(ctx: Context, serviceName: String) = Intent().apply { setClassName(ctx, serviceName) }
 }
