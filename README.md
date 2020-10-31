@@ -19,7 +19,6 @@ allprojects {
 ```gradle
 dependencies {
         implementation 'com.github.evilthreads669966:bootlaces:6.0'
-        implementation 'androidx.lifecycle:lifecycle-service:2.2.0'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
