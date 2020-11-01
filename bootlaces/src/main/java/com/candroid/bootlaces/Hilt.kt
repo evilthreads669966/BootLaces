@@ -84,7 +84,7 @@ object BroadcastReceiverModule {
     fun provideChannel() = Channel<Work>()
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext ctx: Context): WorkerDao = WorkerDatabase.getInstance(ctx).workerDao()
+    fun provideDatabase(@ApplicationContext ctx: Context): WorkDao = WorkDatabase.getInstance(ctx).workerDao()
 }
 
 @ForegroundScope

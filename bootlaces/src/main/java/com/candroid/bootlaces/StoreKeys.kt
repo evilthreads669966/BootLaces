@@ -43,7 +43,7 @@ import androidx.datastore.preferences.preferencesKey
  *
  **/
 internal object StoreKeys {
-        val KEY_SERVICE: String = "KEY_SERVICE"
-        val PREF_KEY: Preferences.Key<String> = preferencesKey(KEY_SERVICE)
+        val KEY_WORK_SERVICE: String = "KEY_WORK_SERVICE"
+        val PREF_KEY: Preferences.Key<String> = preferencesKey(KEY_WORK_SERVICE)
         val FILE_NAME = "service_config.preferences_pb"
 }
