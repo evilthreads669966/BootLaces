@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -77,6 +78,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         startWorkService()
+        delay(1000)
         channel.send(work)
     }
 

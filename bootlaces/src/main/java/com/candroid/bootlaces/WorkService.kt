@@ -61,7 +61,6 @@ abstract class WorkService: BaseLifecycleService() {
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
         if(newValue == 0){
             foreground.deactivate()
-            stopSelf(startId)
         }
     }
 
@@ -83,15 +82,14 @@ abstract class WorkService: BaseLifecycleService() {
     }
 
     private suspend fun Flow<Work>.processWorkRequests(){
-        this.filterNotNull()
-            .map { it.toWorker() }
+        this.map { it.toWorker() }
             .onEach { worker -> assignWorker(foreground.scope, worker) }
             .launchIn(foreground.scope)
     }
 
     private suspend fun handleWork(){
         withContext(Dispatchers.IO) {
-            foreground.database.getAll().processWorkRequests()
+            foreground.database.getAll().filterNotNull().processWorkRequests()
         }
         withContext(Dispatchers.Default){
             foreground.channel.consumeAsFlow().processWorkRequests()

@@ -40,7 +40,7 @@ import androidx.lifecycle.ServiceLifecycleDispatcher
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 11/01/20
+ * @date 11z/01/20
  * */
 abstract class BaseLifecycleService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
