@@ -132,7 +132,7 @@ abstract class WorkService: LifecycleService() {
         }
         if(!BootServiceState.isForeground())
             foreground.activate()
-        coroutineScope.launch(Dispatchers.Default){
+        coroutineScope.launch{
             val intent = IntentFactory.createWorkNotificationIntent(worker)
             NotificatonService.enqueue(this@WorkService, intent)
             worker.doWork(this@WorkService)
