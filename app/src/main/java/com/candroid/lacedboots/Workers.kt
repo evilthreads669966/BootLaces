@@ -21,6 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -48,6 +49,9 @@ import kotlinx.coroutines.delay
  *
  **/
 class OneTimeWorker: Worker(66,"One time work") {
+    override val receiver: WorkReceiver?
+        get() = null
+
     override suspend fun doWork(ctx: Context) {
         for(i in 1..10)
             delay(1000)
@@ -56,7 +60,14 @@ class OneTimeWorker: Worker(66,"One time work") {
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class ScreenLockerJob: Worker(666,"Locking the screen", action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
+class ScreenLockerJob: Worker(666,"Locking the screen"){
+    override val receiver: WorkReceiver?
+        get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                LockManager.takeIf { !it.isLocked() && it.isLockable(ctx!!) }?.lockScreen(ctx!!, intent)
+            }
+        }
+
     override suspend fun doWork(ctx: Context) {
         val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
         while(true){
@@ -65,9 +76,5 @@ class ScreenLockerJob: Worker(666,"Locking the screen", action = Intent.ACTION_C
             if (powerMgr.isInteractive)
                 ctx.sendBroadcast(intent)
         }
-    }
-
-    override fun onReceive(ctx: Context, intent: Intent) {
-        LockManager.takeIf { !it.isLocked() && it.isLockable(ctx) }?.lockScreen(ctx, intent)
     }
 }
