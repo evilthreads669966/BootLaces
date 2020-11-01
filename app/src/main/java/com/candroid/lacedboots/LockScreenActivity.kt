@@ -56,7 +56,7 @@ class LockScreenActivity: VisibilityActivity(){
         lifecycleScope.launchWhenCreated {
             withContext(Dispatchers.IO){
                 scheduler.run {
-                    schedulePersistent(ScreenLockerJob())
+                    //schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
                     scheduleOneTime(SecondWorker())
                 }
