@@ -13,8 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import androidx.room.*
-import kotlinx.coroutines.flow.Flow
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -41,15 +43,12 @@ import kotlinx.coroutines.flow.Flow
  * @date 10/31/20
  *
  **/
-@Dao
-interface WorkerDao{
-
-    @Query("SELECT * FROM work")
-    fun getAll(): Flow<Work>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(worker: Work)
-
-    @Delete
-    fun delete(worker: Work)
+@Database(entities = arrayOf(Work::class), version = 1, exportSchema = false)
+internal abstract class WorkDatabase: RoomDatabase(){
+    companion object{
+        fun getInstance(ctx: Context): WorkDatabase{
+            return Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build()
+        }
+    }
+    abstract fun workerDao(): WorkDao
 }

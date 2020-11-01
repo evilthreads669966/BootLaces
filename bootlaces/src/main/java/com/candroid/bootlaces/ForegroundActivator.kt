@@ -45,10 +45,10 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
- * activates foreground in [BackgroundWorkService]
+ * activates foreground in [WorkService]
  **/
 @ForegroundScope
-class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkerDao){
+class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkDao){
      fun notifyForeground() {
           val notification = factory.createForegroundNotification()
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

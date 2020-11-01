@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Activates [BackgroundWorkService]
+ * Activates [WorkService]
  **/
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){

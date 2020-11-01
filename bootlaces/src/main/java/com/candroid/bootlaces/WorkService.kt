@@ -60,7 +60,7 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @ForegroundScope
-abstract class BackgroundWorkService: LifecycleService() {
+abstract class WorkService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
     private var startId: Int = 0
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
@@ -113,7 +113,6 @@ abstract class BackgroundWorkService: LifecycleService() {
     private suspend fun handleWork(){
         foreground.database.getAll().processWorkRequests()
         channel.consumeAsFlow().processWorkRequests()
-
     }
 
     @InternalCoroutinesApi
@@ -131,10 +130,10 @@ abstract class BackgroundWorkService: LifecycleService() {
             foreground.activate()
         coroutineScope.launch(Dispatchers.Default){
             val intent = IntentFactory.createWorkNotificationIntent(worker)
-            NotificatonService.enqueue(this@BackgroundWorkService, intent)
-            worker.doWork(this@BackgroundWorkService)
+            NotificatonService.enqueue(this@WorkService, intent)
+            worker.doWork(this@WorkService)
             intent.setAction(Actions.ACTION_FINISH.action)
-            NotificatonService.enqueue(this@BackgroundWorkService, intent)
+            NotificatonService.enqueue(this@WorkService, intent)
             workers -= worker
             workerCount--
         }

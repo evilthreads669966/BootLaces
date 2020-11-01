@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import com.candroid.bootlaces.BackgroundWorkService
+import com.candroid.bootlaces.WorkService
 import com.candroid.bootlaces.ForegroundScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -47,4 +47,4 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @ForegroundScope
 @AndroidEntryPoint
-class LockService : BackgroundWorkService()
+class LockService : WorkService()

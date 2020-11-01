@@ -52,11 +52,11 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
- * activates [BackgroundWorkService]
+ * activates [WorkService]
  **/
 @InternalCoroutinesApi
 @ActivityScoped
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>,val database: WorkerDao, val channel: Channel<Work>) {
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>, val database: WorkDao, val channel: Channel<Work>) {
 
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
