@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
@@ -43,18 +44,32 @@ import android.content.Intent
  * @date 10/18/20
  *
  **/
-abstract class Worker(val id: Int, val description: String, val action: String? = null){
-     suspend abstract fun doWork(ctx: Context)
+abstract class Worker(val id: Int, val description: String){
+     abstract val receiver: WorkReceiver?
 
-     open fun onReceive(ctx: Context, intent: Intent) = Unit
+     suspend abstract fun doWork(ctx: Context)
 
      override fun equals(other: Any?): Boolean {
           if(this === other) return true
           if(other !is Worker) return false
-          if(this.id == other.id && this.description.equals(other.description) && this.action.equals(other.action))
+          if(this.id == other.id && this.description.equals(other.description))
                return true
           return false
      }
 
      override fun hashCode(): Int = id.hashCode()
+
+     open inner class WorkReceiver(val action: String): BroadcastReceiver(){
+          override fun onReceive(context: Context?, intent: Intent?){}
+
+          override fun hashCode() = action.hashCode()
+
+          override fun equals(other: Any?): Boolean {
+               if(this === other) return true
+               if(other !is WorkReceiver) return false
+               if(this.action.equals(other.action)) return true
+               return false
+          }
+     }
 }
+

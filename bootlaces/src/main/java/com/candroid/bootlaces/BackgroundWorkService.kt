@@ -14,7 +14,6 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.app.ServiceCompat
@@ -77,7 +76,7 @@ abstract class BackgroundWorkService: LifecycleService() {
 
     init {
         lifecycle.addObserver(BootServiceState)
-        lifecycleScope.launchWhenCreated { handleWorkers() }
+        lifecycleScope.launchWhenCreated { handleWork() }
     }
 
     override fun getLifecycle() = mDispatcher.lifecycle
@@ -107,35 +106,29 @@ abstract class BackgroundWorkService: LifecycleService() {
         super.onDestroy()
     }
 
-    private suspend fun handleWorkers(){
+    private suspend fun handleWork(){
         foreground.scope.launch {
             foreground.database.getAll().filterNotNull().collect { work ->
-                handleWork(this, work)
+                assignWorker(this, work.toWorker())
             }
         }
         foreground.scope.launch {
-            channel.consumeEach {
-                handleWork(this, it)
+            channel.consumeEach { work ->
+                assignWorker(this, work.toWorker())
             }
         }
     }
 
     @InternalCoroutinesApi
-    private suspend fun handleWork(coroutineScope: CoroutineScope, work: Work){
-        val worker = Class.forName(work.job).newInstance() as Worker
+    private suspend fun assignWorker(coroutineScope: CoroutineScope, worker: Worker){
         if(workers.contains(worker))
             return
         workers += worker
         workerCount++
-        if(worker.action != null){
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context?, intent: Intent?) {
-                    worker.onReceive(context!!, intent!!)
-                }
-            }
-            val filter = IntentFilter(worker.action)
-            registerReceiver(receiver,filter)
-            receivers.add(receiver)
+        if(worker.receiver != null){
+            val filter = IntentFilter(worker.receiver!!.action)
+            registerReceiver(worker.receiver,filter)
+            receivers.add(worker.receiver)
         }
         if(!BootServiceState.isForeground())
             foreground.activate()
