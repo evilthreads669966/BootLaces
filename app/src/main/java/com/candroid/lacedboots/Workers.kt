@@ -57,6 +57,15 @@ class OneTimeWorker: Worker(66,"One time work") {
             delay(1000)
     }
 }
+class SecondWorker: Worker(99,"Second worker") {
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        for(i in 1..10)
+            delay(1000)
+    }
+}
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi

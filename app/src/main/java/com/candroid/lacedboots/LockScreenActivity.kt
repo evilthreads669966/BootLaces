@@ -58,6 +58,7 @@ class LockScreenActivity: VisibilityActivity(){
                 scheduler.run {
                     schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
+                    scheduleOneTime(SecondWorker())
                 }
             }
         }
