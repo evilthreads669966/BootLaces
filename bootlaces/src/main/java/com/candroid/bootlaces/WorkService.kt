@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.app.ServiceCompat
@@ -103,6 +102,7 @@ abstract class WorkService: LifecycleService() {
         stopSelfResult(startId)
         super.onDestroy()
     }
+
     private suspend fun Flow<Work>.processWorkRequests(){
         this.filterNotNull()
             .map { it.toWorker() }
@@ -125,10 +125,7 @@ abstract class WorkService: LifecycleService() {
             return
         workers += worker
         workerCount++
-        if(worker.receiver != null){
-            val filter = IntentFilter(worker.receiver!!.action)
-            registerReceiver(worker.receiver,filter)
-        }
+        worker.registerReceiver()
         if(!BootServiceState.isForeground())
             foreground.activate()
         coroutineScope.launch{
@@ -136,10 +133,19 @@ abstract class WorkService: LifecycleService() {
             NotificatonService.enqueue(this@WorkService, intent)
             worker.doWork(this@WorkService)
             intent.setAction(Actions.ACTION_FINISH.action)
-            worker.receiver?.let { unregisterReceiver(it) }
+            worker.unregisterReceiver()
             NotificatonService.enqueue(this@WorkService, intent)
             workers -= worker
             workerCount--
+        }
+    }
+
+    private fun Worker.unregisterReceiver() = this.receiver?.let { unregisterReceiver(it) }
+
+    private fun Worker.registerReceiver(){
+        this.receiver?.run {
+            val filter = IntentFilter(this.action)
+            registerReceiver(this, filter)
         }
     }
 }
