@@ -59,7 +59,7 @@ import javax.inject.Inject
 @InternalCoroutinesApi
 @ActivityScoped
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>, val database: WorkDao, val channel: Channel<Work>) {
-
+    @Throws(SchedulerActivationException::class)
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         startWorkService()
@@ -74,6 +74,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
             ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
     }
 
+    @Throws(SchedulerActivationException::class)
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         startWorkService()
@@ -85,9 +86,10 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
         runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
     }
 
+    @Throws(SchedulerActivationException::class)
     private suspend fun startWorkService(){
         if (BootServiceState.isStarted()) return
-        val serviceName = dataStore.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: return
+        val serviceName = dataStore.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: throw SchedulerActivationException()
         val intent = IntentFactory.createBackgroundServiceIntent(ctx, serviceName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
