@@ -67,7 +67,6 @@ abstract class WorkService: LifecycleService() {
     @Inject lateinit var channel: Channel<Work>
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
-    private val receivers = Collections.synchronizedList(mutableListOf<BroadcastReceiver>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
         if(newValue == 0) foreground.deactivate()
     }
@@ -98,7 +97,8 @@ abstract class WorkService: LifecycleService() {
             ServiceCompat.stopForeground(this,ServiceCompat.STOP_FOREGROUND_REMOVE)
         foreground.scope.also { it.coroutineContext.cancelChildren() }.cancel()
         channel.close()
-        receivers.forEach { unregisterReceiver(it) }
+        workers.filterNot { it.receiver == null }.forEach { unregisterReceiver(it.receiver) }
+        workers.clear()
         lifecycle.removeObserver(BootServiceState)
         stopSelfResult(startId)
         super.onDestroy()
@@ -128,7 +128,6 @@ abstract class WorkService: LifecycleService() {
         if(worker.receiver != null){
             val filter = IntentFilter(worker.receiver!!.action)
             registerReceiver(worker.receiver,filter)
-            receivers.add(worker.receiver)
         }
         if(!BootServiceState.isForeground())
             foreground.activate()
@@ -137,6 +136,7 @@ abstract class WorkService: LifecycleService() {
             NotificatonService.enqueue(this@WorkService, intent)
             worker.doWork(this@WorkService)
             intent.setAction(Actions.ACTION_FINISH.action)
+            worker.receiver?.let { unregisterReceiver(it) }
             NotificatonService.enqueue(this@WorkService, intent)
             workers -= worker
             workerCount--
