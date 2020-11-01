@@ -96,7 +96,7 @@ abstract class WorkService: LifecycleService() {
             ServiceCompat.stopForeground(this,ServiceCompat.STOP_FOREGROUND_REMOVE)
         foreground.scope.also { it.coroutineContext.cancelChildren() }.cancel()
         channel.close()
-        workers.filterNot { it.receiver == null }.forEach { unregisterReceiver(it.receiver) }
+        workers.forEach { it.unregisterWorkReceiver() }
         workers.clear()
         lifecycle.removeObserver(BootServiceState)
         stopSelfResult(startId)
