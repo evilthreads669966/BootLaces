@@ -125,8 +125,7 @@ abstract class WorkService: LifecycleService() {
         if(!BootServiceState.isForeground()) foreground.activate()
         coroutineScope.launch{
             workers -= worker.apply {
-                workers += this
-                workerCount++
+                workerCount = workers.also { it += this }.size
                 val intent = IntentFactory.createWorkNotificationIntent(this)
                 NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()
