@@ -24,7 +24,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import java.security.KeyStore
 import javax.inject.Inject
 
 /*
@@ -60,6 +62,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
+        startWorkService()
         database.insert(work)
         persistWorkService()
     }
@@ -73,16 +76,22 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
+        startWorkService()
         channel.send(work)
     }
 
     fun activate(serviceName: String){
         if (BootServiceState.isStarted()) return
+        runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
+    }
+
+    private suspend fun startWorkService(){
+        if (BootServiceState.isStarted()) return
+        val serviceName = dataStore.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: return
         val intent = IntentFactory.createBackgroundServiceIntent(ctx, serviceName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else
             ctx.startService(intent)
-        runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
     }
 }
