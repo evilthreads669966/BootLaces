@@ -72,4 +72,3 @@ abstract class Worker(val id: Int, val description: String){
           }
      }
 }
-
