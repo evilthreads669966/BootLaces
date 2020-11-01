@@ -49,6 +49,7 @@ abstract class Worker(val id: Int, val description: String, val action: String? 
      open fun onReceive(ctx: Context, intent: Intent) = Unit
 
      override fun equals(other: Any?): Boolean {
+          if(this === other) return true
           if(other !is Worker) return false
           if(this.id == other.id && this.description.equals(other.description) && this.action.equals(other.action))
                return true
