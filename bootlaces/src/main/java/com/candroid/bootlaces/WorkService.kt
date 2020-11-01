@@ -13,7 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.content.Intent
 import android.content.IntentFilter
+import androidx.core.app.ServiceCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
@@ -121,5 +125,38 @@ abstract class WorkService: BaseLifecycleService() {
             val filter = IntentFilter(this.action)
             registerReceiver(this, filter)
         }
+    }
+}
+
+@ForegroundScope
+sealed class BaseLifecycleService: LifecycleService() {
+    private val mDispatcher = ServiceLifecycleDispatcher(this)
+    internal var startId: Int = 0
+
+    init {
+        lifecycle.addObserver(BootServiceState)
+    }
+
+    override fun getLifecycle() = mDispatcher.lifecycle
+
+    override fun onCreate() {
+        mDispatcher.onServicePreSuperOnCreate()
+        super.onCreate()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        mDispatcher.onServicePreSuperOnStart()
+        super.onStartCommand(intent, flags, startId)
+        this.startId = startId
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        mDispatcher.onServicePreSuperOnDestroy()
+        if(BootServiceState.isForeground())
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        lifecycle.removeObserver(BootServiceState)
+        stopSelfResult(startId)
+        super.onDestroy()
     }
 }
