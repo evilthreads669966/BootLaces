@@ -20,8 +20,6 @@ import android.os.Build
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -63,6 +61,10 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         database.insert(work)
+        persistWorkService()
+    }
+
+    private fun persistWorkService(){
         val componentName = ComponentName(ctx, BootReceiver::class.java)
         val state = ctx.packageManager.getComponentEnabledSetting(componentName)
         if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
@@ -84,6 +86,3 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
         runBlocking { dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName } }
     }
 }
-
-@Entity
-data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val job: String)
