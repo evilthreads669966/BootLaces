@@ -67,7 +67,10 @@ abstract class WorkService: LifecycleService() {
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
-        if(newValue == 0) foreground.deactivate()
+        if(newValue == 0){
+            foreground.deactivate()
+            stopSelf(startId)
+        }
     }
 
     init {

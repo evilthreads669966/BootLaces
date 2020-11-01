@@ -53,7 +53,7 @@ class LockScreenActivity: VisibilityActivity(){
     }
     @Inject lateinit var scheduler: WorkScheduler
     init {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO){
                 scheduler.run {
                     schedulePersistent(ScreenLockerJob())
