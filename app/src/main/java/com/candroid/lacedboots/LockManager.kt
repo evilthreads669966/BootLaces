@@ -28,11 +28,13 @@ object LockManager: ILockManager {
 
     @InternalCoroutinesApi
     override fun lockScreen(ctx: Context, intent: Intent?) {
-        val activityIntent = (intent ?: Intent()).apply {
-            setClass(ctx, LockScreenActivity::class.java)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        if(!isLocked() && isLockable(ctx)){
+            val activityIntent = (intent ?: Intent()).apply {
+                setClass(ctx, LockScreenActivity::class.java)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            ctx.startActivity(activityIntent)
         }
-        ctx.startActivity(activityIntent)
     }
 }
 
