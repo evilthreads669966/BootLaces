@@ -46,8 +46,8 @@ internal object IntentFactory{
     fun createWorkNotificationIntent(worker: Worker): Intent {
         return Intent().apply {
             setAction(Actions.ACTION_START.action)
-            putExtra(WorkNotificationService.KEY_ID, worker.id)
-            putExtra(WorkNotificationService.KEY_DESCRIPTION, worker.description)
+            putExtra(NotificatonService.KEY_ID, worker.id)
+            putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
         }
     }
 

@@ -107,7 +107,7 @@ abstract class BackgroundWorkService: LifecycleService() {
         super.onDestroy()
     }
 
-    suspend fun handleWorkers(){
+    private suspend fun handleWorkers(){
         foreground.scope.launch {
             foreground.database.getAll().filterNotNull().collect { work ->
                 handleWork(this, work)
@@ -125,7 +125,7 @@ abstract class BackgroundWorkService: LifecycleService() {
         val worker = Class.forName(work.job).newInstance() as Worker
         if(workers.contains(worker))
             return
-        workers.add(worker)
+        workers += worker
         workerCount++
         if(worker.action != null){
             val receiver = object : BroadcastReceiver() {
@@ -141,11 +141,11 @@ abstract class BackgroundWorkService: LifecycleService() {
             foreground.activate()
         coroutineScope.launch(Dispatchers.Default){
             val intent = IntentFactory.createWorkNotificationIntent(worker)
-            WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
+            NotificatonService.enqueue(this@BackgroundWorkService, intent)
             worker.doWork(this@BackgroundWorkService)
             intent.setAction(Actions.ACTION_FINISH.action)
-            WorkNotificationService.enqueue(this@BackgroundWorkService, WorkNotificationService.ID_JOB, intent)
-            workers.remove(worker)
+            NotificatonService.enqueue(this@BackgroundWorkService, intent)
+            workers -= worker
             workerCount--
         }
     }
