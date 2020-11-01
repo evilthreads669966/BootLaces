@@ -23,9 +23,10 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
@@ -107,16 +108,14 @@ abstract class BackgroundWorkService: LifecycleService() {
     }
 
     private suspend fun handleWork(){
-        foreground.scope.launch {
-            foreground.database.getAll().filterNotNull().collect { work ->
-                assignWorker(this, work.toWorker())
-            }
-        }
-        foreground.scope.launch {
-            channel.consumeEach { work ->
-                assignWorker(this, work.toWorker())
-            }
-        }
+        foreground.database.getAll()
+            .mapNotNull { work -> work.toWorker() }
+            .onEach {  worker -> assignWorker(foreground.scope, worker)  }
+            .launchIn(foreground.scope)
+        channel.consumeAsFlow()
+            .mapNotNull { it.toWorker() }
+            .onEach { worker -> assignWorker(foreground.scope, worker) }
+            .launchIn(foreground.scope)
     }
 
     @InternalCoroutinesApi
