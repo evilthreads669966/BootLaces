@@ -73,7 +73,7 @@ class ScreenLockerJob: Worker(666,"Locking the screen"){
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                LockManager.takeIf { !it.isLocked() && it.isLockable(ctx!!) }?.lockScreen(ctx!!, intent)
+                LockManager.lockScreen(ctx!!, intent)
             }
         }
 

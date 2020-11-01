@@ -125,24 +125,25 @@ abstract class WorkService: LifecycleService() {
             return
         workers += worker
         workerCount++
-        worker.registerReceiver()
         if(!BootServiceState.isForeground())
             foreground.activate()
         coroutineScope.launch{
-            val intent = IntentFactory.createWorkNotificationIntent(worker)
-            NotificatonService.enqueue(this@WorkService, intent)
-            worker.doWork(this@WorkService)
-            intent.setAction(Actions.ACTION_FINISH.action)
-            worker.unregisterReceiver()
-            NotificatonService.enqueue(this@WorkService, intent)
-            workers -= worker
+           workers -= worker.apply {
+                val intent = IntentFactory.createWorkNotificationIntent(this)
+                NotificatonService.enqueue(this@WorkService, intent)
+                registerWorkReceiver()
+                doWork(this@WorkService)
+                unregisterWorkReceiver()
+                intent.setAction(Actions.ACTION_FINISH.action)
+                NotificatonService.enqueue(this@WorkService, intent)
+            }
             workerCount--
         }
     }
 
-    private fun Worker.unregisterReceiver() = this.receiver?.let { unregisterReceiver(it) }
+    private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
 
-    private fun Worker.registerReceiver(){
+    private fun Worker.registerWorkReceiver(){
         this.receiver?.run {
             val filter = IntentFilter(this.action)
             registerReceiver(this, filter)
