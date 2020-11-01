@@ -121,21 +121,18 @@ abstract class WorkService: LifecycleService() {
 
     @InternalCoroutinesApi
     private suspend fun assignWorker(coroutineScope: CoroutineScope, worker: Worker){
-        if(workers.contains(worker))
-            return
-        workers += worker
-        workerCount++
-        if(!BootServiceState.isForeground())
-            foreground.activate()
+        if(workers.contains(worker)) return
+        if(!BootServiceState.isForeground()) foreground.activate()
         coroutineScope.launch{
-           workers -= worker.apply {
+            workers -= worker.apply {
+                workers += this
+                workerCount++
                 val intent = IntentFactory.createWorkNotificationIntent(this)
                 NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()
                 doWork(this@WorkService)
                 unregisterWorkReceiver()
-                intent.setAction(Actions.ACTION_FINISH.action)
-                NotificatonService.enqueue(this@WorkService, intent)
+                NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
             }
             workerCount--
         }
