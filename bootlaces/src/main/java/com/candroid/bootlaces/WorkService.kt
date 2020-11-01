@@ -111,8 +111,12 @@ abstract class WorkService: LifecycleService() {
     }
 
     private suspend fun handleWork(){
-        foreground.database.getAll().processWorkRequests()
-        channel.consumeAsFlow().processWorkRequests()
+        withContext(Dispatchers.IO) {
+            foreground.database.getAll().processWorkRequests()
+        }
+        withContext(Dispatchers.Default){
+            channel.consumeAsFlow().processWorkRequests()
+        }
     }
 
     @InternalCoroutinesApi
