@@ -13,15 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.content.Intent
 import android.content.IntentFilter
-import androidx.core.app.ServiceCompat
-import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
@@ -59,11 +54,8 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @ForegroundScope
-abstract class WorkService: LifecycleService() {
-    private val mDispatcher = ServiceLifecycleDispatcher(this)
-    private var startId: Int = 0
+abstract class WorkService: BaseLifecycleService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
-    @Inject lateinit var channel: Channel<Work>
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
@@ -74,35 +66,19 @@ abstract class WorkService: LifecycleService() {
     }
 
     init {
-        lifecycle.addObserver(BootServiceState)
         lifecycleScope.launchWhenCreated { handleWork() }
     }
 
-    override fun getLifecycle() = mDispatcher.lifecycle
-
     override fun onCreate() {
-        mDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        mDispatcher.onServicePreSuperOnStart()
-        super.onStartCommand(intent, flags, startId)
-        this.startId = startId
-        return START_STICKY
-    }
-
     override fun onDestroy() {
-        mDispatcher.onServicePreSuperOnDestroy()
-        if(BootServiceState.isForeground())
-            ServiceCompat.stopForeground(this,ServiceCompat.STOP_FOREGROUND_REMOVE)
         foreground.scope.also { it.coroutineContext.cancelChildren() }.cancel()
-        channel.close()
+        foreground.channel.close()
         workers.forEach { it.unregisterWorkReceiver() }
         workers.clear()
-        lifecycle.removeObserver(BootServiceState)
-        stopSelfResult(startId)
         super.onDestroy()
     }
 
@@ -118,7 +94,7 @@ abstract class WorkService: LifecycleService() {
             foreground.database.getAll().processWorkRequests()
         }
         withContext(Dispatchers.Default){
-            channel.consumeAsFlow().processWorkRequests()
+            foreground.channel.consumeAsFlow().processWorkRequests()
         }
     }
 

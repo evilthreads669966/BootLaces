@@ -13,14 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.Service
-import android.os.Build
+import android.content.Intent
 import androidx.core.app.ServiceCompat
-import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import javax.inject.Inject
-
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.ServiceLifecycleDispatcher
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -44,32 +40,36 @@ import javax.inject.Inject
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/16/20
- *
- * activates foreground in [WorkService]
- **/
-@ForegroundScope
-class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkDao, val channel: Channel<Work>){
-     fun notifyForeground() {
-          val notification = factory.createForegroundNotification()
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-               ctx.startForeground(FOREGROUND_ID, notification, ctx.foregroundServiceType)
-          } else
-               ctx.startForeground(FOREGROUND_ID,notification)
-     }
+ * @date 11/01/20
+ * */
+abstract class BaseLifecycleService: LifecycleService() {
+    private val mDispatcher = ServiceLifecycleDispatcher(this)
+    internal var startId: Int = 0
 
-     @Throws(SecurityException::class)
-     fun activate() {
-          if(BootServiceState.isForeground())
-               return
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-               BootServiceState.setForeground()
-               notifyForeground()
-          }
-     }
+    init {
+        lifecycle.addObserver(BootServiceState)
+    }
 
-     fun deactivate() {
-          ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
-          BootServiceState.setBackground()
-     }
+    override fun getLifecycle() = mDispatcher.lifecycle
+
+    override fun onCreate() {
+        mDispatcher.onServicePreSuperOnCreate()
+        super.onCreate()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        mDispatcher.onServicePreSuperOnStart()
+        super.onStartCommand(intent, flags, startId)
+        this.startId = startId
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        mDispatcher.onServicePreSuperOnDestroy()
+        if(BootServiceState.isForeground())
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        lifecycle.removeObserver(BootServiceState)
+        stopSelfResult(startId)
+        super.onDestroy()
+    }
 }
