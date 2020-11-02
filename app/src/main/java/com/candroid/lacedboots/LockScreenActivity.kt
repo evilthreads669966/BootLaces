@@ -43,6 +43,7 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
+@OptIn(FlowPreview::class)
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -56,6 +57,7 @@ class LockScreenActivity: VisibilityActivity(){
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO){
                 scheduler.run {
+                    activate(LockService::class.java.name)
                     schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
                     scheduleOneTime(SecondWorker())
@@ -66,7 +68,6 @@ class LockScreenActivity: VisibilityActivity(){
 
     override fun onStart() {
         super.onStart()
-        scheduler.activate(LockService::class.java.name)
         checkPermission()
     }
 

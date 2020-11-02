@@ -15,6 +15,8 @@ package com.candroid.bootlaces
 
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.InternalCoroutinesApi
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -42,13 +44,17 @@ import android.content.Intent
  *
  * creates intents
  **/
+@InternalCoroutinesApi
 internal object IntentFactory{
-    fun createWorkNotificationIntent(worker: Worker): Intent {
-        return Intent().apply {
-            setAction(Actions.ACTION_START.action)
-            putExtra(NotificatonService.KEY_ID, worker.id)
-            putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
-        }
+    fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
+        setAction(Actions.ACTION_START.action)
+        putExtra(NotificatonService.KEY_ID, worker.id)
+        putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
+    }
+
+    fun createWorkIntent(work: Work) = Intent().apply {
+        action = Actions.ACTION_WORK.action
+        putExtra(Work.KEY_PARCEL, work)
     }
 
     fun createBackgroundServiceIntent(ctx: Context, serviceName: String) = Intent().apply { setClassName(ctx, serviceName) }

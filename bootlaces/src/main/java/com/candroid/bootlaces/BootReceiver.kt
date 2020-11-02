@@ -22,6 +22,8 @@ import androidx.datastore.DataStore
 import androidx.datastore.preferences.Preferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -53,6 +55,8 @@ import javax.inject.Inject
  *
  * Activates [WorkService]
  **/
+@FlowPreview
+@InternalCoroutinesApi
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
    @Inject lateinit var store: DataStore<Preferences>
@@ -60,7 +64,7 @@ class BootReceiver : HiltBugReceiver(){
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
-        if(!BootServiceState.isStarted() && intent?.action?.contains("BOOT") ?: false) {
+        if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             runBlocking {
                 val service = store.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: return@runBlocking
                 intent?.setClassName(ctx!!, service)

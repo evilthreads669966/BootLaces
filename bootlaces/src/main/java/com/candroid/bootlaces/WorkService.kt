@@ -13,12 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenCreated
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -58,14 +61,20 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @ForegroundScope
-abstract class WorkService: BaseLifecycleService() {
+abstract class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
         if(newValue == 0){
             foreground.deactivate()
+            stopSelf()
         }
+    }
+
+    companion object{
+        var state: ServiceState = ServiceState.STOPPED
+        fun isStarted() = !state.equals(ServiceState.STOPPED)
     }
 
     init {
@@ -74,7 +83,9 @@ abstract class WorkService: BaseLifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+        state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
+        registerReceiver(foreground.receiver, IntentFilter(Actions.ACTION_WORK.action) )
     }
 
     override fun onDestroy() {
@@ -82,6 +93,10 @@ abstract class WorkService: BaseLifecycleService() {
         foreground.channel.close()
         workers.forEach { it.unregisterWorkReceiver() }
         workers.clear()
+        unregisterReceiver(foreground.receiver)
+        if(state.equals(ServiceState.FOREGROUND))
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        state = ServiceState.STOPPED
         super.onDestroy()
     }
 
@@ -103,7 +118,7 @@ abstract class WorkService: BaseLifecycleService() {
     @InternalCoroutinesApi
     private suspend fun assignWorker(coroutineScope: CoroutineScope, worker: Worker){
         if(workers.contains(worker)) return
-        if(!BootServiceState.isForeground()) foreground.activate()
+        if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
         coroutineScope.launch{
             workers -= worker.apply {
                 workerCount = workers.also { it += this }.size
@@ -118,6 +133,10 @@ abstract class WorkService: BaseLifecycleService() {
         }
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return super.onStartCommand(intent, flags, startId)
+    }
+
     private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
 
     private fun Worker.registerWorkReceiver(){
@@ -129,13 +148,8 @@ abstract class WorkService: BaseLifecycleService() {
 }
 
 @ForegroundScope
-sealed class BaseLifecycleService: LifecycleService() {
+sealed class BaseWorkService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
-    internal var startId: Int = 0
-
-    init {
-        lifecycle.addObserver(BootServiceState)
-    }
 
     override fun getLifecycle() = mDispatcher.lifecycle
 
@@ -147,16 +161,11 @@ sealed class BaseLifecycleService: LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mDispatcher.onServicePreSuperOnStart()
         super.onStartCommand(intent, flags, startId)
-        this.startId = startId
         return START_STICKY
     }
 
     override fun onDestroy() {
         mDispatcher.onServicePreSuperOnDestroy()
-        if(BootServiceState.isForeground())
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        lifecycle.removeObserver(BootServiceState)
-        stopSelfResult(startId)
         super.onDestroy()
     }
 }

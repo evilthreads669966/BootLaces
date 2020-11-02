@@ -13,7 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.DataStore
@@ -29,10 +31,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.migration.AliasOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
 import java.io.File
 import javax.inject.Scope
 import javax.inject.Singleton
@@ -79,14 +80,14 @@ object BroadcastReceiverModule {
             scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         )
     }
-    @Singleton
-    @Provides
-    fun provideChannel() = Channel<Work>()
+
     @Singleton
     @Provides
     fun provideDatabase(@ApplicationContext ctx: Context): WorkDao = WorkDatabase.getInstance(ctx).workerDao()
 }
 
+@FlowPreview
+@InternalCoroutinesApi
 @ForegroundScope
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
@@ -104,6 +105,16 @@ object ForegroundModule{
     @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
     @ForegroundScope
     @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
+    @ForegroundScope
+    @Provides fun provideChannel() = Channel<Work>()
+    @ForegroundScope
+    @Provides fun provideBroadcastReceiver(channel: Channel<Work>) = object: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL)
+            if(work != null)
+                channel.sendBlocking(work)
+        }
+    }
 }
 
 @DefineComponent(parent = ServiceComponent::class)
