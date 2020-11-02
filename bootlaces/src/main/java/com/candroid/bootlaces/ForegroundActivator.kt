@@ -14,10 +14,14 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.os.Build
 import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject
 
@@ -48,8 +52,11 @@ import javax.inject.Inject
  *
  * activates foreground in [WorkService]
  **/
+@FlowPreview
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 @ForegroundScope
-class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkDao, val channel: Channel<Work>){
+class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkDao, val channel: Channel<Work>, val receiver: BroadcastReceiver){
      fun notifyForeground() {
           val notification = factory.createForegroundNotification()
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -60,16 +67,15 @@ class ForegroundActivator @Inject constructor(val ctx: Service, val scope: Corou
 
      @Throws(SecurityException::class)
      fun activate() {
-          if(BootServiceState.isForeground())
-               return
+          if(WorkService.state.equals(ServiceState.FOREGROUND)) return
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-               BootServiceState.setForeground()
+               WorkService.state = ServiceState.FOREGROUND
                notifyForeground()
           }
      }
 
      fun deactivate() {
           ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
-          BootServiceState.setBackground()
+          WorkService.state = ServiceState.BACKGROUND
      }
 }
