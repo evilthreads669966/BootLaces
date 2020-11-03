@@ -15,7 +15,6 @@ package com.candroid.bootlaces
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.datastore.DataStore
@@ -24,7 +23,6 @@ import androidx.datastore.preferences.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
@@ -59,12 +57,11 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @ActivityScoped
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>, val database: WorkDao) {
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>) {
     @Throws(SchedulerActivationException::class)
     suspend fun schedulePersistent(worker: Worker){
-        startWorkService()
         val work = Work( worker.id, worker::class.java.name)
-        database.insert(work)
+        sendWorkRequest(work, Actions.ACTION_WORK_PERSISTENT)
         persistWorkService()
     }
 
@@ -77,26 +74,25 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
 
     @Throws(SchedulerActivationException::class)
     suspend fun scheduleOneTime(worker: Worker){
-        startWorkService()
         val work = Work( worker.id, worker::class.java.name)
-        val intent = IntentFactory.createWorkIntent(work)
-        ctx.sendBroadcast(intent)
+        sendWorkRequest(work, Actions.ACTION_WORK_ONE_TIME)
     }
 
     suspend fun activate(serviceName: String){
         if (WorkService.isStarted()) return
-        dataStore.edit { it[StoreKeys.PREF_KEY] = serviceName }
+        dataStore.edit {
+            if(it[StoreKeys.PREF_KEY] == null)
+                it[StoreKeys.PREF_KEY] = serviceName
+        }
     }
 
     @Throws(SchedulerActivationException::class)
-    private suspend fun startWorkService(){
-        if (WorkService.isStarted()) return
+    private suspend fun sendWorkRequest(work: Work, action: Actions){
         val serviceName = dataStore.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: throw SchedulerActivationException()
-        val intent = IntentFactory.createBackgroundServiceIntent(ctx, serviceName)
+        val intent = IntentFactory.createWorkServiceIntent(ctx, work, action, serviceName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else
             ctx.startService(intent)
-        delay(1000)
     }
 }

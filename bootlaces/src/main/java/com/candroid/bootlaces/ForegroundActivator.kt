@@ -56,7 +56,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @ForegroundScope
-class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory,val database: WorkDao, val channel: Channel<Work>, val receiver: BroadcastReceiver){
+class ForegroundActivator @Inject constructor(val ctx: Service, val scope: CoroutineScope, val factory: NotificationFactory, val database: WorkDao, val channel: Channel<Work>){
      fun notifyForeground() {
           val notification = factory.createForegroundNotification()
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

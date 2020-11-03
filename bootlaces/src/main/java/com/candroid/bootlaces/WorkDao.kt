@@ -15,6 +15,8 @@ package com.candroid.bootlaces
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -41,6 +43,7 @@ import kotlinx.coroutines.flow.Flow
  * @date 10/31/20
  *
  **/
+@Singleton
 @Dao
 interface WorkDao{
 

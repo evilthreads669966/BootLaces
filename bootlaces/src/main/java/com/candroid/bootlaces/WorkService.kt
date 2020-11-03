@@ -24,6 +24,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
@@ -85,7 +87,23 @@ abstract class WorkService: BaseWorkService() {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
-        registerReceiver(foreground.receiver, IntentFilter(Actions.ACTION_WORK.action) )
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.run {
+            if(!hasExtra(Work.KEY_PARCEL)) return@run
+            if(action == null) return@run
+            val work = getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@run
+            lifecycleScope.launch {
+                when(intent.action){
+                    Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ foreground.database.insert(work) } }
+                    Actions.ACTION_WORK_ONE_TIME.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
+                    else -> return@launch
+                }
+            }
+
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
@@ -93,7 +111,6 @@ abstract class WorkService: BaseWorkService() {
         foreground.channel.close()
         workers.forEach { it.unregisterWorkReceiver() }
         workers.clear()
-        unregisterReceiver(foreground.receiver)
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
@@ -131,10 +148,6 @@ abstract class WorkService: BaseWorkService() {
             }
             workerCount--
         }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
     }
 
     private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }

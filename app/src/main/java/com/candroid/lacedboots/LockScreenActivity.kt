@@ -43,7 +43,7 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
-@OptIn(FlowPreview::class)
+@FlowPreview
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -55,7 +55,7 @@ class LockScreenActivity: VisibilityActivity(){
     @Inject lateinit var scheduler: WorkScheduler
     init {
         lifecycleScope.launchWhenResumed {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.Default){
                 scheduler.run {
                     activate(LockService::class.java.name)
                     schedulePersistent(ScreenLockerJob())

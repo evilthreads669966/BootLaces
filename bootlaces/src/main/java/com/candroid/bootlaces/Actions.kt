@@ -42,5 +42,6 @@ package com.candroid.bootlaces
 internal enum class Actions(val action: String){
     ACTION_START("ACTION_START"),
     ACTION_FINISH("ACTION_FINISH"),
-    ACTION_WORK("ACTION_WORK")
+    ACTION_WORK_PERSISTENT("ACTION_WORK_PERSISTENT"),
+    ACTION_WORK_ONE_TIME("ACTION_WORK_ONE_TIME")
 }
