@@ -26,11 +26,9 @@ import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
-import dagger.hilt.components.SingletonComponent
 import dagger.hilt.migration.AliasOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import java.io.File
 import javax.inject.Scope
 import javax.inject.Singleton
 

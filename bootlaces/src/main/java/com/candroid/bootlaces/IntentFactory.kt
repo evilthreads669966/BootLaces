@@ -16,6 +16,7 @@ package com.candroid.bootlaces
 import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
 
 /*
@@ -45,6 +46,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
  *
  * creates intents
  **/
+@FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 internal object IntentFactory{

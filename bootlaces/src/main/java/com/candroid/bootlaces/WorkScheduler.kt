@@ -56,7 +56,6 @@ import javax.inject.Singleton
 @InternalCoroutinesApi
 @Singleton
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
-    @Throws(SchedulerActivationException::class)
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         sendWorkRequest(work, Actions.ACTION_WORK_PERSISTENT)
@@ -70,13 +69,11 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
             ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
     }
 
-    @Throws(SchedulerActivationException::class)
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
         sendWorkRequest(work, Actions.ACTION_WORK_ONE_TIME)
     }
 
-    @Throws(SchedulerActivationException::class)
     private suspend fun sendWorkRequest(work: Work, action: Actions){
         val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
