@@ -52,10 +52,9 @@ internal object IntentFactory{
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    fun createWorkIntent(work: Work) = Intent().apply {
-        action = Actions.ACTION_WORK.action
+    fun createWorkServiceIntent(ctx: Context, work: Work, action: Actions, serviceName: String) = Intent().apply {
+        setClassName(ctx, serviceName)
+        setAction(action.action)
         putExtra(Work.KEY_PARCEL, work)
     }
-
-    fun createBackgroundServiceIntent(ctx: Context, serviceName: String) = Intent().apply { setClassName(ctx, serviceName) }
 }

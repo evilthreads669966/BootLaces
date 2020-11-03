@@ -17,6 +17,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -43,12 +45,8 @@ import androidx.room.RoomDatabase
  * @date 10/31/20
  *
  **/
+@Singleton
 @Database(entities = arrayOf(Work::class), version = 1, exportSchema = false)
-internal abstract class WorkDatabase: RoomDatabase(){
-    companion object{
-        fun getInstance(ctx: Context): WorkDatabase{
-            return Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build()
-        }
-    }
+abstract class WorkDatabase: RoomDatabase(){
     abstract fun workerDao(): WorkDao
 }

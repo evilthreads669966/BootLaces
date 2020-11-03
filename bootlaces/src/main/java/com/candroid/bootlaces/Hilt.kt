@@ -21,6 +21,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.PreferenceDataStoreFactory
 import androidx.datastore.preferences.Preferences
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
@@ -80,10 +83,8 @@ object BroadcastReceiverModule {
             scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         )
     }
-
     @Singleton
-    @Provides
-    fun provideDatabase(@ApplicationContext ctx: Context): WorkDao = WorkDatabase.getInstance(ctx).workerDao()
+    @Provides fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
 }
 
 @FlowPreview
@@ -107,15 +108,13 @@ object ForegroundModule{
     @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
     @ForegroundScope
     @Provides fun provideChannel() = Channel<Work>()
-    @ForegroundScope
-    @Provides fun provideBroadcastReceiver(channel: Channel<Work>) = object: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL)
-            if(work != null)
-                channel.sendBlocking(work)
-        }
-    }
 }
+/*@InstallIn(ServiceComponent::class)
+@Module
+interface ForegroundBindingModule{
+    @ForegroundScope
+    @Binds fun bindDatabase(database: WorkDatabase): RoomDatabase
+}*/
 
 @DefineComponent(parent = ServiceComponent::class)
 interface ForegroundComponent{
