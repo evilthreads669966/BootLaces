@@ -13,22 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.DataStore
 import androidx.datastore.preferences.PreferenceDataStoreFactory
 import androidx.datastore.preferences.Preferences
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
@@ -36,7 +33,6 @@ import dagger.hilt.components.SingletonComponent
 import dagger.hilt.migration.AliasOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
 import java.io.File
 import javax.inject.Scope
 import javax.inject.Singleton
@@ -72,7 +68,7 @@ import javax.inject.Singleton
 annotation class ForegroundScope
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ApplicationComponent::class)
 object BroadcastReceiverModule {
     @Singleton
     @Provides fun provideDataStore(@ApplicationContext ctx: Context): DataStore<Preferences> {

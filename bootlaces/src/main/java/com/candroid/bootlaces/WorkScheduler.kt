@@ -22,9 +22,12 @@ import androidx.datastore.preferences.Preferences
 import androidx.datastore.preferences.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -56,7 +59,7 @@ import javax.inject.Inject
 @FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-@ActivityScoped
+@Singleton
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>) {
     @Throws(SchedulerActivationException::class)
     suspend fun schedulePersistent(worker: Worker){

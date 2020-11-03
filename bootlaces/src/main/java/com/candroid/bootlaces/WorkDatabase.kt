@@ -45,7 +45,6 @@ import javax.inject.Singleton
  * @date 10/31/20
  *
  **/
-@Singleton
 @Database(entities = arrayOf(Work::class), version = 1, exportSchema = false)
 abstract class WorkDatabase: RoomDatabase(){
     abstract fun workerDao(): WorkDao
