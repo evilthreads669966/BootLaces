@@ -17,15 +17,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
-import androidx.datastore.preferences.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,7 +55,7 @@ import javax.inject.Singleton
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val dataStore: DataStore<Preferences>) {
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
     @Throws(SchedulerActivationException::class)
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
@@ -81,18 +76,9 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
         sendWorkRequest(work, Actions.ACTION_WORK_ONE_TIME)
     }
 
-    suspend fun activate(serviceName: String){
-        if (WorkService.isStarted()) return
-        dataStore.edit {
-            if(it[StoreKeys.PREF_KEY] == null)
-                it[StoreKeys.PREF_KEY] = serviceName
-        }
-    }
-
     @Throws(SchedulerActivationException::class)
     private suspend fun sendWorkRequest(work: Work, action: Actions){
-        val serviceName = dataStore.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: throw SchedulerActivationException()
-        val intent = IntentFactory.createWorkServiceIntent(ctx, work, action, serviceName)
+        val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else

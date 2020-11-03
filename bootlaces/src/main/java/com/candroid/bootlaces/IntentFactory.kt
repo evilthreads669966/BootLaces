@@ -15,6 +15,7 @@ package com.candroid.bootlaces
 
 import android.content.Context
 import android.content.Intent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
 /*
@@ -44,6 +45,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
  *
  * creates intents
  **/
+@ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 internal object IntentFactory{
     fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
@@ -52,8 +54,8 @@ internal object IntentFactory{
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    fun createWorkServiceIntent(ctx: Context, work: Work, action: Actions, serviceName: String) = Intent().apply {
-        setClassName(ctx, serviceName)
+    fun createWorkServiceIntent(ctx: Context, work: Work, action: Actions) = Intent().apply {
+        setClass(ctx, WorkService::class.java)
         setAction(action.action)
         putExtra(Work.KEY_PARCEL, work)
     }

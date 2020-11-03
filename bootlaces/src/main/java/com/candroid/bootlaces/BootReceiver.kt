@@ -18,15 +18,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.Preferences
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -59,15 +55,12 @@ import javax.inject.Inject
 @InternalCoroutinesApi
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
-   @Inject lateinit var store: DataStore<Preferences>
-
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             runBlocking {
-                val service = store.data.firstOrNull()?.get(StoreKeys.PREF_KEY) ?: return@runBlocking
-                intent?.setClassName(ctx!!, service)
+                intent?.setClass(ctx!!, WorkService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     ctx!!.startForegroundService(intent)
                 else
