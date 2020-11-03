@@ -14,7 +14,6 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.os.Build
 import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID

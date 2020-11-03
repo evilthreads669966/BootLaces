@@ -42,9 +42,7 @@ import javax.inject.Singleton
  * @email evilthreads669966@gmail.com
  * @date 10/31/20
  *
- **/
-@Singleton
-@Dao
+ **/ @Dao
 interface WorkDao{
 
     @Query("SELECT * FROM work")

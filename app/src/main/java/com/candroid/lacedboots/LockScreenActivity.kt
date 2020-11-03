@@ -58,7 +58,7 @@ class LockScreenActivity: VisibilityActivity(){
             withContext(Dispatchers.Default){
                 scheduler.run {
                     activate(LockService::class.java.name)
-                    schedulePersistent(ScreenLockerJob())
+                    //schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
                     scheduleOneTime(SecondWorker())
                 }

@@ -10,6 +10,6 @@ import kotlinx.android.parcel.Parcelize
 data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val job: String): Parcelable{
     fun toWorker(): Worker = Class.forName(this.job).newInstance() as Worker
     companion object{
-        val KEY_PARCEL = "KEY_PARCEL"
+       const val KEY_PARCEL = "KEY_PARCEL"
     }
 }
