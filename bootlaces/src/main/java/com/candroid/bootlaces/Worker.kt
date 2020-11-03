@@ -17,7 +17,6 @@ package com.candroid.bootlaces
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -42,7 +41,6 @@ import android.content.Intent
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
- *
  **/
 abstract class Worker(val id: Int, val description: String){
      abstract val receiver: WorkReceiver?

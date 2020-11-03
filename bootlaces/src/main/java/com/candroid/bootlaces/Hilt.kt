@@ -16,9 +16,6 @@ package com.candroid.bootlaces
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.datastore.DataStore
-import androidx.datastore.preferences.PreferenceDataStoreFactory
-import androidx.datastore.preferences.Preferences
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -70,15 +67,6 @@ annotation class ForegroundScope
 @Module
 @InstallIn(ApplicationComponent::class)
 object BroadcastReceiverModule {
-    @Singleton
-    @Provides fun provideDataStore(@ApplicationContext ctx: Context): DataStore<Preferences> {
-        return PreferenceDataStoreFactory.create(
-            produceFile = {
-                File(ctx.filesDir, StoreKeys.FILE_NAME).apply { createNewFile() }
-            },
-            scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        )
-    }
     @Singleton
     @Provides fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
 }

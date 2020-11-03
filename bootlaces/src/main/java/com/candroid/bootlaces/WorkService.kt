@@ -20,6 +20,7 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -57,8 +58,9 @@ import kotlin.properties.Delegates
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @FlowPreview
+@AndroidEntryPoint
 @ForegroundScope
-abstract class WorkService: BaseWorkService() {
+class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
@@ -156,7 +158,7 @@ abstract class WorkService: BaseWorkService() {
 }
 
 @ForegroundScope
-sealed class BaseWorkService: LifecycleService() {
+abstract class BaseWorkService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
 
     override fun getLifecycle() = mDispatcher.lifecycle
