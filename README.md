@@ -38,21 +38,7 @@ class App: Application()
     ...
 >
 ```
-6. Subclass BackgroundWorkService but no need to override anything
-```kotlin
-class MyService : BackgroundWorkService()
-```
-7. Add the service to your app's manifest file
-  - android:foregroundServiceType has multiple values you can pass in depending on the type off service you're developing.
-    - https://developer.android.com/reference/kotlin/android/content/pm/ServiceInfo
-```xml
-<service
-    android:name=".MyService"
-    android:directBootAware="true"
-    android:foregroundServiceType="dataSync"
-/>
-```
-8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
+6. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
 ```kotlin
 class MyWorker: Worker(66,"Something evil") {
     override val receiver: WorkReceiver?
@@ -78,11 +64,11 @@ class WorkerWithReceiver: Worker(666,"Locking the screen"){
     }
 }
 ```
-9. Inject your WorkScheduler inside of an Android context
+7. Inject your WorkScheduler inside of an Android context
 ```kotlin
 @Inject lateinit var scheduler: WorkScheduler
 ```
-11. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
+8. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
 ```kotlin
 //persistent worker
 scheduler.schedulePersistent(WorkerWithReceiver())
