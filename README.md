@@ -1,10 +1,6 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
-### Boot Laces is an Android library that provides you with a reactive background service framework for managing work in parallel.
-### It allows you to schedule work perstistent and one time work that includes an optional broadcast receiver that is ran in the foreground.
-### When work is scheduled it is synchronized with an elegant notification system that automatically handles foreground and work progress.
-### Your service becomes persistent when you schedule persistent work allowing for your service to only start at boot when needed
-### A background service that is only brought to the foreground when there is work to be done.
+### A work manager library for Android that includes notifications.
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
@@ -18,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:6.0'
+        implementation 'com.github.evilthreads669966:bootlaces:7.0'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -58,28 +54,38 @@ class MyService : BackgroundWorkService()
 ```
 8. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
 ```kotlin
-class MyWorker: Worker(666,"Locking the screen", action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS){
+class MyWorker: Worker(66,"Something evil") {
+    override val receiver: WorkReceiver?
+        get() = null
+
     override suspend fun doWork(ctx: Context) {
-        //do some work
+        for(i in 1..10)
+            delay(1000)
     }
-    //you only need to override this if your set hasReceiver to true
-    override fun onReceive(ctx: Context, intent: Intent) {
-        //handle broadcast for action your passed in as parameter to worker
+}
+
+//if you want to add a BroadcastReceiver to your worker
+class WorkerWithReceiver: Worker(666,"Locking the screen"){
+    override val receiver: WorkReceiver?
+        get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                //do something
+            }
+        }
+
+    override suspend fun doWork(ctx: Context) {
+        //do work
     }
 }
 ```
-9. Inject your WorkScheduler into your activity
+9. Inject your WorkScheduler inside of an Android context
 ```kotlin
 @Inject lateinit var scheduler: WorkScheduler
-```
-10. Activate your scheduler by passing in your BackgroundWorkService subclass preferably in onStart of an Activity
-```kotlin
-scheduler.activate(LockService::class.java.name)
 ```
 11. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
 ```kotlin
 //persistent worker
-scheduler.schedulePersistent(MyWorker())
+scheduler.schedulePersistent(WorkerWithReceiver())
 //one time worker
 scheduler.scheduleOneTime(MyWorker())
 ```
