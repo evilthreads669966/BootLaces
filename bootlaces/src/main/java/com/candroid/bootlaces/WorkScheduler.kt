@@ -13,14 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemClock
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,7 +64,7 @@ import javax.inject.Singleton
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
-        sendWorkRequest(work, Actions.ACTION_WORK_PERSISTENT)
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
         persistWorkService()
     }
 
@@ -71,14 +77,28 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
 
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
-        sendWorkRequest(work, Actions.ACTION_WORK_ONE_TIME)
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_ONE_TIME)
     }
 
-    private suspend fun sendWorkRequest(work: Work, action: Actions){
-        val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            ctx.startForegroundService(intent)
-        else
-            ctx.startService(intent)
+    suspend fun schedulePeriodic(interval: Long, worker: Worker){
+        val work = Work( worker.id, worker::class.java.name,interval = interval)
+        val alarmMgr = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent().apply {
+            setClass(ctx, AlarmReceiver::class.java)
+            putExtra(Work.KEY_PARCEL, work)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(ctx, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        if(work.interval != null)
+            alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + work.interval!!, work.interval!!, pendingIntent)
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERIODIC)
     }
+}
+
+@InternalCoroutinesApi
+suspend fun sendWorkRequest(ctx: Context, work: Work, action: Actions){
+    val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        ctx.startForegroundService(intent)
+    else
+        ctx.startService(intent)
 }
