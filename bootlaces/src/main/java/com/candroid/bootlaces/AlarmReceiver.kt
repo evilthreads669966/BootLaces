@@ -1,4 +1,4 @@
-/*Copyright 2019 Chris Basinger
+/*Copyright 2020 Chris Basinger
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import androidx.room.*
-import kotlinx.coroutines.flow.Flow
-import javax.inject.Singleton
-
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.launch
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -40,18 +42,14 @@ import javax.inject.Singleton
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/31/20
- *
+ * @date 12/29/20
  **/
-@Dao
-interface WorkDao{
-
-    @Query("SELECT * FROM work")
-    fun getAll(): Flow<Work>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(worker: Work)
-
-    @Delete
-    fun delete(worker: Work)
+class AlarmReceiver: BroadcastReceiver() {
+    @InternalCoroutinesApi
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val work = intent!!.getParcelableExtra<Work>(Work.KEY_PARCEL)
+        GlobalScope.launch {
+            sendWorkRequest(context!!, work!!, Actions.ACTION_WORK_PERIODIC)
+        }
+    }
 }

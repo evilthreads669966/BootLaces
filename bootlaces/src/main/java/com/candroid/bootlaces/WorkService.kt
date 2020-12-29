@@ -13,8 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.SystemClock
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ServiceLifecycleDispatcher
@@ -95,10 +101,10 @@ class WorkService: BaseWorkService() {
                 when(intent.action){
                     Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ foreground.database.insert(work) } }
                     Actions.ACTION_WORK_ONE_TIME.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
+                    Actions.ACTION_WORK_PERIODIC.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
                     else -> return@launch
                 }
             }
-
         }
         return super.onStartCommand(intent, flags, startId)
     }

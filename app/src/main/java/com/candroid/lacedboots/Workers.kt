@@ -16,6 +16,7 @@ package com.candroid.lacedboots
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
+import android.util.Log
 import com.candroid.bootlaces.Worker
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -48,6 +49,15 @@ import kotlinx.coroutines.delay
  * @date 10/31/20
  *
  **/
+class PeriodicWorker: Worker(777, "Periodic Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Periodic worker", "working")
+    }
+
+}
 class OneTimeWorker: Worker(66,"One time work") {
     override val receiver: WorkReceiver?
         get() = null
