@@ -82,13 +82,13 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
 
     suspend fun schedulePeriodic(interval: Long, worker: Worker){
         val work = Work( worker.id, worker::class.java.name,interval = interval)
-        persistWorkService()
         sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
+        persistWorkService()
     }
 }
 
 @InternalCoroutinesApi
-suspend fun sendWorkRequest(ctx: Context, work: Work, action: Actions){
+internal suspend fun sendWorkRequest(ctx: Context, work: Work, action: Actions){
     val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         ctx.startForegroundService(intent)
