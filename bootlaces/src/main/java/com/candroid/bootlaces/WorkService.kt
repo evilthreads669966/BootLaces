@@ -121,8 +121,22 @@ class WorkService: BaseWorkService() {
     }
 
     private suspend fun Flow<Work>.processWorkRequests(){
-        this.map { it.toWorker() }
-            .onEach { worker -> assignWorker(foreground.scope, worker) }
+        this.onEach {
+            if(it.interval != null){
+                val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent().apply {
+                    setClass(this@WorkService, BootReceiver::class.java)
+                    putExtra(Work.KEY_PARCEL, it)
+                }
+                val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+                alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, pendingIntent)
+            }
+        }
+            .map { it.toWorker() }
+            .onEach { worker ->
+                if(worker.interval == null)
+                    assignWorker(foreground.scope, worker)
+            }
             .launchIn(foreground.scope)
     }
 

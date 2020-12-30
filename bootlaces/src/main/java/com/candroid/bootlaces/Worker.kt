@@ -42,7 +42,7 @@ import android.content.Intent
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
  **/
-abstract class Worker(val id: Int, val description: String){
+abstract class Worker(val id: Int, val description: String, var interval: Long? = null){
      abstract val receiver: WorkReceiver?
 
      suspend abstract fun doWork(ctx: Context)
