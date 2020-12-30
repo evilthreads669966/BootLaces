@@ -121,31 +121,30 @@ class WorkService: BaseWorkService() {
     }
 
     private suspend fun Flow<Work>.processWorkRequests(){
-        this.onEach {
-            if(it.interval != null){
-                val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val intent = Intent().apply {
-                    setClass(this@WorkService, BootReceiver::class.java)
-                    putExtra(Work.KEY_PARCEL, it)
-                }
-                val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-                alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, pendingIntent)
-            }
-        }
-            .map { it.toWorker() }
-            .onEach { worker ->
-                if(worker.interval == null)
-                    assignWorker(foreground.scope, worker)
-            }
+        this.map { it.toWorker() }
+            .onEach { worker -> assignWorker(foreground.scope, worker) }
             .launchIn(foreground.scope)
     }
 
-    private suspend fun handleWork(){
+    private suspend fun handleWork(){/*
         withContext(Dispatchers.IO) {
-            foreground.database.getAll().filterNotNull().processWorkRequests()
-        }
+            foreground.database.getPersistentWork().filterNotNull().processWorkRequests()
+        }*/
         withContext(Dispatchers.Default){
             foreground.channel.consumeAsFlow().processWorkRequests()
+        }
+        withContext(Dispatchers.IO){
+            foreground.database.getPeriodicWork().filterNotNull().onEach {
+                if(it.interval != null){
+                    val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    val intent = Intent().apply {
+                        setClass(this@WorkService, BootReceiver::class.java)
+                        putExtra(Work.KEY_PARCEL, it)
+                    }
+                    val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+                    alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, pendingIntent)
+                }
+            }.launchIn(foreground.scope)
         }
     }
 

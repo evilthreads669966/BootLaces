@@ -46,9 +46,11 @@ import javax.inject.Singleton
 @Dao
 interface WorkDao{
 
-    @Query("SELECT * FROM work")
-    fun getAll(): Flow<Work>
+    @Query("SELECT * FROM work WHERE interval IS NULL")
+    fun getPersistentWork(): Flow<Work>
 
+    @Query("SELECT * FROM work WHERE interval IS NOT NULL")
+    fun getPeriodicWork(): Flow<Work>
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(worker: Work)
 
