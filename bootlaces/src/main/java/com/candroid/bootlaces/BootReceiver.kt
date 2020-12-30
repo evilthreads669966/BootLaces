@@ -19,10 +19,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 /*
             (   (                ) (             (     (
@@ -65,6 +62,14 @@ class BootReceiver : HiltBugReceiver(){
                     ctx!!.startForegroundService(intent)
                 else
                     ctx!!.startService(intent)
+            }
+        }
+        else{
+            if(intent!!.hasExtra(Work.KEY_PARCEL)){
+                val work = intent.getParcelableExtra<Work>(Work.KEY_PARCEL)
+                GlobalScope.launch {
+                    sendWorkRequest(ctx!!, work!!, Actions.ACTION_WORK_PERIODIC)
+                }
             }
         }
     }

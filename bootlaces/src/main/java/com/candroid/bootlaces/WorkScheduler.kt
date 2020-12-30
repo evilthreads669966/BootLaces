@@ -82,15 +82,8 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
 
     suspend fun schedulePeriodic(interval: Long, worker: Worker){
         val work = Work( worker.id, worker::class.java.name,interval = interval)
-        val alarmMgr = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent().apply {
-            setClass(ctx, AlarmReceiver::class.java)
-            putExtra(Work.KEY_PARCEL, work)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(ctx, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-        if(work.interval != null)
-            alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + work.interval!!, work.interval!!, pendingIntent)
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERIODIC)
+        persistWorkService()
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
     }
 }
 

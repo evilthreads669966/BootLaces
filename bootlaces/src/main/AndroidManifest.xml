@@ -12,7 +12,7 @@
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"
             android:enabled="true" />
-        <receiver android:name=".BootReceiver" android:enabled="false" android:exported="true" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+        <receiver android:name=".BootReceiver" android:enabled="false" android:exported="true" android:directBootAware="true" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
@@ -20,10 +20,5 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".AlarmReceiver"
-            android:enabled="true"
-            android:exported="true"
-        />
     </application>
 </manifest>
