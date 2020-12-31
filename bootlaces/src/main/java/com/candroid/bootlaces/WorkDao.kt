@@ -46,10 +46,10 @@ import javax.inject.Singleton
 @Dao
 interface WorkDao{
 
-    @Query("SELECT * FROM work WHERE interval IS NULL")
+    @Query("SELECT * FROM work WHERE interval IS NULL AND delay IS NULL")
     fun getPersistentWork(): Flow<Work>
 
-    @Query("SELECT * FROM work WHERE interval IS NOT NULL")
+    @Query("SELECT * FROM work WHERE interval IS NOT NULL AND delay IS NULL")
     fun getPeriodicWork(): Flow<Work>
 
     @Query("SELECT * FROM work WHERE delay IS NOT NULL AND interval IS NULL")

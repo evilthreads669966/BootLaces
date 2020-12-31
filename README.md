@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:7.0'
+        implementation 'com.github.evilthreads669966:bootlaces:8.0'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -68,12 +68,19 @@ class WorkerWithReceiver: Worker(666,"Locking the screen"){
 ```kotlin
 @Inject lateinit var scheduler: WorkScheduler
 ```
-8. Choose a persistent worker or a one time worker. A persistent worker will cause your service to start at boot and run the worker.
+8. Schedule your worker
 ```kotlin
 //persistent worker
 scheduler.schedulePersistent(WorkerWithReceiver())
+
 //one time worker
 scheduler.scheduleOneTime(MyWorker())
+
+//periodic worker
+scheduler.schedulePeriodic(10000, MyWorker()) //runs task every 10 seconds and persists through reboot
+
+//future worker
+scheduler.scheduleFuture(5000, MyWorker()) //runs task once in 5 seconds and persists through reboot if device is restarted before
 ```
 ## Important To Know
 - You can schedule as many workers as you want both persistent and one time workers.
