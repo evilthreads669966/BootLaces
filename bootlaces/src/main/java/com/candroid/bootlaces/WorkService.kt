@@ -102,7 +102,10 @@ class WorkService: BaseWorkService() {
                     Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ foreground.database.insert(work) } }
                     Actions.ACTION_WORK_ONE_TIME.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
                     Actions.ACTION_WORK_PERIODIC.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
-                    Actions.ACTION_WORK_FUTURE.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
+                    Actions.ACTION_WORK_FUTURE.action -> {
+                        withContext(Dispatchers.Default){ foreground.channel.send(work) }
+                        withContext(Dispatchers.IO){ foreground.database.delete(work) }
+                    }
                     else -> return@launch
                 }
             }
