@@ -13,9 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.AlarmManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LifecycleService
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -90,6 +92,8 @@ object ForegroundModule{
     @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
     @ForegroundScope
     @Provides fun provideChannel() = Channel<Work>()
+    @ForegroundScope
+    @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
 }
 /*@InstallIn(ServiceComponent::class)
 @Module
