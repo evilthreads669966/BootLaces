@@ -126,10 +126,10 @@ class WorkService: BaseWorkService() {
             .launchIn(foreground.scope)
     }
 
-    private suspend fun handleWork(){/*
+    private suspend fun handleWork(){
         withContext(Dispatchers.IO) {
             foreground.database.getPersistentWork().filterNotNull().processWorkRequests()
-        }*/
+        }
         withContext(Dispatchers.Default){
             foreground.channel.consumeAsFlow().processWorkRequests()
         }
