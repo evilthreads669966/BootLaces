@@ -69,7 +69,6 @@ class BootReceiver : HiltBugReceiver(){
                 val work = intent.getParcelableExtra<Work>(Work.KEY_PARCEL)
                 GlobalScope.launch {
                     if(work!!.interval != null)
-
                         sendWorkRequest(ctx!!, work, Actions.ACTION_WORK_PERIODIC)
                     else
                         sendWorkRequest(ctx!!, work, Actions.ACTION_WORK_FUTURE)
