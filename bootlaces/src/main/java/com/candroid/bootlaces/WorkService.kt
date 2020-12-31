@@ -66,6 +66,7 @@ import kotlin.properties.Delegates
 @ForegroundScope
 class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
+    @Inject lateinit var alarmMgr: AlarmManager
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
@@ -135,32 +136,27 @@ class WorkService: BaseWorkService() {
             launch{ foreground.database.getPersistentWork().filterNotNull().processWorkRequests() }
             launch{
                 foreground.database.getPeriodicWork().filterNotNull().onEach {
-                    if(it.interval != null){
-                        val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                        val intent = Intent().apply {
-                            setClass(this@WorkService, BootReceiver::class.java)
-                            putExtra(Work.KEY_PARCEL, it)
-                        }
-                        val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, pendingIntent)
+                    preparePendingWork(it).run {
+                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
                     }
                 }.launchIn(foreground.scope)
             }
             launch{
                 foreground.database.getFutureWork().filterNotNull().onEach {
-                    val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    val intent = Intent().apply {
-                        setClass(this@WorkService, BootReceiver::class.java)
-                        putExtra(Work.KEY_PARCEL, it)
-                    }
-                    val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 66, intent, PendingIntent.FLAG_IMMUTABLE)
-                    alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME, it.delay!!, pendingIntent)
+                    preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME, it.delay!!, this) }
                 }.launchIn(foreground.scope)
             }
         }
         withContext(Dispatchers.Default){
             foreground.channel.consumeAsFlow().processWorkRequests()
         }
+    }
+    private fun preparePendingWork(work: Work): PendingIntent {
+        val intent = Intent().apply {
+            setClass(this@WorkService, BootReceiver::class.java)
+            putExtra(Work.KEY_PARCEL, work)
+        }
+        return PendingIntent.getBroadcast(this@WorkService, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 
     @InternalCoroutinesApi
