@@ -81,7 +81,13 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
     }
 
     suspend fun schedulePeriodic(interval: Long, worker: Worker){
-        val work = Work( worker.id, worker::class.java.name,interval = interval)
+        val work = Work( worker.id, worker::class.java.name, interval = interval)
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
+        persistWorkService()
+    }
+
+    suspend fun scheduleFuture(delay: Long, worker: Worker){
+        val work = Work(worker.id, worker::class.java.name, delay = delay)
         sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
         persistWorkService()
     }

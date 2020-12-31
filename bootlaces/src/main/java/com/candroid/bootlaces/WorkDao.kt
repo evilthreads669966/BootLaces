@@ -51,6 +51,10 @@ interface WorkDao{
 
     @Query("SELECT * FROM work WHERE interval IS NOT NULL")
     fun getPeriodicWork(): Flow<Work>
+
+    @Query("SELECT * FROM work WHERE delay IS NOT NULL AND interval IS NULL")
+    fun getFutureWork(): Flow<Work>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(worker: Work)
 
