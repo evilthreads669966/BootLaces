@@ -83,7 +83,7 @@ class WorkService: BaseWorkService() {
     }
 
     init {
-        lifecycleScope.launchWhenCreated { handleWork() }
+        lifecycleScope.launchWhenCreated { withContext(Dispatchers.Default){ handleWork() } }
     }
 
     override fun onCreate() {
@@ -102,6 +102,7 @@ class WorkService: BaseWorkService() {
                     Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ foreground.database.insert(work) } }
                     Actions.ACTION_WORK_ONE_TIME.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
                     Actions.ACTION_WORK_PERIODIC.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
+                    Actions.ACTION_WORK_FUTURE.action -> { withContext(Dispatchers.Default){ foreground.channel.send(work) } }
                     else -> return@launch
                 }
             }
@@ -144,6 +145,17 @@ class WorkService: BaseWorkService() {
                     val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 0, intent, PendingIntent.FLAG_IMMUTABLE)
                     alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, pendingIntent)
                 }
+            }.launchIn(foreground.scope)
+        }
+        withContext(Dispatchers.IO){
+            foreground.database.getFutureWork().filterNotNull().onEach {
+                val alarmMgr = this@WorkService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent().apply {
+                    setClass(this@WorkService, BootReceiver::class.java)
+                    putExtra(Work.KEY_PARCEL, it)
+                }
+                val pendingIntent = PendingIntent.getBroadcast(this@WorkService, 66, intent, PendingIntent.FLAG_IMMUTABLE)
+                alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME, it.delay!!, pendingIntent)
             }.launchIn(foreground.scope)
         }
     }

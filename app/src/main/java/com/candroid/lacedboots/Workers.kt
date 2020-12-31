@@ -56,7 +56,14 @@ class PeriodicWorker: Worker(777, "Periodic Worker"){
     override suspend fun doWork(ctx: Context) {
         Log.d("Periodic worker", "working")
     }
+}
+class FutureWorker: Worker(999, "Future Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
 
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Future worker", "working")
+    }
 }
 class OneTimeWorker: Worker(66,"One time work") {
     override val receiver: WorkReceiver?
