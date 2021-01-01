@@ -55,7 +55,7 @@ class YearlyWorker: Worker(444, "Yearly Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Yearly worker", "working yearly")
+        Log.d("Yearly Worker", "working yearly")
     }
 }
 
@@ -64,7 +64,16 @@ class MonthlyWorker: Worker(333, "Monthly Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Monthly worker", "working monthly")
+        Log.d("Monthly Worker", "working monthly")
+    }
+}
+
+class WeeklyWorker: Worker(888, "Weekly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Weekly Worker", "working weekly")
     }
 }
 
@@ -73,7 +82,7 @@ class DailyWorker: Worker(222, "Daily Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Daily worker", "working daily")
+        Log.d("Daily Worker", "working daily")
     }
 }
 
@@ -82,7 +91,7 @@ class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Periodic worker", "working")
+        Log.d("Periodic Worker", "working")
     }
 }
 
@@ -91,7 +100,7 @@ class HourlyWorker: Worker(111, "Hourly Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Hourly worker", "working hourly")
+        Log.d("Hourly Worker", "working hourly")
     }
 }
 
@@ -100,7 +109,7 @@ class FutureWorker: Worker(999, "Future Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Future worker", "working")
+        Log.d("Future Worker", "working")
     }
 }
 class OneTimeWorker: Worker(66,"One time work", withNotification = true) {
