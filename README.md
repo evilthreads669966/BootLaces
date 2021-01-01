@@ -15,7 +15,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:8.3'
+        implementation 'com.github.evilthreads669966:bootlaces:8.4'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -102,6 +102,9 @@ scheduler.scheduleHourly(MyWorker()) //runs task once every hour and persists th
 //daily worker
 scheduler.scheduleDaily(MyWorker()) //runs task once every day and persists through reboot
 
+//weekly worker
+scheduler.scheduleWeekly(MyWorker()) //runs task once every week (7 days) and persists through reboot
+
 //monthly worker
 scheduler.scheduleMonthly(MyWorker()) //runs task once every month and persists through reboot
 
@@ -109,9 +112,6 @@ scheduler.scheduleMonthly(MyWorker()) //runs task once every month and persists 
 scheduler.scheduleYearly(MyWorker()) //runs task once every year and persists through reboot
 ```
 ## Important To Know
-- You can schedule as many workers as you want both persistent and one time workers.
-- Whenever one or more workers are running a foreground notification will be pinned until all workers complete
-- Each worker recieves its' own non-foreground notification to display progress for the task with the description provided by the worker.
 ## License
 ```
 Copyright 2019 Chris Basinger
