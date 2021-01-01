@@ -42,7 +42,7 @@ import android.content.Intent
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
  **/
-abstract class Worker(val id: Int, val description: String, var interval: Long? = null, var delay: Long? = null, var hourly: Boolean = false, var daily: Boolean = false, var monthly: Boolean = false, var yearly: Boolean = false){
+abstract class Worker(val id: Int, val description: String, var withNotification: Boolean = false, var interval: Long? = null, var delay: Long? = null, var hourly: Boolean = false, var daily: Boolean = false, var monthly: Boolean = false, var yearly: Boolean = false){
      abstract val receiver: WorkReceiver?
 
      suspend abstract fun doWork(ctx: Context)

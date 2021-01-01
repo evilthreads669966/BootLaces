@@ -59,7 +59,7 @@ class DailyWorker: Worker(222, "Daily Worker"){
     }
 }
 
-class PeriodicWorker: Worker(777, "Periodic Worker"){
+class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
@@ -85,11 +85,12 @@ class FutureWorker: Worker(999, "Future Worker"){
         Log.d("Future worker", "working")
     }
 }
-class OneTimeWorker: Worker(66,"One time work") {
+class OneTimeWorker: Worker(66,"One time work", withNotification = true) {
     override val receiver: WorkReceiver?
         get() = null
 
     override suspend fun doWork(ctx: Context) {
+        Log.d("OneTimeWorker", "working one time")
         for(i in 1..10)
             delay(1000)
     }

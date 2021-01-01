@@ -180,11 +180,13 @@ class WorkService: BaseWorkService() {
             workers -= worker.apply {
                 workerCount = workers.also { it += this }.size
                 val intent = IntentFactory.createWorkNotificationIntent(this)
-                NotificatonService.enqueue(this@WorkService, intent)
+                if(withNotification == true)
+                    NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()
                 doWork(this@WorkService)
                 unregisterWorkReceiver()
-                NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
+                if(withNotification == true)
+                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
             }
             workerCount--
         }
