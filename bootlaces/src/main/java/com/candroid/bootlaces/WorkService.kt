@@ -153,9 +153,13 @@ class WorkService: BaseWorkService() {
                             interval = AlarmManager.INTERVAL_HOUR
                         else if(work.daily == true)
                             interval = AlarmManager.INTERVAL_DAY
+                        else if(work.monthly == true)
+                            interval = AlarmManager.INTERVAL_DAY * 31
+                        else if(work.yearly == true)
+                            interval = AlarmManager.INTERVAL_DAY * 365
                         else
                             return@run
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, this)
+                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
                     }
                 }.launchIn(foreground.scope)
             }

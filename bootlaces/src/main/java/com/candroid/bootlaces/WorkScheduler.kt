@@ -85,6 +85,16 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
         val work = Work( worker.id, worker::class.java.name, daily = true)
         schedulePersistentWork(ctx, work)
     }
+
+    suspend fun scheduleMonthly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, monthly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleYearly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, yearly = true)
+        schedulePersistentWork(ctx, work)
+    }
 }
 
 @InternalCoroutinesApi
