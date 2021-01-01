@@ -15,7 +15,6 @@ package com.candroid.bootlaces
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
@@ -137,14 +136,28 @@ class WorkService: BaseWorkService() {
             launch{
                 foreground.database.getPeriodicWork().filterNotNull().onEach {
                     preparePendingWork(it).run {
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
+                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
                     }
                 }.launchIn(foreground.scope)
             }
             launch{
                 foreground.database.getFutureWork().filterNotNull().onEach {
-                    preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME, it.delay!!, this) }
+                    preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
                 }.launchIn(foreground.scope)
+            }
+            launch{
+                foreground.database.getSpecificPeriodicWork().filterNotNull().onEach { work ->
+                    preparePendingWork(work).run {
+                        var interval = 0L
+                        if(work.hourly == true)
+                            interval = AlarmManager.INTERVAL_HOUR
+                        else if(work.daily == true)
+                            interval = AlarmManager.INTERVAL_DAY
+                        else
+                            return@run
+                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, this)
+                    }
+                }
             }
         }
         withContext(Dispatchers.Default){

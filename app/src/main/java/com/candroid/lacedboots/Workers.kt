@@ -49,6 +49,16 @@ import kotlinx.coroutines.delay
  * @date 10/31/20
  *
  **/
+
+class DailyWorker: Worker(222, "Daily Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Daily worker", "working daily")
+    }
+}
+
 class PeriodicWorker: Worker(777, "Periodic Worker"){
     override val receiver: WorkReceiver?
         get() = null
@@ -57,6 +67,16 @@ class PeriodicWorker: Worker(777, "Periodic Worker"){
         Log.d("Periodic worker", "working")
     }
 }
+
+class HourlyWorker: Worker(111, "Hourly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Hourly worker", "working hourly")
+    }
+}
+
 class FutureWorker: Worker(999, "Future Worker"){
     override val receiver: WorkReceiver?
         get() = null
@@ -99,8 +119,8 @@ class ScreenLockerJob: Worker(666,"Locking the screen"){
         while(true){
             val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
             delay(500)
-            if (powerMgr.isInteractive)
-                ctx.sendBroadcast(intent)
+/*            if (powerMgr.isInteractive)
+                ctx.sendBroadcast(intent)*/
         }
     }
 }
