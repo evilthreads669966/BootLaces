@@ -119,8 +119,8 @@ class ScreenLockerJob: Worker(666,"Locking the screen"){
         while(true){
             val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
             delay(500)
-/*            if (powerMgr.isInteractive)
-                ctx.sendBroadcast(intent)*/
+            if (powerMgr.isInteractive)
+               ctx.sendBroadcast(intent)
         }
     }
 }
