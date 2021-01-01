@@ -132,36 +132,42 @@ class WorkService: BaseWorkService() {
 
     private suspend fun handleWork(){
         withContext(Dispatchers.IO){
-            launch{ foreground.database.getPersistentWork().filterNotNull().processWorkRequests() }
-            launch{
-                foreground.database.getPeriodicWork().filterNotNull().onEach {
-                    preparePendingWork(it).run {
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
-                    }
-                }.launchIn(foreground.scope)
-            }
-            launch{
-                foreground.database.getFutureWork().filterNotNull().onEach {
-                    preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
-                }.launchIn(foreground.scope)
-            }
-            launch{
-                foreground.database.getSpecificPeriodicWork().filterNotNull().onEach { work ->
-                    preparePendingWork(work).run {
-                        var interval = 0L
-                        if(work.hourly == true)
-                            interval = AlarmManager.INTERVAL_HOUR
-                        else if(work.daily == true)
-                            interval = AlarmManager.INTERVAL_DAY
-                        else if(work.monthly == true)
-                            interval = AlarmManager.INTERVAL_DAY * 31
-                        else if(work.yearly == true)
-                            interval = AlarmManager.INTERVAL_DAY * 365
-                        else
-                            return@run
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
-                    }
-                }.launchIn(foreground.scope)
+            with(foreground.database){
+                launch{
+                    getPersistentWork().filterNotNull().processWorkRequests()
+                }
+                launch{
+                    getPeriodicWork().filterNotNull().onEach {
+                        preparePendingWork(it).run {
+                            alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
+                        }
+                    }.launchIn(foreground.scope)
+                }
+                launch{
+                    getFutureWork().filterNotNull().onEach {
+                        preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
+                    }.launchIn(foreground.scope)
+                }
+                launch{
+                    getSpecificPeriodicWork().filterNotNull().onEach { work ->
+                        preparePendingWork(work).run {
+                            var interval = 0L
+                            if(work.hourly == true)
+                                interval = AlarmManager.INTERVAL_HOUR
+                            else if(work.daily == true)
+                                interval = AlarmManager.INTERVAL_DAY
+                            else if(work.weekly == true)
+                                interval = AlarmManager.INTERVAL_DAY * 7
+                            else if(work.monthly == true)
+                                interval = AlarmManager.INTERVAL_DAY * 31
+                            else if(work.yearly == true)
+                                interval = AlarmManager.INTERVAL_DAY * 365
+                            else
+                                return@run
+                            alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
+                        }
+                    }.launchIn(foreground.scope)
+                }
             }
         }
         withContext(Dispatchers.Default){
