@@ -64,7 +64,7 @@ class WorkerWithReceiver: Worker(666,"Locking the screen"){
     }
 }
 //worker with a progress notification
-class MyProgressWorker: Worker(66,"Working while displaying a notification for progress") {
+class MyProgressWorker: Worker(66,"Working while displaying a notification for progress", withNotification = true) {
     override val receiver: WorkReceiver?
         get() = null
 
