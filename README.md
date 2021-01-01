@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:8.1'
+        implementation 'com.github.evilthreads669966:bootlaces:8.2'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -63,6 +63,16 @@ class WorkerWithReceiver: Worker(666,"Locking the screen"){
         //do work
     }
 }
+//worker with a progress notification
+class MyProgressWorker: Worker(66,"Working while displaying a notification for progress") {
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        for(i in 1..10)
+            delay(1000)
+    }
+}
 ```
 7. Inject your WorkScheduler inside of an Android context
 ```kotlin
@@ -75,6 +85,9 @@ scheduler.schedulePersistent(WorkerWithReceiver())
 
 //one time worker
 scheduler.scheduleOneTime(MyWorker())
+
+//one time worker with notificaton for displaying progress. This works for all scheduler methods
+scheduler.scheduleOneTime(MyProgressWorker())
 
 //periodic worker
 scheduler.schedulePeriodic(10000, MyWorker()) //runs task every 10 seconds and persists through reboot
