@@ -1,6 +1,7 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
-### A work manager library for Android that includes notifications.
+### A kotlin work manager library for Android that includes notifications.
+## Warning: Version 8.+ is not stable
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
@@ -14,7 +15,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:8.2'
+        implementation 'com.github.evilthreads669966:bootlaces:8.3'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -100,6 +101,12 @@ scheduler.scheduleHourly(MyWorker()) //runs task once every hour and persists th
 
 //daily worker
 scheduler.scheduleDaily(MyWorker()) //runs task once every day and persists through reboot
+
+//monthly worker
+scheduler.scheduleMonthly(MyWorker()) //runs task once every month and persists through reboot
+
+//yearly worker
+scheduler.scheduleYearly(MyWorker()) //runs task once every year and persists through reboot
 ```
 ## Important To Know
 - You can schedule as many workers as you want both persistent and one time workers.
