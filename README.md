@@ -102,7 +102,7 @@ Found a bug on a specific feature? Open an issue on [Github issues](https://gith
 
 ## Contributing
 
-SMS Backdoor is released under the [Apache 2.0 license](https://github.com/evilthreads669966/bootlaces/blob/master/LICENSE). If you would like to contribute
+BootLaces is released under the [Apache 2.0 license](https://github.com/evilthreads669966/bootlaces/blob/master/LICENSE). If you would like to contribute
 something, or simply want to hack then this document should help you get started.
 
 ### Code of Conduct
