@@ -50,6 +50,24 @@ import kotlinx.coroutines.delay
  *
  **/
 
+class YearlyWorker: Worker(444, "Yearly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Yearly worker", "working yearly")
+    }
+}
+
+class MonthlyWorker: Worker(333, "Monthly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Monthly worker", "working monthly")
+    }
+}
+
 class DailyWorker: Worker(222, "Daily Worker"){
     override val receiver: WorkReceiver?
         get() = null
