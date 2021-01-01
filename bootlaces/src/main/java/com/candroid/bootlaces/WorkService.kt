@@ -157,7 +157,7 @@ class WorkService: BaseWorkService() {
                             return@run
                         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, this)
                     }
-                }
+                }.launchIn(foreground.scope)
             }
         }
         withContext(Dispatchers.Default){
