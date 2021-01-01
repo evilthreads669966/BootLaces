@@ -86,6 +86,11 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
         schedulePersistentWork(ctx, work)
     }
 
+    suspend fun scheduleWeekly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, weekly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
     suspend fun scheduleMonthly(worker: Worker){
         val work = Work( worker.id, worker::class.java.name, monthly = true)
         schedulePersistentWork(ctx, work)
@@ -94,6 +99,10 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
     suspend fun scheduleYearly(worker: Worker){
         val work = Work( worker.id, worker::class.java.name, yearly = true)
         schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleReboot(worker: Worker){
+
     }
 }
 
