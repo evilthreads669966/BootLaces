@@ -62,6 +62,8 @@ class LockScreenActivity: VisibilityActivity(){
                     scheduleOneTime(SecondWorker())
                     schedulePeriodic(10000, PeriodicWorker())
                     scheduleFuture(5000, FutureWorker())
+                    scheduleHourly(HourlyWorker())
+                    scheduleDaily(DailyWorker())
                 }
             }
         }

@@ -58,15 +58,7 @@ import javax.inject.Singleton
 class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
     suspend fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
-        persistWorkService()
-    }
-
-    private fun persistWorkService(){
-        val componentName = ComponentName(ctx, BootReceiver::class.java)
-        val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-        if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-            ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        schedulePersistentWork(ctx, work)
     }
 
     suspend fun scheduleOneTime(worker: Worker){
@@ -76,15 +68,37 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
 
     suspend fun schedulePeriodic(interval: Long, worker: Worker){
         val work = Work( worker.id, worker::class.java.name, interval = interval)
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
-        persistWorkService()
+        schedulePersistentWork(ctx, work)
     }
 
     suspend fun scheduleFuture(delay: Long, worker: Worker){
         val work = Work(worker.id, worker::class.java.name, delay = delay)
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
-        persistWorkService()
+        schedulePersistentWork(ctx, work)
     }
+
+    suspend fun scheduleHourly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, hourly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleDaily(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, daily = true)
+        schedulePersistentWork(ctx, work)
+    }
+}
+
+@InternalCoroutinesApi
+private suspend fun schedulePersistentWork(ctx: Context, work: Work){
+    sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
+    persistWorkService(ctx)
+}
+
+@InternalCoroutinesApi
+private fun persistWorkService(ctx: Context){
+    val componentName = ComponentName(ctx, BootReceiver::class.java)
+    val state = ctx.packageManager.getComponentEnabledSetting(componentName)
+    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+        ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
 }
 
 @InternalCoroutinesApi

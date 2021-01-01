@@ -14,7 +14,7 @@ allprojects {
 2. Add the dependency to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:8.0'
+        implementation 'com.github.evilthreads669966:bootlaces:8.1'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -81,6 +81,12 @@ scheduler.schedulePeriodic(10000, MyWorker()) //runs task every 10 seconds and p
 
 //future worker
 scheduler.scheduleFuture(5000, MyWorker()) //runs task once in 5 seconds and persists through reboot if device is restarted before
+
+//hourly worker
+scheduler.scheduleHourly(MyWorker()) //runs task once every hour and persists through reboot
+
+//daily worker
+scheduler.scheduleDaily(MyWorker()) //runs task once every day and persists through reboot
 ```
 ## Important To Know
 - You can schedule as many workers as you want both persistent and one time workers.
