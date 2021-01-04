@@ -1,7 +1,7 @@
 [![Release](https://jitpack.io/v/evilthreads669966/bootlaces.svg)](https://jitpack.io/#evilthreads669966/bootlaces)&nbsp;&nbsp;[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=plastic)](https://android-arsenal.com/api?level=24)&nbsp;&nbsp;[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://kotlin.link)
 # Boot Laces
 ### A kotlin work manager library for Android that includes notifications.
-## Warning: Version 8.+ is not stable
+## Warning: Hourly Workers are not stable
 ## User Instructions
 1. Add the JitPack repository to your project's build.gradle
 ```gradle
