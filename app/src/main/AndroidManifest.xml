@@ -10,17 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity
-            android:name=".LauncherActivity"
-            android:launchMode="singleInstance"
-            android:resizeableActivity="false"
-            android:screenOrientation="portrait">
+        <activity android:name=".LauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LockActivity">
+        <activity android:name=".LockActivity" android:launchMode="singleInstance"
+            android:resizeableActivity="false"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
