@@ -13,7 +13,6 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 object LockManager: ILockManager {
-    const val KEY_HIDEABLE = "KEY_HIDEABLE"
     override fun isLocked() = ScreenVisibility.isVisible()
 
     override fun isLockable(ctx: Context): Boolean{
@@ -33,7 +32,6 @@ object LockManager: ILockManager {
                 setClass(ctx, LockActivity::class.java)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-            activityIntent.putExtra(KEY_HIDEABLE, true)
             ctx.startActivity(activityIntent)
         }
     }
