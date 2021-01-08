@@ -14,9 +14,11 @@ limitations under the License.*/
 package com.candroid.lacedboots
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,10 +50,11 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LockScreenActivity: VisibilityActivity(){
+class LauncherActivity: AppCompatActivity(){
     companion object{
         private const val mOverlay_request_code = 666
     }
+
     @Inject lateinit var scheduler: WorkScheduler
     init {
         lifecycleScope.launchWhenResumed {
@@ -69,6 +72,10 @@ class LockScreenActivity: VisibilityActivity(){
                     scheduleYearly(YearlyWorker())
                 }
             }
+            val state = packageManager.getComponentEnabledSetting(this@LauncherActivity.componentName)
+            if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+                getPackageManager().setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            finish()
         }
     }
 
