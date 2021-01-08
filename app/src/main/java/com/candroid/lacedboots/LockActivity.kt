@@ -22,6 +22,6 @@ package com.candroid.lacedboots
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
- * @date 10/18/20
+ * @date 01/07/21
  **/
 class LockActivity: VisibilityActivity()
