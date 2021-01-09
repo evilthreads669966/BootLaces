@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import androidx.room.Room
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
@@ -94,6 +95,13 @@ object ForegroundModule{
     @Provides fun provideChannel() = Channel<Work>()
     @ForegroundScope
     @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
+}
+
+@InstallIn(ServiceComponent::class)
+@Module
+interface ForegroundBindings{
+    @ForegroundScope
+    @Binds fun bindAdapter(workAdapter: WorkAdapter): Adapter<Work,Worker>
 }
 /*@InstallIn(ServiceComponent::class)
 @Module
