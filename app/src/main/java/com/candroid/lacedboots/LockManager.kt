@@ -36,7 +36,6 @@ object LockManager: ILockManager {
         }
     }
 }
-
 interface ILockManager {
     fun isLocked(): Boolean
 

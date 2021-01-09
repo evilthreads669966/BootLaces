@@ -66,6 +66,8 @@ import kotlin.properties.Delegates
 class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
+    @Inject lateinit var workAdapter: Adapter<Work,Worker>
+
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
@@ -125,7 +127,7 @@ class WorkService: BaseWorkService() {
     }
 
     private suspend fun Flow<Work>.processWorkRequests(){
-        this.map { it.toWorker() }
+        this.map { work -> workAdapter.request(work) }
             .onEach { worker -> assignWorker(foreground.scope, worker) }
             .launchIn(foreground.scope)
     }
