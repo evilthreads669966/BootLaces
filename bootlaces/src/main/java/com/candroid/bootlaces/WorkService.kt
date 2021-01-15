@@ -24,6 +24,7 @@ import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -63,7 +64,7 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-@ForegroundScope
+@ServiceScoped
 class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
