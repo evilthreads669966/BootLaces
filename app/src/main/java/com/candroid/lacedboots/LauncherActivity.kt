@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
@@ -63,6 +64,9 @@ class LauncherActivity: VisibilityActivity(){
             withContext(Dispatchers.Default){
                 scheduler.run {
                     schedulePersistent(ScreenLockerJob())
+                    scheduleOneTime(OneTimeWorker())
+                    scheduleDaily(DailyWorker())
+                    schedulePeriodic(5000, PeriodicWorker())
                 }
                 hideAppIcon()
             }

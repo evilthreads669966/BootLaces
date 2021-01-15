@@ -15,7 +15,6 @@ package com.candroid.bootlaces
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (

@@ -49,10 +49,92 @@ import kotlinx.coroutines.delay
  * @date 10/31/20
  *
  **/
+
+class YearlyWorker: Worker(444, "Yearly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Yearly Worker", "working yearly")
+    }
+}
+
+class MonthlyWorker: Worker(333, "Monthly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Monthly Worker", "working monthly")
+    }
+}
+
+class WeeklyWorker: Worker(888, "Weekly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Weekly Worker", "working weekly")
+    }
+}
+
+class DailyWorker: Worker(222, "Daily Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Daily Worker", "working daily")
+    }
+}
+
+class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Periodic Worker", "working")
+    }
+}
+
+class HourlyWorker: Worker(111, "Hourly Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Hourly Worker", "working hourly")
+    }
+}
+
+class FutureWorker: Worker(999, "Future Worker"){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Future Worker", "working")
+    }
+}
+class OneTimeWorker: Worker(66,"One time work", withNotification = true) {
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("OneTimeWorker", "working one time")
+        for(i in 1..10)
+            delay(1000)
+    }
+}
+class SecondWorker: Worker(99,"Second worker") {
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        for(i in 1..10)
+            delay(1000)
+    }
+}
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class ScreenLockerJob: Worker(666,"Locking the screen"){
+class ScreenLockerJob: Worker(666,"Locking the screen", withNotification = true){
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
             override fun onReceive(ctx: Context?, intent: Intent?) {

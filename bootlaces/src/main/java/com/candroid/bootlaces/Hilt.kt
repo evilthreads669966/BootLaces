@@ -84,25 +84,24 @@ interface ForegroundEntryPoint{
 
 @InstallIn(ServiceComponent::class)
 @Module
-object ForegroundModule{
-    @ForegroundScope
-    @Provides fun notificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
-    @ForegroundScope
-    @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    @ForegroundScope
-    @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
-    @ForegroundScope
+object BackgroundModule{
+    @ServiceScoped
     @Provides fun provideChannel() = Channel<Work>()
-    @ForegroundScope
+    @ServiceScoped
     @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
+    @ServiceScoped
+    @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
 }
 
 @InstallIn(ServiceComponent::class)
 @Module
-interface ForegroundBindings{
+object ForegroundModule{
     @ForegroundScope
-    @Binds fun bindAdapter(workAdapter: WorkAdapter): Adapter<Work,Worker>
+    @Provides fun notificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
+    @ForegroundScope
+    @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
+
 /*@InstallIn(ServiceComponent::class)
 @Module
 interface ForegroundBindingModule{
