@@ -56,7 +56,7 @@ import javax.inject.Inject
 @InternalCoroutinesApi
 @ForegroundScope
 class ForegroundActivator @Inject constructor(val ctx: Service, val factory: NotificationFactory){
-     fun notifyForeground() {
+     private fun notifyForeground() {
           val notification = factory.createForegroundNotification()
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                ctx.startForeground(FOREGROUND_ID, notification, ctx.foregroundServiceType)
