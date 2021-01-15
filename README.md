@@ -12,7 +12,7 @@ allprojects {
 	}
 }
 ```
-2. Add the dependency to your app's build.gradle
+2. Add the dependencies for boot laces & hilt to your app's build.gradle
 ```gradle
 dependencies {
         implementation 'com.github.evilthreads669966:bootlaces:8.4'
@@ -20,26 +20,31 @@ dependencies {
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
 ```
-3. Add the Hilt plugin to your project's build.gradle dependencies
+3. Add the kapt and hilt plugins to the top of your app's build.gradle file
+```gradle
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
+```
+4. Add the Hilt plugin to your project's build.gradle dependencies
 ```gradle
 dependencies {
     ...
     classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
 }
 ```
-4. Annotate your subclass of Application class
+5. Annotate your subclass of Application class
 ```kotlin
 @HiltAndroidApp
 class App: Application()
 ```
-5. Add name of your Application subclass to manifest
+6. Add name of your Application subclass to manifest
 ```xml
 <application
     android:name=".App"
     ...
 >
 ```
-6. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
+7. Create your worker(s). The description parameter will be used for your notification. You can create a Broadcast receiver for your worker by overriding onReceive an action to Worker.
 ```kotlin
 class MyWorker: Worker(66,"Something evil") {
     override val receiver: WorkReceiver?
@@ -75,11 +80,11 @@ class MyProgressWorker: Worker(66,"Working while displaying a notification for p
     }
 }
 ```
-7. Inject your WorkScheduler inside of an Android context
+8. Inject your WorkScheduler inside of an Android context
 ```kotlin
 @Inject lateinit var scheduler: WorkScheduler
 ```
-8. Schedule your worker
+9. Schedule your worker
 ```kotlin
 //persistent worker
 scheduler.schedulePersistent(WorkerWithReceiver())
