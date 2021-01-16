@@ -66,9 +66,8 @@ class WorkService(): Service() {
     @Inject lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
     @Inject lateinit var channel: Channel<Work>
-    @Inject lateinit var scope: CoroutineScope
     @Inject lateinit var supervisor: CompletableJob
-
+    private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
@@ -87,6 +86,7 @@ class WorkService(): Service() {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
+        scope = CoroutineScope(Dispatchers.Default + supervisor)
         scope.launch { handleWork() }
     }
 
