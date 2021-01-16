@@ -135,7 +135,7 @@ class SecondWorker: Worker(99,"Second worker") {
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class ScreenLockerJob: Worker(666,"Locking the screen", withNotification = true){
+class PersistentWorker: Worker(666,"Locking the screen", withNotification = true){
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
             override fun onReceive(ctx: Context?, intent: Intent?) {

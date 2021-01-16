@@ -18,15 +18,10 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.app.ServiceCompat
-import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.ServiceLifecycleDispatcher
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -100,17 +95,15 @@ class WorkService(): Service() {
             if(action == null) return@run
             val work = getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@run
             scope.launch {
-                withContext(Dispatchers.Default){
-                    when(intent.action){
-                        Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
-                        Actions.ACTION_WORK_ONE_TIME.action -> { channel.send(work) }
-                        Actions.ACTION_WORK_PERIODIC.action -> { channel.send(work) }
-                        Actions.ACTION_WORK_FUTURE.action -> {
-                            channel.send(work)
-                            withContext(Dispatchers.IO){ database.delete(work) }
-                        }
-                        else -> return@withContext
+                when(intent.action){
+                    Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
+                    Actions.ACTION_WORK_ONE_TIME.action -> { channel.send(work) }
+                    Actions.ACTION_WORK_PERIODIC.action -> { channel.send(work) }
+                    Actions.ACTION_WORK_FUTURE.action -> {
+                        channel.send(work)
+                        withContext(Dispatchers.IO){ database.delete(work) }
                     }
+                    else -> return@launch
                 }
             }
         }
@@ -139,39 +132,39 @@ class WorkService(): Service() {
 
     private suspend fun CoroutineScope.handleWork(){
         val ioScope = CoroutineScope(this@handleWork.coroutineContext + Dispatchers.IO)
-            with(database){
-                getPersistentWork().filterNotNull().processWorkRequests(ioScope)
+        with(database){
+            getPersistentWork().filterNotNull().processWorkRequests(ioScope)
 
-                getPeriodicWork().filterNotNull().onEach {
-                    preparePendingWork(it).run {
-                        alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
-                    }
-                }.launchIn(ioScope)
+            getPeriodicWork().filterNotNull().onEach {
+                preparePendingWork(it).run {
+                    alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
+                }
+            }.launchIn(ioScope)
 
-                getFutureWork().filterNotNull().onEach {
-                    preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
-                }.launchIn(ioScope)
+            getFutureWork().filterNotNull().onEach {
+                preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
+            }.launchIn(ioScope)
 
-                getSpecificPeriodicWork().filterNotNull().onEach { work ->
-                    preparePendingWork(work).run {
-                        var interval = 0L
-                        if(work.hourly == true)
-                            interval = AlarmManager.INTERVAL_HOUR
-                        else if(work.daily == true)
-                            interval = AlarmManager.INTERVAL_DAY
-                        else if(work.weekly == true)
-                            interval = AlarmManager.INTERVAL_DAY * 7
-                        else if(work.monthly == true)
-                            interval = AlarmManager.INTERVAL_DAY * 31
-                        else if(work.yearly == true)
-                            interval = AlarmManager.INTERVAL_DAY * 365
-                        else
-                            return@run
-                        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
-                    }
-                }.launchIn(ioScope)
-            }
-            channel.consumeAsFlow().processWorkRequests(scope)
+            getSpecificPeriodicWork().filterNotNull().onEach { work ->
+                preparePendingWork(work).run {
+                    var interval = 0L
+                    if(work.hourly == true)
+                        interval = AlarmManager.INTERVAL_HOUR
+                    else if(work.daily == true)
+                        interval = AlarmManager.INTERVAL_DAY
+                    else if(work.weekly == true)
+                        interval = AlarmManager.INTERVAL_DAY * 7
+                    else if(work.monthly == true)
+                        interval = AlarmManager.INTERVAL_DAY * 31
+                    else if(work.yearly == true)
+                        interval = AlarmManager.INTERVAL_DAY * 365
+                    else
+                        return@run
+                    alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
+                }
+            }.launchIn(ioScope)
+        }
+        channel.consumeAsFlow().processWorkRequests(scope)
     }
     private fun preparePendingWork(work: Work): PendingIntent {
         val intent = Intent().apply {
