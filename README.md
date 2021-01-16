@@ -12,7 +12,12 @@ allprojects {
 	}
 }
 ```
-2. Add the dependencies for boot laces & hilt to your app's build.gradle
+2. Add the kapt and hilt plugins to the top of your app's build.gradle file
+```gradle
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
+```
+3. Add the dependencies for boot laces & hilt to your app's build.gradle
 ```gradle
 dependencies {
         implementation 'com.github.evilthreads669966:bootlaces:8.4'
@@ -20,11 +25,7 @@ dependencies {
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
 ```
-3. Add the kapt and hilt plugins to the top of your app's build.gradle file
-```gradle
-apply plugin: 'kotlin-kapt'
-apply plugin: 'dagger.hilt.android.plugin'
-```
+
 4. Add the Hilt plugin to your project's build.gradle dependencies
 ```gradle
 dependencies {
