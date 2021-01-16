@@ -15,8 +15,10 @@ package com.candroid.bootlaces
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.IBinder
 import android.os.SystemClock
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
@@ -64,7 +66,7 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: BaseWorkService() {
+class WorkService(): Service() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
@@ -85,14 +87,11 @@ class WorkService: BaseWorkService() {
         fun isStarted() = !state.equals(ServiceState.STOPPED)
     }
 
-    init {
-        lifecycleScope.launchWhenCreated { withContext(Dispatchers.Default){ handleWork() } }
-    }
-
     override fun onCreate() {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
+        scope.launch { handleWork() }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -100,7 +99,7 @@ class WorkService: BaseWorkService() {
             if(!hasExtra(Work.KEY_PARCEL)) return@run
             if(action == null) return@run
             val work = getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@run
-            lifecycleScope.launch {
+            scope.launch {
                 withContext(Dispatchers.Default){
                     when(intent.action){
                         Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
@@ -115,7 +114,8 @@ class WorkService: BaseWorkService() {
                 }
             }
         }
-        return super.onStartCommand(intent, flags, startId)
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -129,26 +129,28 @@ class WorkService: BaseWorkService() {
         super.onDestroy()
     }
 
-    private suspend fun Flow<Work>.processWorkRequests(){
+    override fun onBind(intent: Intent?) = null
+
+    private suspend fun Flow<Work>.processWorkRequests(scope: CoroutineScope){
         this.map { work -> work.toWorker() }
-            .onEach { worker -> assignWorker(scope, worker) }
+            .onEach { worker -> this@WorkService.scope.assignWorker(worker) }
             .launchIn(scope)
     }
 
-    private suspend fun handleWork(){
-        withContext(Dispatchers.IO){
+    private suspend fun CoroutineScope.handleWork(){
+        val ioScope = CoroutineScope(this@handleWork.coroutineContext + Dispatchers.IO)
             with(database){
-                getPersistentWork().filterNotNull().processWorkRequests()
+                getPersistentWork().filterNotNull().processWorkRequests(ioScope)
 
                 getPeriodicWork().filterNotNull().onEach {
                     preparePendingWork(it).run {
                         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
                     }
-                }.launchIn(scope)
+                }.launchIn(ioScope)
 
                 getFutureWork().filterNotNull().onEach {
                     preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
-                }.launchIn(scope)
+                }.launchIn(ioScope)
 
                 getSpecificPeriodicWork().filterNotNull().onEach { work ->
                     preparePendingWork(work).run {
@@ -167,12 +169,9 @@ class WorkService: BaseWorkService() {
                             return@run
                         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
                     }
-                }.launchIn(scope)
+                }.launchIn(ioScope)
             }
-        }
-        withContext(Dispatchers.Default){
-            channel.consumeAsFlow().processWorkRequests()
-        }
+            channel.consumeAsFlow().processWorkRequests(scope)
     }
     private fun preparePendingWork(work: Work): PendingIntent {
         val intent = Intent().apply {
@@ -183,10 +182,10 @@ class WorkService: BaseWorkService() {
     }
 
     @InternalCoroutinesApi
-    private suspend fun assignWorker(coroutineScope: CoroutineScope, worker: Worker){
+    private suspend fun CoroutineScope.assignWorker(worker: Worker){
         if(workers.contains(worker)) return
         if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
-        coroutineScope.launch{
+        launch{
             workers -= worker.apply {
                 workerCount = workers.also { it += this }.size
                 val intent = IntentFactory.createWorkNotificationIntent(this)
@@ -209,28 +208,5 @@ class WorkService: BaseWorkService() {
             val filter = IntentFilter(this.action)
             registerReceiver(this, filter)
         }
-    }
-}
-
-@ServiceScoped
-abstract class BaseWorkService: LifecycleService() {
-    private val mDispatcher = ServiceLifecycleDispatcher(this)
-
-    override fun getLifecycle() = mDispatcher.lifecycle
-
-    override fun onCreate() {
-        mDispatcher.onServicePreSuperOnCreate()
-        super.onCreate()
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        mDispatcher.onServicePreSuperOnStart()
-        super.onStartCommand(intent, flags, startId)
-        return START_STICKY
-    }
-
-    override fun onDestroy() {
-        mDispatcher.onServicePreSuperOnDestroy()
-        super.onDestroy()
     }
 }
