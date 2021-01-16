@@ -67,6 +67,7 @@ class WorkService(): Service() {
     @Inject lateinit var database: WorkDao
     @Inject lateinit var channel: Channel<Work>
     @Inject lateinit var scope: CoroutineScope
+    @Inject lateinit var supervisor: CompletableJob
 
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
@@ -112,7 +113,7 @@ class WorkService(): Service() {
     }
 
     override fun onDestroy() {
-        scope.also { it.coroutineContext.cancelChildren() }.cancel()
+        supervisor.also { it.cancelChildren() }.cancel()
         channel.close()
         workers.forEach { it.unregisterWorkReceiver() }
         workers.clear()
