@@ -48,7 +48,6 @@ import javax.inject.Inject
  *
  **/
 @AndroidEntryPoint
-@ForegroundScope
 class NotificatonService: JobIntentService(){
     @Inject lateinit var factory: NotificationFactory
     companion object{

@@ -89,7 +89,7 @@ class LauncherActivity: VisibilityActivity(){
 }
 
 fun Activity.hideAppIcon(){
-    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R){
+    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
         val state = packageManager.getComponentEnabledSetting(componentName)
         if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
             getPackageManager().setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);

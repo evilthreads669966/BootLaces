@@ -61,10 +61,6 @@ import javax.inject.Singleton
  * @date 10/31/20
  *
  **/
-@Scope
-@AliasOf(ServiceScoped::class)
-annotation class ForegroundScope
-
 @Module
 @InstallIn(ApplicationComponent::class)
 object BroadcastReceiverModule {
@@ -74,31 +70,24 @@ object BroadcastReceiverModule {
 
 @FlowPreview
 @InternalCoroutinesApi
-@ForegroundScope
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
 interface ForegroundEntryPoint{
-    @ForegroundScope
     fun getActivator(): ForegroundActivator
 }
 
 @InstallIn(ServiceComponent::class)
 @Module
 object BackgroundModule{
-    @ServiceScoped
     @Provides fun provideChannel() = Channel<Work>()
-    @ServiceScoped
     @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
-    @ServiceScoped
     @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
 }
 
 @InstallIn(ServiceComponent::class)
 @Module
 object ForegroundModule{
-    @ForegroundScope
     @Provides fun notificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
-    @ForegroundScope
     @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
