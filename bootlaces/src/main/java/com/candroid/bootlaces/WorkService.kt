@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
 import androidx.core.app.ServiceCompat
+import com.evilthreads.wakescopelib.wakeScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -87,7 +88,7 @@ class WorkService(): Service() {
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
         scope = CoroutineScope(Dispatchers.Default + supervisor)
-        scope.launch { handleWork() }
+        wakeScope { scope.launch { handleWork() } }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
