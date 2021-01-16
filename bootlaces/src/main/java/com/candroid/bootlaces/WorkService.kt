@@ -64,7 +64,6 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-@ServiceScoped
 class WorkService: BaseWorkService() {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
@@ -213,7 +212,7 @@ class WorkService: BaseWorkService() {
     }
 }
 
-@ForegroundScope
+@ServiceScoped
 abstract class BaseWorkService: LifecycleService() {
     private val mDispatcher = ServiceLifecycleDispatcher(this)
 

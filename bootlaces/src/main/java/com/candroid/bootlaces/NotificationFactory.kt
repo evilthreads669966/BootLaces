@@ -32,6 +32,8 @@ import com.candroid.bootlaces.NotificationFactory.WorkNotification.TEMPLATE_STAR
 import com.candroid.bootlaces.NotificationFactory.WorkNotification.createBackgroundChannel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
+
 /*
             (   (                ) (             (     (
             )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
@@ -58,7 +60,6 @@ import javax.inject.Inject
  * @date 10/31/20
  * creates notifications for foreground and workers
  **/
-@ForegroundScope
 class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Context, val mgr: NotificationManagerCompat, val builder: NotificationCompat.Builder){
     fun createStartedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
