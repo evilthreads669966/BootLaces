@@ -14,14 +14,11 @@ limitations under the License.*/
 package com.candroid.lacedboots
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,7 +60,7 @@ class LauncherActivity: VisibilityActivity(){
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Default){
                 scheduler.run {
-                    //schedulePersistent(ScreenLockerJob())
+                    schedulePersistent(PersistentWorker())
                     scheduleOneTime(OneTimeWorker())
                     scheduleDaily(DailyWorker())
                     schedulePeriodic(5000, PeriodicWorker())
