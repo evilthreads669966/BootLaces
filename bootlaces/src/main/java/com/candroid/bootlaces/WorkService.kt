@@ -75,7 +75,7 @@ class WorkService(): Service() {
 
     private lateinit var foreground: ForegroundActivator
     private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
-    private var workerCount: Int by Delegates.observable(0){property, oldValue, newValue ->
+    private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0){
             foreground.deactivate()
             stopSelf()
