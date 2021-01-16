@@ -81,7 +81,8 @@ interface ForegroundEntryPoint{
 object BackgroundModule{
     @Provides fun provideChannel() = Channel<Work>()
     @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
-    @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    @Provides fun provideScope() = CoroutineScope(Dispatchers.Default + provideSupervisor())
+    @Provides fun provideSupervisor(): CompletableJob = SupervisorJob()
 }
 
 @InstallIn(ServiceComponent::class)
