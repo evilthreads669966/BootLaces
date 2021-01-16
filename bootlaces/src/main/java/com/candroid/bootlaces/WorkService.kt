@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
 import androidx.core.app.ServiceCompat
+import com.evilthreads.wakescopelib.suspendedWakeScope
 import com.evilthreads.wakescopelib.wakeScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,7 +89,7 @@ class WorkService(): Service() {
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
         scope = CoroutineScope(Dispatchers.Default + supervisor)
-        wakeScope { scope.launch { handleWork() } }
+        scope.launch { suspendedWakeScope { handleWork() } }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
