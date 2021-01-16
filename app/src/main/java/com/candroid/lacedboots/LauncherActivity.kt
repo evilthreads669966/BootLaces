@@ -19,6 +19,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,7 +51,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
-class LauncherActivity: VisibilityActivity(){
+class LauncherActivity: AppCompatActivity(){
     companion object{
         private const val mOverlay_request_code = 666
     }
