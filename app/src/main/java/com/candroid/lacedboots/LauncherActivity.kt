@@ -63,7 +63,7 @@ class LauncherActivity: VisibilityActivity(){
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Default){
                 scheduler.run {
-                    schedulePersistent(ScreenLockerJob())
+                    //schedulePersistent(ScreenLockerJob())
                     scheduleOneTime(OneTimeWorker())
                     scheduleDaily(DailyWorker())
                     schedulePeriodic(5000, PeriodicWorker())

@@ -91,6 +91,7 @@ class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
+        delay(10000)
         Log.d("Periodic Worker", "working")
     }
 }
