@@ -163,7 +163,7 @@ class WorkService(): Service() {
                         interval = AlarmManager.INTERVAL_DAY * 365
                     else
                         return@run
-                    if(interval == AlarmManager.INTERVAL_DAY || interval == AlarmManager.INTERVAL_DAY)
+                    if(interval == AlarmManager.INTERVAL_HOUR || interval == AlarmManager.INTERVAL_DAY)
                         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
                     else
                         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
