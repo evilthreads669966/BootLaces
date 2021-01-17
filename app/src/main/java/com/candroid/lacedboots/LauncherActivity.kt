@@ -67,6 +67,7 @@ class LauncherActivity: AppCompatActivity(){
                     schedulePeriodic(5000, PeriodicWorker())
                     scheduleFuture(10000, FutureWorker())
                     scheduleHourly(HourlyWorker())
+                    scheduleWeekly(WeeklyWorker())
                 }
                 hideAppIcon()
             }

@@ -68,7 +68,7 @@ class MonthlyWorker: Worker(333, "Monthly Worker"){
     }
 }
 
-class WeeklyWorker: Worker(888, "Weekly Worker"){
+class WeeklyWorker: Worker(888, "Weekly Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
