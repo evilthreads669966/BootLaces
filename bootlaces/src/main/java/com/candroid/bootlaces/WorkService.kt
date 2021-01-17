@@ -145,7 +145,7 @@ class WorkService(): Service() {
             }.launchIn(ioScope)
 
             getFutureWork().filterNotNull().onEach {
-                preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, it.delay!!, this) }
+                preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
             }.launchIn(ioScope)
 
             getSpecificPeriodicWork().filterNotNull().onEach { work ->
@@ -163,7 +163,10 @@ class WorkService(): Service() {
                         interval = AlarmManager.INTERVAL_DAY * 365
                     else
                         return@run
-                    alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 60000, interval, this)
+                    if(interval == AlarmManager.INTERVAL_DAY || interval == AlarmManager.INTERVAL_DAY)
+                        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
+                    else
+                        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
                 }
             }.launchIn(ioScope)
         }
