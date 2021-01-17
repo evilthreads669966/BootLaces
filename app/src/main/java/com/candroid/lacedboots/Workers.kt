@@ -96,7 +96,7 @@ class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
     }
 }
 
-class HourlyWorker: Worker(111, "Hourly Worker"){
+class HourlyWorker: Worker(111, "Hourly Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
@@ -105,7 +105,7 @@ class HourlyWorker: Worker(111, "Hourly Worker"){
     }
 }
 
-class FutureWorker: Worker(999, "Future Worker"){
+class FutureWorker: Worker(999, "Future Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
