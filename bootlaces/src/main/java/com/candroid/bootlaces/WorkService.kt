@@ -65,16 +65,16 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService(): Service() {
+class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
     @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
     @Inject lateinit var channel: Channel<Work>
     @Inject lateinit var supervisor: CompletableJob
     @Inject lateinit var mutex: Mutex
+    @Inject lateinit var workers: MutableCollection<Worker>
     private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
-    private val workers = mutableSetOf<Worker>()
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0){
             foreground.deactivate()
@@ -136,16 +136,16 @@ class WorkService(): Service() {
 
     override fun onBind(intent: Intent?) = null
 
-    private suspend fun Flow<Work>.processWorkRequests(scope: CoroutineScope){
+    override suspend fun Flow<Work>.processWork(scope: CoroutineScope){
         this.map { work -> work.toWorker() }
             .onEach { worker -> this@WorkService.scope.assignWorker(worker) }
             .launchIn(scope)
     }
 
-    private suspend fun CoroutineScope.handleWork(){
+    override suspend fun CoroutineScope.handleWork(){
         val ioScope = CoroutineScope(this@handleWork.coroutineContext + Dispatchers.IO)
         with(database){
-            getPersistentWork().filterNotNull().processWorkRequests(ioScope)
+            getPersistentWork().filterNotNull().processWork(ioScope)
 
             getFutureWork().filterNotNull().onEach {
                 preparePendingWork(it).run { alarmMgr.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
@@ -178,7 +178,7 @@ class WorkService(): Service() {
                 }
             }.launchIn(ioScope)
         }
-        channel.consumeAsFlow().processWorkRequests(scope)
+        channel.consumeAsFlow().processWork(scope)
     }
     private fun preparePendingWork(work: Work): PendingIntent {
         val intent = Intent().apply {
@@ -186,29 +186,6 @@ class WorkService(): Service() {
             putExtra(Work.KEY_PARCEL, work)
         }
         return PendingIntent.getBroadcast(this@WorkService, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
-    }
-
-    @InternalCoroutinesApi
-    private suspend fun CoroutineScope.assignWorker(worker: Worker){
-        if(workers.contains(worker)) return
-        if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
-        launch{
-            with(worker){
-                mutex.withLock {
-                    workers += this
-                    workerCount++
-                }
-                val intent = IntentFactory.createWorkNotificationIntent(worker)
-                if(worker.withNotification == true)
-                    NotificatonService.enqueue(this@WorkService, intent)
-                registerWorkReceiver()
-                doWork(this@WorkService)
-                unregisterWorkReceiver()
-                if(withNotification == true)
-                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
-            }
-            mutex.withLock { workerCount-- }
-        }
     }
 
     private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
@@ -219,4 +196,33 @@ class WorkService(): Service() {
             registerReceiver(this, filter)
         }
     }
+
+    override suspend fun CoroutineScope.assignWorker(worker: Worker) {
+        if(workers.contains(worker)) return
+        if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
+        launch{
+            with(worker){
+                mutex.withLock {
+                    workers.add(this)
+                    workerCount++
+                }
+                val intent = com.candroid.bootlaces.IntentFactory.createWorkNotificationIntent(worker)
+                if(worker.withNotification == true)
+                    com.candroid.bootlaces.NotificatonService.enqueue(this@WorkService, intent)
+                registerWorkReceiver()
+                doWork(this@WorkService)
+                unregisterWorkReceiver()
+                if(withNotification == true)
+                    com.candroid.bootlaces.NotificatonService.enqueue(this@WorkService, intent.apply { setAction(
+                        com.candroid.bootlaces.Actions.ACTION_FINISH.action) })
+            }
+            mutex.withLock { workerCount-- }
+        }
+    }
+}
+
+internal interface IWorkHandler<in T, in S, in R>{
+    suspend fun R.handleWork()
+    suspend fun R.assignWorker(worker: T)
+    suspend fun S.processWork(scope: R)
 }

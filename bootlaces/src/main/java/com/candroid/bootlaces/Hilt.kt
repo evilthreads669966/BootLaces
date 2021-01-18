@@ -88,6 +88,8 @@ object BackgroundModule{
     fun provideSupervisor(): CompletableJob = SupervisorJob()
     @Provides
     fun providesMutex() = Mutex()
+    @Provides
+    fun provideWorkers(): MutableCollection<Worker> = mutableSetOf()
 }
 
 @InstallIn(ServiceComponent::class)
