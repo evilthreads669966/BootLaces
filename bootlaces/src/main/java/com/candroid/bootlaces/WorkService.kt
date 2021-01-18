@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.properties.Delegates
@@ -152,7 +151,7 @@ class WorkService(): Service() {
                 preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
             }.launchIn(ioScope)
 
-            getSpecificPeriodicWork().filterNotNull().onEach { work ->
+            getPeriodicWork().filterNotNull().onEach { work ->
                 preparePendingWork(work).run {
                     var interval = 0L
                     if(work.hourly == true)
