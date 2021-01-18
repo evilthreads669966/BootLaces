@@ -32,6 +32,7 @@ import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.migration.AliasOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Mutex
 import javax.inject.Scope
 import javax.inject.Singleton
 
@@ -79,9 +80,14 @@ interface ForegroundEntryPoint{
 @InstallIn(ServiceComponent::class)
 @Module
 object BackgroundModule{
-    @Provides fun provideChannel() = Channel<Work>()
-    @Provides fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
-    @Provides fun provideSupervisor(): CompletableJob = SupervisorJob()
+    @Provides
+    fun provideChannel() = Channel<Work>()
+    @Provides
+    fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
+    @Provides
+    fun provideSupervisor(): CompletableJob = SupervisorJob()
+    @Provides
+    fun providesMutex() = Mutex()
 }
 
 @InstallIn(ServiceComponent::class)
