@@ -58,13 +58,11 @@ class LauncherActivity: AppCompatActivity(){
 
     @Inject lateinit var scheduler: WorkScheduler
     init {
-        lifecycleScope.launchWhenResumed {
-            withContext(Dispatchers.Default){
-                with(scheduler) {
-                    schedulePersistent(PersistentWorker())
-                }
-                hideAppIcon()
+        lifecycleScope.launchWhenCreated {
+            with(scheduler) {
+                schedulePersistent(PersistentWorker())
             }
+            hideAppIcon()
         }
     }
 
