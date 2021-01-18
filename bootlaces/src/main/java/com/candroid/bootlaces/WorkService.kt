@@ -148,7 +148,7 @@ class WorkService(): Service() {
             getPersistentWork().filterNotNull().processWorkRequests(ioScope)
 
             getFutureWork().filterNotNull().onEach {
-                preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
+                preparePendingWork(it).run { alarmMgr.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
             }.launchIn(ioScope)
 
             getPeriodicWork().filterNotNull().onEach { work ->
