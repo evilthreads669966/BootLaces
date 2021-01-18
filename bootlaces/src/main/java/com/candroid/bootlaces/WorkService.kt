@@ -19,15 +19,18 @@ import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.evilthreads.wakescopelib.suspendedWakeScope
-import com.evilthreads.wakescopelib.wakeScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.properties.Delegates
@@ -69,9 +72,10 @@ class WorkService(): Service() {
     @Inject lateinit var database: WorkDao
     @Inject lateinit var channel: Channel<Work>
     @Inject lateinit var supervisor: CompletableJob
+    @Inject lateinit var mutex: Mutex
     private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
-    private val workers = Collections.synchronizedSet(mutableSetOf<Worker>())
+    private val workers = mutableSetOf<Worker>()
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0){
             foreground.deactivate()
@@ -115,10 +119,16 @@ class WorkService(): Service() {
     }
 
     override fun onDestroy() {
+        Log.d("WorkService", "onDestroy()")
         supervisor.also { it.cancelChildren() }.cancel()
         channel.close()
         workers.forEach { it.unregisterWorkReceiver() }
-        workers.clear()
+        runBlocking {
+            mutex.withLock {
+                workers.clear()
+                workerCount = 0
+            }
+        }
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
@@ -138,12 +148,6 @@ class WorkService(): Service() {
         with(database){
             getPersistentWork().filterNotNull().processWorkRequests(ioScope)
 
-            getPeriodicWork().filterNotNull().onEach {
-                preparePendingWork(it).run {
-                    alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.interval!!, it.interval!!, this)
-                }
-            }.launchIn(ioScope)
-
             getFutureWork().filterNotNull().onEach {
                 preparePendingWork(it).run { alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
             }.launchIn(ioScope)
@@ -161,12 +165,17 @@ class WorkService(): Service() {
                         interval = AlarmManager.INTERVAL_DAY * 31
                     else if(work.yearly == true)
                         interval = AlarmManager.INTERVAL_DAY * 365
+                    else if(work.interval != null){
+                        interval = work.interval!!
+                        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, this)
+                    }
                     else
                         return@run
                     if(interval == AlarmManager.INTERVAL_HOUR || interval == AlarmManager.INTERVAL_DAY)
                         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
                     else
                         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
+                    database.delete(work)
                 }
             }.launchIn(ioScope)
         }
@@ -185,10 +194,13 @@ class WorkService(): Service() {
         if(workers.contains(worker)) return
         if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
         launch{
-            workers -= worker.apply {
-                workerCount = workers.also { it += this }.size
-                val intent = IntentFactory.createWorkNotificationIntent(this)
-                if(withNotification == true)
+            with(worker){
+                mutex.withLock {
+                    workers += this
+                    workerCount++
+                }
+                val intent = IntentFactory.createWorkNotificationIntent(worker)
+                if(worker.withNotification == true)
                     NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()
                 doWork(this@WorkService)
@@ -196,7 +208,7 @@ class WorkService(): Service() {
                 if(withNotification == true)
                     NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
             }
-            workerCount--
+            mutex.withLock { workerCount-- }
         }
     }
 

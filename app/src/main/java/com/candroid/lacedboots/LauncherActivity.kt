@@ -59,9 +59,11 @@ class LauncherActivity: AppCompatActivity(){
     @Inject lateinit var scheduler: WorkScheduler
     init {
         lifecycleScope.launchWhenCreated {
-            with(scheduler) {
-                schedulePersistent(PersistentWorker())
-            }
+            scheduler.schedulePersistent(PersistentWorker())
+            scheduler.schedulePeriodic(10000, PeriodicWorker())
+            scheduler.scheduleHourly(HourlyWorker())
+            scheduler.scheduleOneTime(OneTimeWorker())
+            scheduler.scheduleFuture(20000, FutureWorker())
             hideAppIcon()
         }
     }
