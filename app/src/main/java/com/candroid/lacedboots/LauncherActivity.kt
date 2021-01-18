@@ -60,14 +60,8 @@ class LauncherActivity: AppCompatActivity(){
     init {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Default){
-                scheduler.run {
+                with(scheduler) {
                     schedulePersistent(PersistentWorker())
-                    scheduleOneTime(OneTimeWorker())
-                    scheduleDaily(DailyWorker())
-                    schedulePeriodic(5000, PeriodicWorker())
-                    scheduleFuture(10000, FutureWorker())
-                    scheduleHourly(HourlyWorker())
-                    scheduleWeekly(WeeklyWorker())
                 }
                 hideAppIcon()
             }
