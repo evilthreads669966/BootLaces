@@ -74,7 +74,8 @@ object BroadcastReceiverModule {
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
 interface ForegroundEntryPoint{
-    fun getActivator(): ForegroundActivator
+    @ExperimentalCoroutinesApi
+    fun getForeground(): ForegroundActivator
 }
 
 @InstallIn(ServiceComponent::class)
@@ -83,7 +84,7 @@ object BackgroundModule{
     @Provides
     fun provideChannel() = Channel<Work>()
     @Provides
-    fun provideAlarmManager(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
+    fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
     @Provides
     fun provideSupervisor(): CompletableJob = SupervisorJob()
     @Provides
@@ -95,8 +96,8 @@ object BackgroundModule{
 @InstallIn(ServiceComponent::class)
 @Module
 object ForegroundModule{
-    @Provides fun notificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
-    @Provides fun provideNotificationManager(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
+    @Provides fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
+    @Provides fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
 /*@InstallIn(ServiceComponent::class)

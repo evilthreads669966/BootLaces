@@ -68,7 +68,7 @@ class BootReceiver : HiltBugReceiver(){
             if(intent!!.hasExtra(Work.KEY_PARCEL)){
                 val work = intent.getParcelableExtra<Work>(Work.KEY_PARCEL)
                 GlobalScope.launch {
-                    if(work!!.interval != null || work.daily != null || work.hourly != null || work.monthly != null || work.yearly != null)
+                    if(work!!.interval != null || work.daily == true || work.hourly == true || work.monthly == true || work.yearly == true)
                         sendWorkRequest(ctx!!, work, Actions.ACTION_WORK_PERIODIC)
                     else
                         sendWorkRequest(ctx!!, work, Actions.ACTION_WORK_FUTURE)
@@ -79,5 +79,5 @@ class BootReceiver : HiltBugReceiver(){
 }
 /*fixes bug in Hilt*/
 open class HiltBugReceiver : BroadcastReceiver(){
-    override fun onReceive(context: Context?, intent: Intent?) {}
+    override fun onReceive(ctx: Context?, intent: Intent?) {}
 }

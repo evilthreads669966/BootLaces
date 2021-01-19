@@ -51,7 +51,6 @@ import javax.inject.Inject
  *
  * activates foreground in [WorkService]
  **/
-@FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 class ForegroundActivator @Inject constructor(val ctx: Service){
@@ -64,6 +63,7 @@ class ForegroundActivator @Inject constructor(val ctx: Service){
                ctx.startForeground(FOREGROUND_ID,notification)
      }
 
+     @FlowPreview
      @Throws(SecurityException::class)
      fun activate() {
           if(WorkService.state.equals(ServiceState.FOREGROUND)) return
@@ -73,6 +73,7 @@ class ForegroundActivator @Inject constructor(val ctx: Service){
           }
      }
 
+     @FlowPreview
      fun deactivate() {
           ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
           WorkService.state = ServiceState.BACKGROUND

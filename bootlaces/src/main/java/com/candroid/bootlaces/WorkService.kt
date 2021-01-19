@@ -66,7 +66,7 @@ import kotlin.properties.Delegates
 @FlowPreview
 @AndroidEntryPoint
 class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
-    @Inject lateinit var provider: Provider<ForegroundComponent.Builder>
+    @Inject lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
     @Inject lateinit var channel: Channel<Work>
@@ -90,7 +90,7 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
     override fun onCreate() {
         super.onCreate()
         state = ServiceState.BACKGROUND
-        foreground = EntryPoints.get(provider.get().build(),ForegroundEntryPoint::class.java).getActivator()
+        foreground = EntryPoints.get(foregroundProvider.get().build(),ForegroundEntryPoint::class.java).getForeground()
         scope = CoroutineScope(Dispatchers.Default + supervisor)
         scope.launch { suspendedWakeScope { handleWork() } }
     }
@@ -138,7 +138,7 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
 
     override suspend fun Flow<Work>.processWork(scope: CoroutineScope){
         this.map { work -> work.toWorker() }
-            .onEach { worker -> this@WorkService.scope.assignWorker(worker) }
+            .onEach { worker -> this@WorkService.scope.assignWork(worker) }
             .launchIn(scope)
     }
 
@@ -153,7 +153,7 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
 
             getPeriodicWork().filterNotNull().onEach { work ->
                 preparePendingWork(work).run {
-                    var interval = 0L
+                    val interval: Long
                     if(work.hourly == true)
                         interval = AlarmManager.INTERVAL_HOUR
                     else if(work.daily == true)
@@ -197,7 +197,7 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
         }
     }
 
-    override suspend fun CoroutineScope.assignWorker(worker: Worker) {
+    override suspend fun CoroutineScope.assignWork(worker: Worker) {
         if(workers.contains(worker)) return
         if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
         launch{
@@ -206,15 +206,15 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
                     workers.add(this)
                     workerCount++
                 }
-                val intent = com.candroid.bootlaces.IntentFactory.createWorkNotificationIntent(worker)
-                if(worker.withNotification == true)
-                    com.candroid.bootlaces.NotificatonService.enqueue(this@WorkService, intent)
+                val intent = IntentFactory.createWorkNotificationIntent(this)
+                if(withNotification == true)
+                    NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()
                 doWork(this@WorkService)
                 unregisterWorkReceiver()
                 if(withNotification == true)
-                    com.candroid.bootlaces.NotificatonService.enqueue(this@WorkService, intent.apply { setAction(
-                        com.candroid.bootlaces.Actions.ACTION_FINISH.action) })
+                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(
+                        Actions.ACTION_FINISH.action) })
             }
             mutex.withLock { workerCount-- }
         }
@@ -223,6 +223,6 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
 
 internal interface IWorkHandler<in T, in S, in R>{
     suspend fun R.handleWork()
-    suspend fun R.assignWorker(worker: T)
     suspend fun S.processWork(scope: R)
+    suspend fun R.assignWork(worker: T)
 }

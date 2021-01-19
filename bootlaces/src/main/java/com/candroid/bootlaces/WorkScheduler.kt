@@ -63,63 +63,64 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
 
     suspend fun scheduleOneTime(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
-            sendWorkRequest(ctx, work, Actions.ACTION_WORK_ONE_TIME)
-        }
-
-        suspend fun schedulePeriodic(interval: Long, worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, interval = interval)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleFuture(delay: Long, worker: Worker){
-            val work = Work(worker.id, worker::class.java.name, delay = delay)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleHourly(worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, hourly = true)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleDaily(worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, daily = true)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleWeekly(worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, weekly = true)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleMonthly(worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, monthly = true)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleYearly(worker: Worker){
-            val work = Work( worker.id, worker::class.java.name, yearly = true)
-            schedulePersistentWork(ctx, work)
-        }
-
-        suspend fun scheduleReboot(worker: Worker){
-
-        }
+        sendWorkRequest(ctx, work, Actions.ACTION_WORK_ONE_TIME)
     }
 
-    @InternalCoroutinesApi
-    private suspend fun schedulePersistentWork(ctx: Context, work: Work){
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
-        persistWorkService(ctx)
+    suspend fun schedulePeriodic(interval: Long, worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, interval = interval)
+        schedulePersistentWork(ctx, work)
     }
 
-    @InternalCoroutinesApi
-    private fun persistWorkService(ctx: Context){
-        val componentName = ComponentName(ctx, BootReceiver::class.java)
-        val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-        if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-            ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+    suspend fun scheduleFuture(delay: Long, worker: Worker){
+        val work = Work(worker.id, worker::class.java.name, delay = delay)
+        schedulePersistentWork(ctx, work)
     }
 
+    suspend fun scheduleHourly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, hourly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleDaily(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, daily = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleWeekly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, weekly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleMonthly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, monthly = true)
+        schedulePersistentWork(ctx, work)
+    }
+
+    suspend fun scheduleYearly(worker: Worker){
+        val work = Work( worker.id, worker::class.java.name, yearly = true)
+        schedulePersistentWork(ctx, work)
+    }
+}
+
+@ExperimentalCoroutinesApi
+@FlowPreview
+@InternalCoroutinesApi
+private suspend fun schedulePersistentWork(ctx: Context, work: Work){
+    sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
+    persistWorkService(ctx)
+}
+
+@FlowPreview
+@InternalCoroutinesApi
+private fun persistWorkService(ctx: Context){
+    val componentName = ComponentName(ctx, BootReceiver::class.java)
+    val state = ctx.packageManager.getComponentEnabledSetting(componentName)
+    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+        ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+}
+
+@ExperimentalCoroutinesApi
+@FlowPreview
 @InternalCoroutinesApi
 internal suspend fun sendWorkRequest(ctx: Context, work: Work, action: Actions){
     val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
