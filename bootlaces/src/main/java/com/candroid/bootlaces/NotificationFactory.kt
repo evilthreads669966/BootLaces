@@ -141,7 +141,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
                         FOREGROUND_CHANNEL_NAME,
                         NotificationManager.IMPORTANCE_DEFAULT
                     )
-                    (channel as NotificationChannel).apply {
+                    (channel).apply {
                         description = FOREGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
                         setShowBadge(false)
@@ -236,7 +236,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
                     mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)
                 if (channel == null) {
                     channel = NotificationChannel(BACKGROUND_CHANNEL_ID,BACKGROUND_CHANNEL_NAME,NotificationManager.IMPORTANCE_DEFAULT)
-                    (channel as NotificationChannel).apply {
+                    (channel).apply {
                         description = BACKGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
                         setShowBadge(false)

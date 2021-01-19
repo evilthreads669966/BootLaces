@@ -59,7 +59,6 @@ class NotificatonService: JobIntentService(){
 
     override fun onHandleWork(intent: Intent) {
         var description: String? = null
-        var action: Actions? = null
         var id: Int? = null
         val extras = intent.extras
         extras?.run {
@@ -68,7 +67,7 @@ class NotificatonService: JobIntentService(){
             if(containsKey(KEY_ID))
                 id = getInt(KEY_ID)
         }
-        action = Actions.valueOf(intent.action?: throw IllegalArgumentException("No action provided for notification service"))
+        val action = Actions.valueOf(intent.action?: throw IllegalArgumentException("No action provided for notification service"))
         val notification = when(action) {
             Actions.ACTION_START -> { factory.createStartedNotification(description) }
             Actions.ACTION_FINISH -> { factory.createFinishedNotification(description) }
