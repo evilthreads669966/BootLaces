@@ -14,12 +14,11 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.app.AlarmManager
+import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.LifecycleService
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
@@ -28,12 +27,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ServiceScoped
-import dagger.hilt.migration.AliasOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
-import javax.inject.Scope
 import javax.inject.Singleton
 
 /*
@@ -84,7 +80,7 @@ object BackgroundModule{
     @Provides
     fun provideChannel() = Channel<Work>()
     @Provides
-    fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(LifecycleService.ALARM_SERVICE) as AlarmManager
+    fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
     @Provides
     fun provideSupervisor(): CompletableJob = SupervisorJob()
     @Provides
