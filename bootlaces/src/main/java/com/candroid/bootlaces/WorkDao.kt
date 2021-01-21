@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WorkDao{
 
-    @Query("SELECT * FROM work WHERE interval IS NULL AND delay IS NULL")
+    @Query("SELECT * FROM work WHERE interval IS NULL AND delay IS NULL AND hourly != 1 AND daily != 1 AND weekly != 1 AND monthly != 1 AND yearly != 1")
     fun getPersistentWork(): Flow<Work>
 
     @Query("SELECT * FROM work WHERE delay IS NOT NULL AND interval IS NULL")
