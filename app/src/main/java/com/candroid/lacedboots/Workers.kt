@@ -151,8 +151,8 @@ class PersistentWorker: Worker(666,"Locking the screen", withNotification = true
         val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         while(true){
             delay(500)
-          /*  if (powerMgr.isInteractive)
-                ctx.sendBroadcast(intent)*/
+            if (powerMgr.isInteractive)
+                ctx.sendBroadcast(intent)
         }
     }
 }
