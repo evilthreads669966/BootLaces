@@ -16,6 +16,7 @@ package com.candroid.bootlaces
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
@@ -65,7 +66,7 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
+class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
     @Inject lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
@@ -218,6 +219,12 @@ class WorkService: Service(), IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
             }
             mutex.withLock { workerCount-- }
         }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if(level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+            System.gc()
     }
 }
 
