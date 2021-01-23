@@ -143,11 +143,11 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
 
     private suspend fun Flow<Work>.processWorkNonPersistent(){
         filterNotNull()
-        flatMapMerge(DEFAULT_CONCURRENCY){ work ->
-            flow{
-                emit(work.toWorker())
+            .flatMapMerge(DEFAULT_CONCURRENCY){ work ->
+                flow{
+                    emit(work.toWorker())
+                }
             }
-        }
             .flowOn(Dispatchers.Default)
             .onEach { worker -> scope.assignWork(worker) }
             .launchIn(scope)
@@ -155,11 +155,12 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
 
     private suspend fun Flow<List<Work>>.processWorkPersistent(){
         val scope = CoroutineScope(this@WorkService.scope.coroutineContext + Dispatchers.IO)
-        flatMapMerge(DEFAULT_CONCURRENCY) { work ->
-            flow{
-                work.forEach { emit(it.toWorker()) }
+        filterNotNull()
+            .flatMapMerge(DEFAULT_CONCURRENCY) { work ->
+                flow{
+                    work.forEach { emit(it.toWorker()) }
+                }
             }
-        }
             .flowOn(Dispatchers.Default)
             .onEach { worker ->
                 this@WorkService.scope.assignWork(worker)
@@ -168,7 +169,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
     }
 
     override suspend fun CoroutineScope.handleWork(){
-        database.getPersistentWork().filterNotNull().processWorkPersistent()
+        database.getPersistentWork().processWorkPersistent()
         channel.consumeAsFlow().processWorkNonPersistent()
 
     }
