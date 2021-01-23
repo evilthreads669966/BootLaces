@@ -53,27 +53,25 @@ class LauncherActivity: AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduler.scheduleWork()
+        scheduler.use {
+            WorkerNine().schedulePersistent()
+            WorkerSix().scheduleQuarterHour(true, true)
+            WorkerFive().scheduleHalfHour()
+        }
+        scheduler.use {
+            WorkerFour().scheduleHour(true)
+            WorkerTwelve().scheduleHalfDay()
+            WorkerEleven().scheduleMonth(true, true)
+            WorkerThirteen().scheduleYearly()
+            WorkerTwo().scheduleDay(true)
+            val fourtyFiveSeconds = 45000L
+            WorkerOne().scheduleFuture(fourtyFiveSeconds, true)
+            WorkerThree().scheduleQuarterDay(true)
+        }
+        scheduler.use {
+            WorkerSeven().scheduleNow()
+            WorkerEight().scheduleHoursTwo(true)
+            WorkerTen().scheduleHalfWeek(false)
+        }
     }
-}
-
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
-fun WorkScheduler.scheduleWork(){
-    schedulePersistent(PersistentWorker())
-    scheduleHour(HourlyWorker(), repeating = false, wakeupIfIdle = true)
-    scheduleDay(DailyWorker(), wakeupIfIdle = true)
-    scheduleWeek(WeeklyWorker(), repeating = true, wakeupIfIdle = false)
-    scheduleMonth(MonthlyWorker(), repeating = true, wakeupIfIdle = true)
-    scheduleNow(OneTimeWorker())
-    scheduleHalfHour(HalfHourWorker(), repeating = true, wakeupIfIdle = true)
-    scheduleQuarterHour(QuarterHourWorker(), repeating = true, wakeupIfIdle = true)
-    val tenSeconds = 10000L
-    scheduleFuture(tenSeconds, FirstFutureWorker(), repeating = true)
-    val thirtySeconds = 30000L
-    scheduleFuture(thirtySeconds, SecondFutureWorker(), wakeupIfIdle = true)
-    val fourtyFiveSeconds = 45000L
-    scheduleFuture(fourtyFiveSeconds, ThirdFutureWorker(), repeating = true, wakeupIfIdle = true)
 }

@@ -48,83 +48,66 @@ import javax.inject.Singleton
  * @email evilthreads669966@gmail.com
  * @date 10/16/20
  *
- * activates [WorkService]
  **/
 @FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val alarmMgr: AlarmManager, val intentFactory: IntentFactory) {
-    fun schedulePersistent(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name)
-        sendWorkPersistent(work)
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val alarmMgr: AlarmManager, val factory: IntentFactory) {
+    /*use this scoping function to schedule workers
+    * ie: scheduler.use { MyWorker().scheduleHour() }
+    * */
+    fun use(init: WorkScheduler.() -> Unit){
+        init()
     }
 
-    fun scheduleNow(worker: Worker){
-        sendWorkAlarm(worker.toWork(), 0L, false, false)
-    }
+    fun Worker.schedulePersistent() = schedule(ctx, factory)
 
-    fun scheduleFuture(delay: Long, worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), delay, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleNow(): Boolean = schedule(factory, alarmMgr, 0L, false, false)
 
-    fun scheduleHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleFuture(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, delay, repeating, wakeupIfIdle)
 
-    fun scheduleQuarterDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 6, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HOUR, repeating, wakeupIfIdle)
 
-    fun scheduleHoursTwo(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 2, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleQuarterDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HOUR * 6, repeating, wakeupIfIdle)
 
-    fun scheduleHoursThree(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 3, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHoursTwo(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HOUR * 2, repeating, wakeupIfIdle)
 
-    fun scheduleDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHoursThree(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HOUR * 3, repeating, wakeupIfIdle)
 
-    fun scheduleWeek(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 7, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_DAY, repeating, wakeupIfIdle)
 
-    fun scheduleHalfWeek(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), (AlarmManager.INTERVAL_DAY * 3) + AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleWeek(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_DAY * 7, repeating, wakeupIfIdle)
 
-    fun scheduleHalfDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHalfWeek(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, (AlarmManager.INTERVAL_DAY * 3) + AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
 
-    fun scheduleHalfHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HALF_HOUR, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHalfDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
 
-    fun scheduleQuarterHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleHalfHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_HALF_HOUR, repeating, wakeupIfIdle)
 
-    fun scheduleMonth(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        // TODO: 1/22/21 need to handle months with 28 days..don't remember what month(s) that is but this could cause a bug
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 31, repeating, wakeupIfIdle)
-    }
+    fun Worker.scheduleQuarterHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_FIFTEEN_MINUTES, repeating, wakeupIfIdle)
 
-    fun scheduleYearly(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
-        // TODO: 1/22/21 perhaps calculate remaining days left in the year...not really sure which to choose from as it would be a year from the day scheduled
-        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle)
+    // TODO: 1/22/21 need to handle months with 28 days..don't remember what month(s) that is but this could cause a bug
+    fun Worker.scheduleMonth(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_DAY * 31, repeating, wakeupIfIdle)
 
-    }
+    // TODO: 1/22/21 perhaps calculate remaining days left in the year...not really sure which to choose from as it would be a year from the day scheduled
+    fun Worker.scheduleYearly(repeating: Boolean = false, wakeupIfIdle: Boolean = false): Boolean =
+        schedule(factory, alarmMgr, AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle)
 
-
-
-    @FlowPreview
-    @InternalCoroutinesApi
-    private fun sendWorkAlarm(work: Work, interval: Long, repeating: Boolean, wakeupIfIdle: Boolean): Boolean{
-        val pendingIntent = intentFactory.createPendingIntent(work) ?: return false
+    private fun Worker.schedule(factory: IntentFactory, alarmMgr: AlarmManager, interval: Long, repeating: Boolean, wakeupIfIdle: Boolean): Boolean{
+        val pendingIntent = factory.createPendingIntent(this.toWork()) ?: return false
         var alarmTimeType: Int = AlarmManager.RTC
         val triggerTime = System.currentTimeMillis() + interval
         if(wakeupIfIdle)
@@ -139,11 +122,8 @@ class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, va
         return true
     }
 
-    @ExperimentalCoroutinesApi
-    @FlowPreview
-    @InternalCoroutinesApi
-    internal fun sendWorkPersistent(work: Work){
-        val intent = intentFactory.createWorkIntent(work, Actions.ACTION_WORK_PERSISTENT)
+    private fun Worker.schedule(ctx: Context, factory: IntentFactory){
+        val intent = factory.createWorkIntent(this.toWork(), Actions.ACTION_WORK_PERSISTENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             ctx.startForegroundService(intent)
         else
