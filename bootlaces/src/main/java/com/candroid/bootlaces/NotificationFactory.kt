@@ -61,7 +61,7 @@ import javax.inject.Singleton
  * creates notifications for foreground and workers
  **/
 class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Context, val mgr: NotificationManagerCompat, val builder: NotificationCompat.Builder){
-    fun createStartedNotification(description: String?): Notification{
+    internal fun createStartedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
         return builder.apply {
             extend(TEMPLATE_START)
@@ -70,14 +70,15 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
         }.build()
     }
 
-    fun createFinishedNotification(description: String?): Notification{
+    internal fun createFinishedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
         return builder.apply {
             extend(TEMPLATE_FINISH)
             setContentTitle(description ?: BACKGROUND_FINISHED_DEFAULT_TITLE)
         }.build()
     }
-    fun createForegroundNotification(): Notification{
+
+    internal fun createForegroundNotification(): Notification{
         ForegroundNotification.createForegroundChannel(ctx, mgr)
         return builder.apply {
             extend(NOTIFICATION_TEMPLATE_FOREGROUND).build()
@@ -132,7 +133,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
                 setDefaults(NotificationCompat.DEFAULT_ALL)
             }
         }
-        fun createForegroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
+        internal fun createForegroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 var channel: NotificationChannel? = mgr.getNotificationChannel(FOREGROUND_CHANNEL_ID)
                 if (channel == null) {
@@ -165,7 +166,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        fun createForegroundChannelGroup(mgr: NotificationManagerCompat, channel: NotificationChannel?) {
+        private fun createForegroundChannelGroup(mgr: NotificationManagerCompat, channel: NotificationChannel?) {
             val foregroundGroup =
                 NotificationChannelGroup(
                     FOREGROUND_CHANNEL_GROUP_ID,
@@ -230,7 +231,7 @@ class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Conte
             it.setTimeoutAfter(15000)
         }
 
-        fun createBackgroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
+        internal fun createBackgroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 var channel: NotificationChannel? =
                     mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)

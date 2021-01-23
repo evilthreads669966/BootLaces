@@ -65,13 +65,13 @@ import kotlin.properties.Delegates
 @FlowPreview
 @AndroidEntryPoint
 class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
-    @Inject lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
-    @Inject lateinit var alarmMgr: AlarmManager
+    @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
+    @Inject internal lateinit var alarmMgr: AlarmManager
     @Inject lateinit var database: WorkDao
-    @Inject lateinit var channel: Channel<Work>
-    @Inject lateinit var supervisor: CompletableJob
-    @Inject lateinit var mutex: Mutex
-    @Inject lateinit var workers: MutableCollection<Worker>
+    @Inject internal lateinit var channel: Channel<Work>
+    @Inject internal lateinit var supervisor: CompletableJob
+    @Inject internal lateinit var mutex: Mutex
+    @Inject internal lateinit var workers: MutableCollection<Worker>
     @Inject lateinit var intentFactory: IntentFactory
     private var startId: Int = -666
     private lateinit var scope: CoroutineScope
@@ -86,9 +86,9 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
     }
 
     companion object{
-        var state: ServiceState = ServiceState.STOPPED
+        internal var state: ServiceState = ServiceState.STOPPED
 
-        fun isStarted() = !state.equals(ServiceState.STOPPED)
+        internal fun isStarted() = !state.equals(ServiceState.STOPPED)
 
         internal fun persist(ctx: Context){
             val componentName = ComponentName(ctx, BootReceiver::class.java)
@@ -188,7 +188,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
 }
 
 internal interface IWorkHandler<in T, in S, in R>{
-    suspend fun R.handleWork()
+   suspend fun R.handleWork()
     suspend fun S.processWork(scope: R)
     suspend fun R.assignWork(worker: T)
 }

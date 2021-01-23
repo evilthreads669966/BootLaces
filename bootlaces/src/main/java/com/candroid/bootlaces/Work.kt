@@ -33,6 +33,6 @@ import kotlinx.android.parcel.Parcelize
 @Entity
 data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val job: String):Parcelable{
     companion object{
-       const val KEY_PARCEL = "KEY_PARCEL"
+       internal const val KEY_PARCEL = "KEY_PARCEL"
     }
 }
