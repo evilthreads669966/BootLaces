@@ -17,6 +17,7 @@ package com.candroid.bootlaces
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 
 /*
             (   (                ) (             (     (
@@ -70,6 +71,15 @@ abstract class Worker(val id: Int, val description: String, var withNotification
                if(other !is WorkReceiver) return false
                if(this.action.equals(other.action)) return true
                return false
+          }
+     }
+
+     fun unregisterReceiver(ctx: Context) = this.receiver?.let { ctx.unregisterReceiver(it) }
+
+     fun registerReceiver(ctx: Context){
+          this.receiver?.run {
+               val filter = IntentFilter(this.action)
+               ctx.registerReceiver(this, filter)
           }
      }
 }
