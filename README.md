@@ -47,6 +47,7 @@ class App: Application()
 7. Create your worker(s).
   - you can opt-in for having a progress notification that displays while Worker.doWork is active
     - the description for your worker is good practice and will be used for things like notifications if you choose to use them
+  - you perform your work inside of doWork and Boot Laces will keep it running in the background until it has completed and reschedule as necessary
   - WorkerNine below demonstrates how to create a WorkReceiver
     - a WorkReceiver is created by passing in an action for it to subscribe to.
     - you can broadcast to this BroadcastReceiver from within your doWork function or anywhere else in your app
