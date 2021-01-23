@@ -13,17 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
 /*
@@ -52,42 +49,31 @@ import javax.inject.Inject
 @ObsoleteCoroutinesApi
 @AndroidEntryPoint
 class LauncherActivity: AppCompatActivity(){
-    companion object{
-        private const val mOverlay_request_code = 666
-    }
-
     @Inject lateinit var scheduler: WorkScheduler
-    init {
-        lifecycleScope.launchWhenCreated {
-            scheduler.schedulePersistent(PersistentWorker())
-            scheduler.schedulePeriodic(10000, PeriodicWorker())
-            scheduler.scheduleHourly(HourlyWorker())
-            scheduler.scheduleOneTime(OneTimeWorker())
-            scheduler.scheduleFuture(20000, FutureWorker())
-            hideAppIcon()
-        }
-    }
 
-    override fun onStart() {
-        super.onStart()
-        checkPermission()
-    }
-
-    private fun checkPermission() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-            if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${packageName}"))
-                startActivityForResult(intent, mOverlay_request_code)
-            }
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        scheduler.scheduleWork()
     }
 }
 
-fun Activity.hideAppIcon(){
-    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
-        val state = packageManager.getComponentEnabledSetting(componentName)
-        if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
-            getPackageManager().setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        finish()
-    }
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
+@FlowPreview
+@InternalCoroutinesApi
+fun WorkScheduler.scheduleWork(){
+    schedulePersistent(PersistentWorker())
+    scheduleHour(HourlyWorker(), repeating = false, wakeupIfIdle = true)
+    scheduleDay(DailyWorker(), wakeupIfIdle = true)
+    scheduleWeek(WeeklyWorker(), repeating = true, wakeupIfIdle = false)
+    scheduleMonth(MonthlyWorker(), repeating = true, wakeupIfIdle = true)
+    scheduleNow(OneTimeWorker())
+    scheduleHalfHour(HalfHourWorker(), repeating = true, wakeupIfIdle = true)
+    scheduleQuarterHour(QuarterHourWorker(), repeating = true, wakeupIfIdle = true)
+    val tenSeconds = 10000L
+    scheduleFuture(tenSeconds, FirstFutureWorker(), repeating = true)
+    val thirtySeconds = 30000L
+    scheduleFuture(thirtySeconds, SecondFutureWorker(), wakeupIfIdle = true)
+    val fourtyFiveSeconds = 45000L
+    scheduleFuture(fourtyFiveSeconds, ThirdFutureWorker(), repeating = true, wakeupIfIdle = true)
 }

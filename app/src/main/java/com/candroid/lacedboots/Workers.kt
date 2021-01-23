@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.lacedboots
 
+import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
@@ -55,16 +56,18 @@ class YearlyWorker: Worker(444, "Yearly Worker"){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Yearly Worker", "working yearly")
+        Log.d("Yearly Worker", "working for 2 hours")
+        delay(AlarmManager.INTERVAL_HOUR * 2)
     }
 }
 
-class MonthlyWorker: Worker(333, "Monthly Worker"){
+class MonthlyWorker: Worker(333, "Monthly Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Monthly Worker", "working monthly")
+        Log.d("Monthly Worker", "working for 2 minutes")
+        delay(120000)
     }
 }
 
@@ -73,7 +76,8 @@ class WeeklyWorker: Worker(888, "Weekly Worker", withNotification = true){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("Weekly Worker", "working weekly")
+        Log.d("Weekly Worker", "working for 15 minutes")
+        delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
     }
 }
 
@@ -82,18 +86,8 @@ class DailyWorker: Worker(222, "Daily Worker", withNotification = true){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        delay(30000)
-        Log.d("Daily Worker", "working daily")
-    }
-}
-
-class PeriodicWorker: Worker(777, "Periodic Worker", withNotification = true){
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        delay(10000)
-        Log.d("Periodic Worker", "working")
+        Log.d("Daily Worker", "working for 1 minute")
+        delay(60000)
     }
 }
 
@@ -102,18 +96,63 @@ class HourlyWorker: Worker(111, "Hourly Worker", withNotification = true){
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        delay(15000)
-        Log.d("Hourly Worker", "working hourly")
+        Log.d("Hourly Worker", "working for 5 minutes")
+        delay(60000 * 5)
     }
 }
 
-class FutureWorker: Worker(999, "Future Worker", withNotification = true){
+class HalfHourWorker: Worker(8899, "Half Hour Worker", withNotification = true){
     override val receiver: WorkReceiver?
         get() = null
 
     override suspend fun doWork(ctx: Context) {
+        Log.d("Half Hour Worker", "working for 45 seconds")
+        delay(45000)
+    }
+}
+
+class QuarterHourWorker: Worker(445, "Quarter Hour Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Quarter Hour Worker", "working for 1 minute")
+        delay(60000)
+    }
+}
+
+
+class ThirdFutureWorker: Worker(667, "Third Future Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Third Future Worker", "working for 20 seconds")
+        delay(20000)
+    }
+}
+
+
+
+class SecondFutureWorker: Worker(6666, "Second Future Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("Second Future Worker", "working for 30 seconds")
+        delay(30000)
+    }
+}
+
+
+
+class FirstFutureWorker: Worker(999, "First Future Worker", withNotification = true){
+    override val receiver: WorkReceiver?
+        get() = null
+
+    override suspend fun doWork(ctx: Context) {
+        Log.d("First Future Worker", "working for 5 seconds")
         delay(5000)
-        Log.d("Future Worker", "working")
     }
 }
 class OneTimeWorker: Worker(66,"One time work", withNotification = true) {
@@ -121,20 +160,12 @@ class OneTimeWorker: Worker(66,"One time work", withNotification = true) {
         get() = null
 
     override suspend fun doWork(ctx: Context) {
-        Log.d("OneTimeWorker", "working one time")
+        Log.d("OneTimeWorker", "working for 10 seconds")
         for(i in 1..10)
             delay(1000)
     }
 }
-class SecondWorker: Worker(99,"Second worker") {
-    override val receiver: WorkReceiver?
-        get() = null
 
-    override suspend fun doWork(ctx: Context) {
-        for(i in 1..10)
-            delay(1000)
-    }
-}
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -142,7 +173,7 @@ class PersistentWorker: Worker(666,"Locking the screen", withNotification = true
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                LockManager.lockScreen(ctx!!, intent)
+                //LockManager.lockScreen(ctx!!, intent)
             }
         }
 
@@ -150,9 +181,10 @@ class PersistentWorker: Worker(666,"Locking the screen", withNotification = true
         val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
         val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         while(true){
-            delay(500)
-            if (powerMgr.isInteractive)
-                ctx.sendBroadcast(intent)
+            Log.d("Persistent Worker", "Working for 25 seconds")
+            delay(25000)
+    /*        if (powerMgr.isInteractive)
+                ctx.sendBroadcast(intent)*/
         }
     }
 }

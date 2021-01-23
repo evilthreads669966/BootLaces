@@ -13,11 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -49,16 +54,38 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-internal object IntentFactory{
+@Singleton
+class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
     fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    fun createWorkServiceIntent(ctx: Context, work: Work, action: Actions) = Intent().apply {
+    fun createWorkIntent(work: Work, actions: Actions) = Intent().apply {
         setClass(ctx, WorkService::class.java)
-        setAction(action.action)
+        setAction(actions.action)
         putExtra(Work.KEY_PARCEL, work)
+    }
+
+    fun createAlarmIntent(work: Work): Intent?{
+        val workIntent = createWorkIntent(work, Actions.ACTION_WORK_NOW)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if(PendingIntent.getForegroundService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
+                return null
+            else
+                if(PendingIntent.getService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
+                    return null
+        return workIntent
+    }
+
+    @FlowPreview
+    @InternalCoroutinesApi
+    internal fun createPendingIntent(work: Work): PendingIntent? {
+        val intent = createAlarmIntent(work) ?: return null
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            return PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
+        else
+            return PendingIntent.getService(ctx, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
     }
 }

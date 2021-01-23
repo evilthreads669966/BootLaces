@@ -58,11 +58,17 @@ import javax.inject.Singleton
  * @date 10/31/20
  *
  **/
+@ExperimentalCoroutinesApi
+@FlowPreview
+@InternalCoroutinesApi
 @Module
 @InstallIn(ApplicationComponent::class)
 object BroadcastReceiverModule {
     @Singleton
     @Provides fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
+    @Singleton
+    @Provides
+    fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
 }
 
 @FlowPreview
@@ -80,8 +86,6 @@ object BackgroundModule{
     @Provides
     fun provideChannel() = Channel<Work>()
     @Provides
-    fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
-    @Provides
     fun provideSupervisor(): CompletableJob = SupervisorJob()
     @Provides
     fun providesMutex() = Mutex()
@@ -95,13 +99,6 @@ object ForegroundModule{
     @Provides fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
     @Provides fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
-
-/*@InstallIn(ServiceComponent::class)
-@Module
-interface ForegroundBindingModule{
-    @ForegroundScope
-    @Binds fun bindDatabase(database: WorkDatabase): RoomDatabase
-}*/
 
 @DefineComponent(parent = ServiceComponent::class)
 interface ForegroundComponent{
