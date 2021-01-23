@@ -14,12 +14,10 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.Service
-import android.content.ComponentCallbacks2
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.SystemClock
+import android.content.*
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.evilthreads.wakescopelib.suspendedWakeScope
@@ -74,18 +72,30 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
     @Inject lateinit var supervisor: CompletableJob
     @Inject lateinit var mutex: Mutex
     @Inject lateinit var workers: MutableCollection<Worker>
+    @Inject lateinit var intentFactory: IntentFactory
+    private var startId: Int = -666
     private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0){
-            foreground.deactivate()
-            stopSelf()
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                foreground.deactivate()
+            if(!stopSelfResult(startId))
+                stopSelf()
         }
     }
 
     companion object{
         var state: ServiceState = ServiceState.STOPPED
+
         fun isStarted() = !state.equals(ServiceState.STOPPED)
+
+        internal fun persist(ctx: Context){
+            val componentName = ComponentName(ctx, BootReceiver::class.java)
+            val state = ctx.packageManager.getComponentEnabledSetting(componentName)
+            if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+                ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        }
     }
 
     override fun onCreate() {
@@ -97,25 +107,19 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.run {
-            if(!hasExtra(Work.KEY_PARCEL)) return@run
-            if(action == null) return@run
-            val work = getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@run
+        runBlocking {
             scope.launch {
-                when(intent.action){
+                val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@launch
+                when(intent.action ?: return@launch){
                     Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
-                    Actions.ACTION_WORK_ONE_TIME.action -> { channel.send(work) }
-                    Actions.ACTION_WORK_PERIODIC.action -> { channel.send(work) }
-                    Actions.ACTION_WORK_FUTURE.action -> {
-                        channel.send(work)
-                        withContext(Dispatchers.IO){ database.delete(work) }
-                    }
+                    Actions.ACTION_WORK_NOW.action -> { channel.send(work) }
                     else -> return@launch
                 }
-            }
+            }.join()
         }
-        super.onStartCommand(intent, flags, startId)
-        return START_STICKY
+        this.startId = startId
+        super.onStartCommand(intent, flags, this.startId)
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
@@ -144,49 +148,9 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
     }
 
     override suspend fun CoroutineScope.handleWork(){
-        val ioScope = CoroutineScope(this@handleWork.coroutineContext + Dispatchers.IO)
-        with(database){
-            getPersistentWork().filterNotNull().processWork(ioScope)
-
-            getFutureWork().filterNotNull().onEach {
-                preparePendingWork(it).run { alarmMgr.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + it.delay!!, this) }
-            }.launchIn(ioScope)
-
-            getPeriodicWork().filterNotNull().onEach { work ->
-                preparePendingWork(work).run {
-                    val interval: Long
-                    if(work.hourly == true)
-                        interval = AlarmManager.INTERVAL_HOUR
-                    else if(work.daily == true)
-                        interval = AlarmManager.INTERVAL_DAY
-                    else if(work.weekly == true)
-                        interval = AlarmManager.INTERVAL_DAY * 7
-                    else if(work.monthly == true)
-                        interval = AlarmManager.INTERVAL_DAY * 31
-                    else if(work.yearly == true)
-                        interval = AlarmManager.INTERVAL_DAY * 365
-                    else if(work.interval != null){
-                        interval = work.interval!!
-                        alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, this)
-                    }
-                    else
-                        return@run
-                    if(interval == AlarmManager.INTERVAL_HOUR || interval == AlarmManager.INTERVAL_DAY)
-                        alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
-                    else
-                        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, interval, this)
-                    database.delete(work)
-                }
-            }.launchIn(ioScope)
-        }
-        channel.consumeAsFlow().processWork(scope)
-    }
-    private fun preparePendingWork(work: Work): PendingIntent {
-        val intent = Intent().apply {
-            setClass(this@WorkService, BootReceiver::class.java)
-            putExtra(Work.KEY_PARCEL, work)
-        }
-        return PendingIntent.getBroadcast(this@WorkService, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
+        val ioScope = CoroutineScope(this.coroutineContext + Dispatchers.IO)
+        this.launch { database.getPersistentWork().filterNotNull().processWork(ioScope) }
+        this.launch { channel.consumeAsFlow().processWork(scope) }
     }
 
     private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
@@ -200,14 +164,16 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
 
     override suspend fun CoroutineScope.assignWork(worker: Worker) {
         if(workers.contains(worker)) return
-        if(!state.equals(ServiceState.FOREGROUND)) foreground.activate()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if(!state.equals(ServiceState.FOREGROUND))
+                foreground.activate()
         launch{
             with(worker){
                 mutex.withLock {
                     workers.add(this)
                     workerCount++
                 }
-                val intent = IntentFactory.createWorkNotificationIntent(this)
+                val intent = intentFactory.createWorkNotificationIntent(this)
                 if(withNotification == true)
                     NotificatonService.enqueue(this@WorkService, intent)
                 registerWorkReceiver()

@@ -44,19 +44,9 @@ import kotlinx.coroutines.flow.Flow
  **/
 @Dao
 interface WorkDao{
-
-    @Query("SELECT * FROM work WHERE interval IS NULL AND delay IS NULL AND hourly != 1 AND daily != 1 AND weekly != 1 AND monthly != 1 AND yearly != 1")
+    @Query("SELECT * FROM work")
     fun getPersistentWork(): Flow<Work>
-
-    @Query("SELECT * FROM work WHERE delay IS NOT NULL AND interval IS NULL")
-    fun getFutureWork(): Flow<Work>
-
-    @Query("SELECT * FROM work WHERE hourly = 1 OR daily = 1 OR weekly = 1 OR monthly = 1 OR yearly = 1 OR interval IS NOT NULL")
-    fun getPeriodicWork(): Flow<Work>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(worker: Work)
-
-    @Delete
-    fun delete(worker: Work)
 }

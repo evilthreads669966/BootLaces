@@ -13,9 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.content.ComponentName
+import android.app.AlarmManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,77 +54,100 @@ import javax.inject.Singleton
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context) {
-    suspend fun schedulePersistent(worker: Worker){
+class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val alarmMgr: AlarmManager, val intentFactory: IntentFactory) {
+    fun schedulePersistent(worker: Worker){
         val work = Work( worker.id, worker::class.java.name)
-        schedulePersistentWork(ctx, work)
+        sendWorkPersistent(work)
     }
 
-    suspend fun scheduleOneTime(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name)
-        sendWorkRequest(ctx, work, Actions.ACTION_WORK_ONE_TIME)
+    fun scheduleNow(worker: Worker){
+        sendWorkAlarm(worker.toWork(), 0L, false, false)
     }
 
-    suspend fun schedulePeriodic(interval: Long, worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, interval = interval)
-        schedulePersistentWork(ctx, work)
+    fun scheduleFuture(delay: Long, worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), delay, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleFuture(delay: Long, worker: Worker){
-        val work = Work(worker.id, worker::class.java.name, delay = delay)
-        schedulePersistentWork(ctx, work)
+    fun scheduleHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleHourly(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, hourly = true)
-        schedulePersistentWork(ctx, work)
+    fun scheduleQuarterDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 6, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleDaily(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, daily = true)
-        schedulePersistentWork(ctx, work)
+    fun scheduleHoursTwo(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 2, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleWeekly(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, weekly = true)
-        schedulePersistentWork(ctx, work)
+    fun scheduleHoursThree(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HOUR * 3, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleMonthly(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, monthly = true)
-        schedulePersistentWork(ctx, work)
+    fun scheduleDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY, repeating, wakeupIfIdle)
     }
 
-    suspend fun scheduleYearly(worker: Worker){
-        val work = Work( worker.id, worker::class.java.name, yearly = true)
-        schedulePersistentWork(ctx, work)
+    fun scheduleWeek(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 7, repeating, wakeupIfIdle)
     }
-}
 
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
-private suspend fun schedulePersistentWork(ctx: Context, work: Work){
-    sendWorkRequest(ctx, work, Actions.ACTION_WORK_PERSISTENT)
-    persistWorkService(ctx)
-}
+    fun scheduleHalfWeek(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), (AlarmManager.INTERVAL_DAY * 3) + AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
+    }
 
-@FlowPreview
-@InternalCoroutinesApi
-private fun persistWorkService(ctx: Context){
-    val componentName = ComponentName(ctx, BootReceiver::class.java)
-    val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-        ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-}
+    fun scheduleHalfDay(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle)
+    }
 
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
-internal suspend fun sendWorkRequest(ctx: Context, work: Work, action: Actions){
-    val intent = IntentFactory.createWorkServiceIntent(ctx, work, action)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        ctx.startForegroundService(intent)
-    else
-        ctx.startService(intent)
+    fun scheduleHalfHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_HALF_HOUR, repeating, wakeupIfIdle)
+    }
+
+    fun scheduleQuarterHour(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, repeating, wakeupIfIdle)
+    }
+
+    fun scheduleMonth(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        // TODO: 1/22/21 need to handle months with 28 days..don't remember what month(s) that is but this could cause a bug
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 31, repeating, wakeupIfIdle)
+    }
+
+    fun scheduleYearly(worker: Worker, repeating: Boolean = false, wakeupIfIdle: Boolean = false){
+        // TODO: 1/22/21 perhaps calculate remaining days left in the year...not really sure which to choose from as it would be a year from the day scheduled
+        sendWorkAlarm(worker.toWork(), AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle)
+
+    }
+
+
+
+    @FlowPreview
+    @InternalCoroutinesApi
+    private fun sendWorkAlarm(work: Work, interval: Long, repeating: Boolean, wakeupIfIdle: Boolean): Boolean{
+        val pendingIntent = intentFactory.createPendingIntent(work) ?: return false
+        var alarmTimeType: Int = AlarmManager.RTC
+        val triggerTime = System.currentTimeMillis() + interval
+        if(wakeupIfIdle)
+            alarmTimeType = AlarmManager.RTC_WAKEUP
+        if(repeating)
+            alarmMgr.setRepeating(alarmTimeType, triggerTime, interval, pendingIntent)
+        else
+            if(wakeupIfIdle)
+                alarmMgr.setExactAndAllowWhileIdle(alarmTimeType, triggerTime, pendingIntent)
+            else
+                alarmMgr.setExact(alarmTimeType, triggerTime, pendingIntent)
+        return true
+    }
+
+    @ExperimentalCoroutinesApi
+    @FlowPreview
+    @InternalCoroutinesApi
+    internal fun sendWorkPersistent(work: Work){
+        val intent = intentFactory.createWorkIntent(work, Actions.ACTION_WORK_PERSISTENT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            ctx.startForegroundService(intent)
+        else
+            ctx.startService(intent)
+        WorkService.persist(ctx)
+    }
 }
