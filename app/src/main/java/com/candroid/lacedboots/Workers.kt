@@ -18,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.icu.util.Calendar
 import android.os.PowerManager
+import android.text.format.DateUtils
 import android.util.Log
 import com.candroid.bootlaces.Worker
 import kotlinx.coroutines.delay
@@ -227,8 +228,10 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
             val tag = this::class.java.name
             val calendar = Calendar.getInstance()
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false)
-                    Log.d(tag, "second of day: ${calendar.get(Calendar.SECOND)}")
+                if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
+                    val time = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
+                    Log.d(tag, time ?: "null")
+                }
             }
         }
 

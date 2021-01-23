@@ -142,11 +142,16 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List
     override fun onBind(intent: Intent?) = null
 
     override suspend fun Flow<List<Work>>.processWork(scope: CoroutineScope){
-        this.map{ work ->
-            work.map { it.toWorker() }
-        }.onEach { workers ->
-            workers.forEach { scope.assignWork(it) }
-        }.launchIn(scope)
+        flatMapMerge(DEFAULT_CONCURRENCY) { work ->
+            flow{
+                work.forEach { emit(it.toWorker()) }
+            }
+        }
+            .flowOn(Dispatchers.Default)
+            .onEach { worker ->
+                this@WorkService.scope.assignWork(worker)
+            }
+            .launchIn(scope)
     }
 
     override suspend fun CoroutineScope.handleWork(){
