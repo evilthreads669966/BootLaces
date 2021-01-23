@@ -68,19 +68,17 @@ class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
         putExtra(Work.KEY_PARCEL, work)
     }
 
-    fun createAlarmIntent(work: Work): Intent?{
-        val workIntent = createWorkIntent(work, Actions.ACTION_WORK_NOW)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            if(PendingIntent.getForegroundService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
-                return null
-        else
-            if(PendingIntent.getService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
-                return null
-        return workIntent
+    fun createAlarmIntent(work: Work) = createWorkIntent(work, Actions.ACTION_WORK_NOW).run {
+        when{
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                PendingIntent.getForegroundService(ctx, work.id, this, PendingIntent.FLAG_NO_CREATE)?.let { null } ?: this
+            }
+            else -> {
+                PendingIntent.getService(ctx, work.id, this, PendingIntent.FLAG_NO_CREATE)?.let { null } ?: this
+            }
+        }
     }
-
-    @FlowPreview
-    @InternalCoroutinesApi
+    
     internal fun createPendingIntent(work: Work): PendingIntent? {
         val intent = createAlarmIntent(work) ?: return null
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
