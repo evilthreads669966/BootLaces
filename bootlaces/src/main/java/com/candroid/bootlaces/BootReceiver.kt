@@ -22,8 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -52,7 +50,7 @@ import javax.inject.Inject
  *
  * Activates [WorkService]
  **/
-@ExperimentalCoroutinesApi
+
 @FlowPreview
 @InternalCoroutinesApi
 @AndroidEntryPoint
@@ -61,13 +59,11 @@ class BootReceiver : HiltBugReceiver(){
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
-            runBlocking {
-                intent?.setClass(ctx!!, WorkService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    ctx!!.startForegroundService(intent)
-                else
-                    ctx!!.startService(intent)
-            }
+            intent?.setClass(ctx!!, WorkService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                ctx!!.startForegroundService(intent)
+            else
+                ctx!!.startService(intent)
         }
     }
 }
