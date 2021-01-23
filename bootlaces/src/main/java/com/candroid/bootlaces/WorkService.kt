@@ -64,15 +64,15 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work>, CoroutineScope> {
+class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List<Work>>, CoroutineScope> {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject internal lateinit var alarmMgr: AlarmManager
-    @Inject lateinit var database: WorkDao
+    @Inject internal lateinit var database: WorkDao
     @Inject internal lateinit var channel: Channel<Work>
     @Inject internal lateinit var supervisor: CompletableJob
     @Inject internal lateinit var mutex: Mutex
     @Inject internal lateinit var workers: MutableCollection<Worker>
-    @Inject lateinit var intentFactory: IntentFactory
+    @Inject internal lateinit var intentFactory: IntentFactory
     private var startId: Int = -666
     private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
@@ -141,19 +141,22 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
 
     override fun onBind(intent: Intent?) = null
 
-    override suspend fun Flow<Work>.processWork(scope: CoroutineScope){
-        this.map { work -> work.toWorker() }
-            .onEach { worker -> this@WorkService.scope.assignWork(worker) }
-            .launchIn(scope)
+    override suspend fun Flow<List<Work>>.processWork(scope: CoroutineScope){
+        this.map{ work ->
+            work.map { it.toWorker() }
+        }.onEach { workers ->
+            workers.forEach { scope.assignWork(it) }
+        }.launchIn(scope)
     }
 
     override suspend fun CoroutineScope.handleWork(){
         val ioScope = CoroutineScope(this.coroutineContext + Dispatchers.IO)
         database.getPersistentWork().filterNotNull().processWork(ioScope)
-        channel.consumeAsFlow().processWork(scope)
+        channel.consumeAsFlow()
+            .map { work -> work.toWorker() }
+            .onEach { worker -> scope.assignWork(worker) }
+            .launchIn(scope)
     }
-
-
 
     override suspend fun CoroutineScope.assignWork(worker: Worker) {
         if(workers.contains(worker)) return

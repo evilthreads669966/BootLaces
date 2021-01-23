@@ -43,6 +43,6 @@ import androidx.room.RoomDatabase
  *
  **/
 @Database(entities = arrayOf(Work::class), version = 1, exportSchema = false)
-abstract class WorkDatabase: RoomDatabase(){
+internal abstract class WorkDatabase: RoomDatabase(){
     abstract fun workerDao(): WorkDao
 }

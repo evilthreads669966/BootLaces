@@ -59,11 +59,11 @@ class BootReceiver : HiltBugReceiver(){
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
-            intent?.setClass(ctx!!, WorkService::class.java)
+            intent?.setClass(ctx ?: return, WorkService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                ctx!!.startForegroundService(intent)
+                ctx?.startForegroundService(intent)
             else
-                ctx!!.startService(intent)
+                ctx?.startService(intent)
         }
     }
 }

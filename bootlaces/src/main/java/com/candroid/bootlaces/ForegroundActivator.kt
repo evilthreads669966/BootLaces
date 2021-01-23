@@ -53,7 +53,7 @@ import javax.inject.Inject
  **/
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-class ForegroundActivator @Inject constructor(val ctx: Service){
+internal class ForegroundActivator @Inject constructor(val ctx: Service){
      @Inject lateinit var factory: NotificationFactory
      private fun notifyForeground() {
           val notification = factory.createForegroundNotification()

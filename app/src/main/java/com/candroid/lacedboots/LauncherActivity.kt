@@ -71,6 +71,7 @@ class LauncherActivity: AppCompatActivity(){
             WorkerSeven().scheduleNow()
             WorkerEight().scheduleHoursTwo(true)
             WorkerTen().scheduleHalfWeek(false)
+            WorkerFourteen().schedulePersistent()
         }
     }
 }
