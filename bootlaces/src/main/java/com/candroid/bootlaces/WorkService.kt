@@ -126,7 +126,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
         Log.d("WorkService", "onDestroy()")
         supervisor.also { it.cancelChildren() }.cancel()
         channel.close()
-        workers.forEach { it.unregisterWorkReceiver() }
+        workers.forEach { worker -> worker.unregisterReceiver(this) }
         runBlocking {
             mutex.withLock {
                 workers.clear()
@@ -153,14 +153,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
         channel.consumeAsFlow().processWork(scope)
     }
 
-    private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
 
-    private fun Worker.registerWorkReceiver(){
-        this.receiver?.run {
-            val filter = IntentFilter(this.action)
-            registerReceiver(this, filter)
-        }
-    }
 
     override suspend fun CoroutineScope.assignWork(worker: Worker) {
         if(workers.contains(worker)) return
@@ -176,9 +169,9 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
                 val intent = intentFactory.createWorkNotificationIntent(this)
                 if(withNotification == true)
                     NotificatonService.enqueue(this@WorkService, intent)
-                registerWorkReceiver()
+                registerReceiver(this@WorkService)
                 doWork(this@WorkService)
-                unregisterWorkReceiver()
+                unregisterReceiver(this@WorkService)
                 if(withNotification == true)
                     NotificatonService.enqueue(this@WorkService, intent.apply { setAction(
                         Actions.ACTION_FINISH.action) })
