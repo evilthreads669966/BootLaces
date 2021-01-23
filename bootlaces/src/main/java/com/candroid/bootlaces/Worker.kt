@@ -74,12 +74,7 @@ abstract class Worker(val id: Int, val description: String, var withNotification
           }
      }
 
-     fun unregisterReceiver(ctx: Context) = this.receiver?.let { ctx.unregisterReceiver(it) }
+     fun unregisterReceiver(ctx: Context): Boolean = receiver?.apply { ctx.unregisterReceiver(this) } != null
 
-     fun registerReceiver(ctx: Context){
-          this.receiver?.run {
-               val filter = IntentFilter(this.action)
-               ctx.registerReceiver(this, filter)
-          }
-     }
+     fun registerReceiver(ctx: Context): Boolean = receiver?.apply { ctx.registerReceiver(this, IntentFilter(action)) } != null
 }
