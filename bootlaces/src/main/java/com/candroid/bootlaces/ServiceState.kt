@@ -37,6 +37,6 @@ package com.candroid.bootlaces
  * @email evilthreads669966@gmail.com
  * @date 11/2/20
  **/
-enum class ServiceState{
+internal enum class ServiceState{
     BACKGROUND, FOREGROUND, STOPPED
 }
