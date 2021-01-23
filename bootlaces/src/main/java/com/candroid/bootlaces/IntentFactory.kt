@@ -56,19 +56,19 @@ import javax.inject.Singleton
 @InternalCoroutinesApi
 @Singleton
 class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
-    fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
+    internal fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    fun createWorkIntent(work: Work, actions: Actions) = Intent().apply {
+    internal fun createWorkIntent(work: Work, actions: Actions) = Intent().apply {
         setClass(ctx, WorkService::class.java)
         setAction(actions.action)
         putExtra(Work.KEY_PARCEL, work)
     }
 
-    fun createAlarmIntent(work: Work) = createWorkIntent(work, Actions.ACTION_WORK_NOW).run {
+    private fun createAlarmIntent(work: Work) = createWorkIntent(work, Actions.ACTION_WORK_NOW).run {
         when{
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
                 PendingIntent.getForegroundService(ctx, work.id, this, PendingIntent.FLAG_NO_CREATE)?.let { null } ?: this
@@ -78,7 +78,7 @@ class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
             }
         }
     }
-    
+
     internal fun createPendingIntent(work: Work): PendingIntent? {
         val intent = createAlarmIntent(work) ?: return null
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
