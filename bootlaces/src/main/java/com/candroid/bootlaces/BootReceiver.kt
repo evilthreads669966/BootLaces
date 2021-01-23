@@ -57,7 +57,6 @@ import javax.inject.Inject
 @InternalCoroutinesApi
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
-    @Inject lateinit var intentFactory: IntentFactory
     @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
