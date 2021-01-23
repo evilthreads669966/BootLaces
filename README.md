@@ -226,6 +226,13 @@ class WorkerNine: Worker(9,"Worker Nine", true){
   - within WorkScheduler.use scope you have access to scheduling functions that have a receiver type of Worker
     - This allows you to use your worker(s) instance(s) to call schedule<TIME> on your worker
 9. Schedule your worker inside of WorkScheduler.use scope
+  - you can pass two arguments to your worker's many available KTX schedule functions
+    - repeating
+      - sets whether the worker should be scheduled to repeat everytime the specified time passes
+	- it's default value is false so you don't have to opt out of repeating
+      - wakeUpIfIdle
+	- sets whether you worker should wake up the device to perform work rather than wait for it stop sleeping
+	  - the default value for this is false
 ```kotlin
 @AndroidEntryPoint
 class LauncherActivity: AppCompatActivity(){
