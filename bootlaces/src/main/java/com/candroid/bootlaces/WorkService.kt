@@ -64,7 +64,7 @@ import kotlin.properties.Delegates
 @InternalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List<Work>>, CoroutineScope> {
+class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineScope> {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject internal lateinit var alarmMgr: AlarmManager
     @Inject internal lateinit var database: WorkDao
@@ -141,7 +141,20 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List
 
     override fun onBind(intent: Intent?) = null
 
-    override suspend fun Flow<List<Work>>.processWork(scope: CoroutineScope){
+    private suspend fun Flow<Work>.processWorkNonPersistent(){
+        filterNotNull()
+        flatMapMerge(DEFAULT_CONCURRENCY){ work ->
+            flow{
+                emit(work.toWorker())
+            }
+        }
+            .flowOn(Dispatchers.Default)
+            .onEach { worker -> scope.assignWork(worker) }
+            .launchIn(scope)
+    }
+
+    private suspend fun Flow<List<Work>>.processWorkPersistent(){
+        val scope = CoroutineScope(this@WorkService.scope.coroutineContext + Dispatchers.IO)
         flatMapMerge(DEFAULT_CONCURRENCY) { work ->
             flow{
                 work.forEach { emit(it.toWorker()) }
@@ -155,12 +168,9 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List
     }
 
     override suspend fun CoroutineScope.handleWork(){
-        val ioScope = CoroutineScope(this.coroutineContext + Dispatchers.IO)
-        database.getPersistentWork().filterNotNull().processWork(ioScope)
-        channel.consumeAsFlow()
-            .map { work -> work.toWorker() }
-            .onEach { worker -> scope.assignWork(worker) }
-            .launchIn(scope)
+        database.getPersistentWork().filterNotNull().processWorkPersistent()
+        channel.consumeAsFlow().processWorkNonPersistent()
+
     }
 
     override suspend fun CoroutineScope.assignWork(worker: Worker) {
@@ -195,8 +205,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<List
     }
 }
 
-internal interface IWorkHandler<in T, in S, in R>{
+internal interface IWorkHandler<in T,in R>{
    suspend fun R.handleWork()
-    suspend fun S.processWork(scope: R)
     suspend fun R.assignWork(worker: T)
 }
