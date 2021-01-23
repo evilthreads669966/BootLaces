@@ -73,9 +73,9 @@ class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             if(PendingIntent.getForegroundService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
                 return null
-            else
-                if(PendingIntent.getService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
-                    return null
+        else
+            if(PendingIntent.getService(ctx, work.id, workIntent, PendingIntent.FLAG_NO_CREATE) != null)
+                return null
         return workIntent
     }
 
