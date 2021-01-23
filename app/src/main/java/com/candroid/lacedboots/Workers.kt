@@ -16,12 +16,10 @@ package com.candroid.lacedboots
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
+import android.icu.util.Calendar
 import android.os.PowerManager
 import android.util.Log
 import com.candroid.bootlaces.Worker
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
 
 /*
@@ -137,7 +135,7 @@ class WorkerSix: Worker(6, "Worker Six", true){
 
 class WorkerSeven: Worker(7, "Worker Seven", true){
     val tag = this::class.java.name
-    
+
     override val receiver: WorkReceiver?
         get() = null
 
@@ -215,8 +213,29 @@ class WorkerNine: Worker(9,"Worker Nine", true){
         while(true){
             Log.d(tag, "Working for 25 seconds")
             delay(25000)
-    /*        if (powerMgr.isInteractive)
-                ctx.sendBroadcast(intent)*/
+            /*        if (powerMgr.isInteractive)
+                        ctx.sendBroadcast(intent)*/
+        }
+    }
+}
+
+class WorkerFourteen: Worker(14,"Worker Fourteen", true){
+    val tag = this::class.java.name
+
+    override val receiver: WorkReceiver?
+        get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
+            val tag = this::class.java.name
+            val calendar = Calendar.getInstance()
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false)
+                    Log.d(tag, "second of day: ${calendar.get(Calendar.SECOND)}")
+            }
+        }
+
+    override suspend fun doWork(ctx: Context) {
+        while(true){
+            Log.d(tag, "working for three minutes")
+            delay(60000L * 3)
         }
     }
 }

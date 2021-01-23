@@ -30,7 +30,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
-import javax.inject.Singleton
 
 /*
             (   (                ) (             (     (
@@ -63,10 +62,9 @@ import javax.inject.Singleton
 @InternalCoroutinesApi
 @Module
 @InstallIn(ApplicationComponent::class)
-object BroadcastReceiverModule {
-    @Singleton
-    @Provides fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
-    @Singleton
+internal object GlobalModule {
+    @Provides
+    fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
     @Provides
     fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
 }
@@ -75,14 +73,14 @@ object BroadcastReceiverModule {
 @InternalCoroutinesApi
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
-interface ForegroundEntryPoint{
+internal interface ForegroundEntryPoint{
     @ExperimentalCoroutinesApi
     fun getForeground(): ForegroundActivator
 }
 
 @InstallIn(ServiceComponent::class)
 @Module
-object BackgroundModule{
+internal object BackgroundModule{
     @Provides
     fun provideChannel() = Channel<Work>()
     @Provides
@@ -95,13 +93,15 @@ object BackgroundModule{
 
 @InstallIn(ServiceComponent::class)
 @Module
-object ForegroundModule{
-    @Provides fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
-    @Provides fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
+internal object ForegroundModule{
+    @Provides
+    fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
+    @Provides
+    fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
 @DefineComponent(parent = ServiceComponent::class)
-interface ForegroundComponent{
+internal interface ForegroundComponent{
     @DefineComponent.Builder
     interface Builder {
         fun build(): ForegroundComponent

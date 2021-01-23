@@ -60,7 +60,7 @@ import javax.inject.Singleton
  * @date 10/31/20
  * creates notifications for foreground and workers
  **/
-class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Context, val mgr: NotificationManagerCompat, val builder: NotificationCompat.Builder){
+internal class NotificationFactory @Inject constructor(@ApplicationContext val ctx: Context, val mgr: NotificationManagerCompat, val builder: NotificationCompat.Builder){
     internal fun createStartedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
         return builder.apply {
