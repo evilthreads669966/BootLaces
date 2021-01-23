@@ -149,8 +149,8 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker, Flow<Work
 
     override suspend fun CoroutineScope.handleWork(){
         val ioScope = CoroutineScope(this.coroutineContext + Dispatchers.IO)
-        this.launch { database.getPersistentWork().filterNotNull().processWork(ioScope) }
-        this.launch { channel.consumeAsFlow().processWork(scope) }
+        database.getPersistentWork().filterNotNull().processWork(ioScope)
+        channel.consumeAsFlow().processWork(scope)
     }
 
     private fun Worker.unregisterWorkReceiver() = this.receiver?.let { unregisterReceiver(it) }
