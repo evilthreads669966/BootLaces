@@ -43,10 +43,9 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
+@ExperimentalCoroutinesApi
 @FlowPreview
 @InternalCoroutinesApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 @AndroidEntryPoint
 class LauncherActivity: AppCompatActivity(){
     @Inject lateinit var scheduler: WorkScheduler

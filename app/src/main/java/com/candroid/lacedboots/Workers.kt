@@ -199,9 +199,6 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
     }
 }
 
-@InternalCoroutinesApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 class WorkerNine: Worker(9,"Worker Nine", true){
     val tag = this::class.java.name
 
