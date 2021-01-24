@@ -51,7 +51,6 @@ import kotlinx.coroutines.delay
  **/
 
 class WorkerEight: Worker(8, "Worker Eight", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -63,7 +62,6 @@ class WorkerEight: Worker(8, "Worker Eight", true){
 }
 
 class WorkerOne: Worker(1, "Worker One", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -75,7 +73,6 @@ class WorkerOne: Worker(1, "Worker One", true){
 }
 
 class WorkerTwo: Worker(2, "Worker Two", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -87,7 +84,6 @@ class WorkerTwo: Worker(2, "Worker Two", true){
 }
 
 class WorkerThree: Worker(3, "Worker Three", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -99,7 +95,6 @@ class WorkerThree: Worker(3, "Worker Three", true){
 }
 
 class WorkerFour: Worker(4, "Worker Four", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -111,7 +106,6 @@ class WorkerFour: Worker(4, "Worker Four", true){
 }
 
 class WorkerFive: Worker(5, "Worker Five", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -123,7 +117,6 @@ class WorkerFive: Worker(5, "Worker Five", true){
 }
 
 class WorkerSix: Worker(6, "Worker Six", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -135,7 +128,6 @@ class WorkerSix: Worker(6, "Worker Six", true){
 }
 
 class WorkerSeven: Worker(7, "Worker Seven", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -147,7 +139,6 @@ class WorkerSeven: Worker(7, "Worker Seven", true){
 }
 
 class WorkerThirteen: Worker(13, "Worker Thirteen", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -161,7 +152,6 @@ class WorkerThirteen: Worker(13, "Worker Thirteen", true){
 
 
 class WorkerTwelve: Worker(12, "Worker Twelve", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -175,7 +165,6 @@ class WorkerTwelve: Worker(12, "Worker Twelve", true){
 
 
 class WorkerEleven: Worker(11, "Worker Eleven", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -186,7 +175,6 @@ class WorkerEleven: Worker(11, "Worker Eleven", true){
     }
 }
 class WorkerTen: Worker(10,"Worker Ten", true) {
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -199,7 +187,6 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
 }
 
 class WorkerNine: Worker(9,"Worker Nine", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
@@ -221,16 +208,15 @@ class WorkerNine: Worker(9,"Worker Nine", true){
 }
 
 class WorkerFourteen: Worker(14,"Worker Fourteen", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
-            val tag = this::class.java.name
+            
             val calendar = Calendar.getInstance()
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
-                    val time = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
-                    Log.d(tag, time ?: "null")
+                    val date = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
+                    Log.d(tag, date ?: "null")
                 }
             }
         }
