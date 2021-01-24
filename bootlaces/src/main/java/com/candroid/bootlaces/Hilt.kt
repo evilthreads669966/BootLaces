@@ -57,9 +57,6 @@ import kotlinx.coroutines.sync.Mutex
  * @date 10/31/20
  *
  **/
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
 @Module
 @InstallIn(ApplicationComponent::class)
 internal object GlobalModule {
@@ -69,12 +66,9 @@ internal object GlobalModule {
     fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
 }
 
-@FlowPreview
-@InternalCoroutinesApi
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
 internal interface ForegroundEntryPoint{
-    @ExperimentalCoroutinesApi
     fun getForeground(): ForegroundActivator
 }
 

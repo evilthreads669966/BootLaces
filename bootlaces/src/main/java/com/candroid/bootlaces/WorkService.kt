@@ -60,9 +60,6 @@ import kotlin.properties.Delegates
  *
  * activates [Worker]
  * */
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
-@FlowPreview
 @AndroidEntryPoint
 class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineScope> {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>

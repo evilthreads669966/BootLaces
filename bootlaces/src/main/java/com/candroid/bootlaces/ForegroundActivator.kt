@@ -17,11 +17,6 @@ import android.app.Service
 import android.os.Build
 import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject
 
 /*
@@ -51,8 +46,7 @@ import javax.inject.Inject
  *
  * activates foreground in [WorkService]
  **/
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
+
 internal class ForegroundActivator @Inject constructor(private val ctx: Service){
      @Inject internal lateinit var factory: NotificationFactory
      private fun notifyForeground() {
@@ -63,7 +57,6 @@ internal class ForegroundActivator @Inject constructor(private val ctx: Service)
                ctx.startForeground(FOREGROUND_ID,notification)
      }
 
-     @FlowPreview
      @Throws(SecurityException::class)
      internal fun activate() {
           if(WorkService.state.equals(ServiceState.FOREGROUND)) return
@@ -73,7 +66,6 @@ internal class ForegroundActivator @Inject constructor(private val ctx: Service)
           }
      }
 
-     @FlowPreview
      internal fun deactivate() {
           ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
           WorkService.state = ServiceState.BACKGROUND

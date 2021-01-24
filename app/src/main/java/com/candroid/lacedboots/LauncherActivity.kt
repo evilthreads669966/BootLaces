@@ -17,10 +17,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
 /*
@@ -43,9 +39,6 @@ import javax.inject.Inject
 ............\..............(
 ..............\.............\...
 */
-@ExperimentalCoroutinesApi
-@FlowPreview
-@InternalCoroutinesApi
 @AndroidEntryPoint
 class LauncherActivity: AppCompatActivity(){
     @Inject lateinit var scheduler: WorkScheduler

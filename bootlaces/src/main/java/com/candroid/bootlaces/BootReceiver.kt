@@ -19,9 +19,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
 
 /*
             (   (                ) (             (     (
@@ -51,11 +48,8 @@ import kotlinx.coroutines.InternalCoroutinesApi
  * Activates [WorkService]
  **/
 
-@FlowPreview
-@InternalCoroutinesApi
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
-    @ExperimentalCoroutinesApi
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
