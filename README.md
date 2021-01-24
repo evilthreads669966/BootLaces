@@ -60,7 +60,6 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
             val tag = this::class.java.name
-            val calendar = Calendar.getInstance()
 	    
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
