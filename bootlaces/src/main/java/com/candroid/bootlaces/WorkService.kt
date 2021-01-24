@@ -80,7 +80,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
         if(newValue == 0){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 foreground.deactivate()
-            if(startId != -1) stopSelf()
+            if(startId == -1) stopSelf()
             else if(!stopSelfResult(startId))
                 stopSelf()
         }
