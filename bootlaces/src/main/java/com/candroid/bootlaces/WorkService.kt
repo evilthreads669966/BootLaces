@@ -144,13 +144,9 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
 
     private suspend fun Flow<Work>.processWorkNonPersistent(){
         filterNotNull()
-            .flatMapMerge(DEFAULT_CONCURRENCY){ work ->
-                flow{
-                    emit(work.toWorker())
-                }
-            }
-            .flowOn(Dispatchers.Default)
+            .map { work -> work.toWorker() }
             .onEach { worker -> scope.assignWork(worker) }
+            .flowOn(Dispatchers.Default)
             .launchIn(scope)
     }
 
