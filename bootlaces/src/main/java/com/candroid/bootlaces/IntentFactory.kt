@@ -18,9 +18,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,33 +48,30 @@ import javax.inject.Singleton
  *
  * creates intents
  **/
-@FlowPreview
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Singleton
 class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Context){
 
-    internal fun createWorkNotificationIntent(worker: Worker): Intent = Intent().apply {
+    internal fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    internal fun createWorkIntent(work: Work, actions: Actions): Intent = Intent().apply {
+    internal fun createWorkIntent(work: Work, actions: Actions) = Intent().apply {
         setClass(ctx, WorkService::class.java)
         setAction(actions.action)
         putExtra(Work.KEY_PARCEL, work)
     }
 
-    private fun createAlarmIntent(work: Work): Intent? = createWorkIntent(work, Actions.ACTION_WORK_NON_PERSISTENT).run {
-        when{
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                PendingIntent.getForegroundService(ctx, work.id, this, PendingIntent.FLAG_NO_CREATE)?.let { null } ?: this
-            }
-            else -> {
-                PendingIntent.getService(ctx, work.id, this, PendingIntent.FLAG_NO_CREATE)?.let { null } ?: this
-            }
-        }
+    private fun createAlarmIntent(work: Work): Intent?{
+        val intent = createWorkIntent(work, Actions.ACTION_WORK_NON_PERSISTENT)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                if(PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
+                    return null
+            else
+                if(PendingIntent.getService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
+                    return null
+        return intent
     }
     
     internal fun createPendingIntent(work: Work): PendingIntent? {

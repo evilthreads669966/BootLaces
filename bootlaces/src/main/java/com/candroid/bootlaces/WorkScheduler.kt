@@ -17,9 +17,6 @@ import android.app.AlarmManager
 import android.content.Context
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,9 +46,6 @@ import javax.inject.Singleton
  * @date 10/16/20
  *
  **/
-@FlowPreview
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Singleton
 class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val alarmMgr: AlarmManager, private val factory: IntentFactory) {
     /*use this scoping function to schedule workers
