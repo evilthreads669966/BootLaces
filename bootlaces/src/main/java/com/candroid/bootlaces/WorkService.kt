@@ -73,14 +73,14 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
     @Inject internal lateinit var mutex: Mutex
     @Inject internal lateinit var workers: MutableCollection<Worker>
     @Inject internal lateinit var intentFactory: IntentFactory
-    private var startId: Int = -666
+    private var startId: Int = -1
     private lateinit var scope: CoroutineScope
     private lateinit var foreground: ForegroundActivator
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 foreground.deactivate()
-            if(!stopSelfResult(startId))
+            if(startId != -1 && !stopSelfResult(startId))
                 stopSelf()
         }
     }
