@@ -53,6 +53,31 @@ class App: Application()
     - you can broadcast to this BroadcastReceiver from within your doWork function or anywhere else in your app
     - for now the WorkReceiver is only registered and subscribing to broadcast while you are performing work. Everytime doWork executes it registers the receiver & unregisters it after doWork completes
 ```kotlin
+
+class WorkerFourteen: Worker(14,"Worker Fourteen", true){
+    val tag = this::class.java.name
+
+    override val receiver: WorkReceiver?
+        get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
+            val tag = this::class.java.name
+            val calendar = Calendar.getInstance()
+	    
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
+                    val time = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
+                    Log.d(tag, time ?: "null") //just prints out the current month name and calendar day
+                }
+            }
+        }
+
+    override suspend fun doWork(ctx: Context) {
+        while(true){
+            Log.d(tag, "working for three minutes")
+            delay(60000L * 3)
+        }
+    }
+}
+
 class WorkerEight: Worker(8, "Worker Eight", withNotification = true){
     val tag = this::class.java.name
 
