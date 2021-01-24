@@ -113,7 +113,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
                 val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@launch
                 when(intent.action ?: return@launch){
                     Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
-                    Actions.ACTION_WORK_NOW.action -> { channel.send(work) }
+                    Actions.ACTION_WORK_NON_PERSISTENT.action -> { channel.send(work) }
                     else -> return@launch
                 }
             }.join()
