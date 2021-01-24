@@ -53,7 +53,7 @@ import javax.inject.Singleton
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext val ctx: Context, val alarmMgr: AlarmManager, val factory: IntentFactory) {
+class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val alarmMgr: AlarmManager, private val factory: IntentFactory) {
     /*use this scoping function to schedule workers
     * ie: scheduler.use { MyWorker().scheduleHour() }
     * */

@@ -55,7 +55,7 @@ import javax.inject.Singleton
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Singleton
-class IntentFactory @Inject constructor(@ApplicationContext val ctx: Context){
+class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Context){
 
     internal fun createWorkNotificationIntent(worker: Worker): Intent = Intent().apply {
         setAction(Actions.ACTION_START.action)
