@@ -16,7 +16,6 @@ package com.candroid.lacedboots
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
-import android.icu.util.Calendar
 import android.os.PowerManager
 import android.text.format.DateUtils
 import android.util.Log
@@ -212,13 +211,13 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
             
-            val calendar = Calendar.getInstance()
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
                     val date = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
                     Log.d(tag, date ?: "null")
                 }
             }
+        
         }
 
     override suspend fun doWork(ctx: Context) {
