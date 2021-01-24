@@ -64,8 +64,8 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
 	    
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
-                    val time = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
-                    Log.d(tag, time ?: "null") //just prints out the current month name and calendar day
+                    val date = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
+                    Log.d(tag, date ?: "null") //just prints out the current month name and calendar day
                 }
             }
         }
