@@ -53,9 +53,7 @@ class App: Application()
     - you can broadcast to this BroadcastReceiver from within your doWork function or anywhere else in your app
     - for now the WorkReceiver is only registered and subscribing to broadcast while you are performing work. Everytime doWork executes it registers the receiver & unregisters it after doWork completes
 ```kotlin
-
 class WorkerFourteen: Worker(14,"Worker Fourteen", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
@@ -77,8 +75,7 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
     }
 }
 
-class WorkerEight: Worker(8, "Worker Eight", withNotification = true){
-    val tag = this::class.java.name
+class WorkerEight: Worker(8, "Worker Eight", true){
 
     override val receiver: WorkReceiver?
         get() = null
@@ -90,7 +87,6 @@ class WorkerEight: Worker(8, "Worker Eight", withNotification = true){
 }
 
 class WorkerOne: Worker(1, "Worker One", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -102,7 +98,6 @@ class WorkerOne: Worker(1, "Worker One", true){
 }
 
 class WorkerTwo: Worker(2, "Worker Two", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -114,7 +109,6 @@ class WorkerTwo: Worker(2, "Worker Two", true){
 }
 
 class WorkerThree: Worker(3, "Worker Three", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -126,7 +120,6 @@ class WorkerThree: Worker(3, "Worker Three", true){
 }
 
 class WorkerFour: Worker(4, "Worker Four", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -138,7 +131,6 @@ class WorkerFour: Worker(4, "Worker Four", true){
 }
 
 class WorkerFive: Worker(5, "Worker Five", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -150,7 +142,6 @@ class WorkerFive: Worker(5, "Worker Five", true){
 }
 
 class WorkerSix: Worker(6, "Worker Six", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -162,7 +153,6 @@ class WorkerSix: Worker(6, "Worker Six", true){
 }
 
 class WorkerSeven: Worker(7, "Worker Seven", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -174,7 +164,6 @@ class WorkerSeven: Worker(7, "Worker Seven", true){
 }
 
 class WorkerThirteen: Worker(13, "Worker Thirteen", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -186,7 +175,6 @@ class WorkerThirteen: Worker(13, "Worker Thirteen", true){
 }
 
 class WorkerTwelve: Worker(12, "Worker Twelve", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -197,10 +185,7 @@ class WorkerTwelve: Worker(12, "Worker Twelve", true){
     }
 }
 
-
-
 class WorkerEleven: Worker(11, "Worker Eleven", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -210,8 +195,8 @@ class WorkerEleven: Worker(11, "Worker Eleven", true){
         delay(5000)
     }
 }
+
 class WorkerTen: Worker(10,"Worker Ten", true) {
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = null
@@ -224,22 +209,26 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
 }
 
 class WorkerNine: Worker(9,"Worker Nine", true){
-    val tag = this::class.java.name
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                //handle broadcast and if you want you can broadcast your action from doWork to onReceive
+                //LockManager.lockScreen(ctx!!, intent)
             }
         }
 
     override suspend fun doWork(ctx: Context) {
+        val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         while(true){
             Log.d(tag, "Working for 25 seconds")
             delay(25000)
+            /*        if (powerMgr.isInteractive)
+                        ctx.sendBroadcast(intent)*/
         }
     }
 }
+
 ```
 8. Inject your WorkScheduler inside of an Android context
 ```kotlin
