@@ -60,7 +60,7 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
             val tag = this::class.java.name
 	    
             override fun onReceive(ctx: Context?, intent: Intent?) {
-                if(intent?.action?.equals(Intent.ACTION_TIME_TICK) ?: false){
+                if(intent?.action?.equals(action) ?: false){
                     val date = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
                     Log.d(tag, date ?: "null") //just prints out the current month name and calendar day
                 }

@@ -63,6 +63,8 @@ abstract class Worker(val id: Int, val description: String, var withNotification
      override fun hashCode(): Int = id.hashCode()
 
      open class WorkReceiver(val action: String): BroadcastReceiver(){
+          val tag = this::class.java.name
+
           override fun onReceive(ctx: Context?, intent: Intent?){}
 
           override fun hashCode() = action.hashCode()
