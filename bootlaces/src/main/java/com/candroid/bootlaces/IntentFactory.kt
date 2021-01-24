@@ -65,12 +65,14 @@ class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Con
 
     private fun createAlarmIntent(work: Work): Intent?{
         val intent = createWorkIntent(work, Actions.ACTION_WORK_NON_PERSISTENT)
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                if(PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
-                    return null
-            else
-                if(PendingIntent.getService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
-                    return null
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            if(PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
+                return null
+        }
+        else{
+            if(PendingIntent.getService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
+                return null
+        }
         return intent
     }
     
