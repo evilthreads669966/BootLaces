@@ -50,10 +50,6 @@ import kotlinx.coroutines.delay
  **/
 
 class WorkerEight: Worker(8, "Worker Eight", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 2 hours")
         delay(AlarmManager.INTERVAL_HOUR * 2)
@@ -61,10 +57,6 @@ class WorkerEight: Worker(8, "Worker Eight", true){
 }
 
 class WorkerOne: Worker(1, "Worker One", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 2 minutes")
         delay(120000)
@@ -72,10 +64,6 @@ class WorkerOne: Worker(1, "Worker One", true){
 }
 
 class WorkerTwo: Worker(2, "Worker Two", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 15 minutes")
         delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
@@ -83,10 +71,6 @@ class WorkerTwo: Worker(2, "Worker Two", true){
 }
 
 class WorkerThree: Worker(3, "Worker Three", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 1 minute")
         delay(60000)
@@ -94,10 +78,6 @@ class WorkerThree: Worker(3, "Worker Three", true){
 }
 
 class WorkerFour: Worker(4, "Worker Four", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 5 minutes")
         delay(60000 * 5)
@@ -105,10 +85,6 @@ class WorkerFour: Worker(4, "Worker Four", true){
 }
 
 class WorkerFive: Worker(5, "Worker Five", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 45 seconds")
         delay(45000)
@@ -116,10 +92,6 @@ class WorkerFive: Worker(5, "Worker Five", true){
 }
 
 class WorkerSix: Worker(6, "Worker Six", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 1 minute")
         delay(60000)
@@ -127,10 +99,6 @@ class WorkerSix: Worker(6, "Worker Six", true){
 }
 
 class WorkerSeven: Worker(7, "Worker Seven", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for a minute and a half")
         delay(90000L)
@@ -138,10 +106,6 @@ class WorkerSeven: Worker(7, "Worker Seven", true){
 }
 
 class WorkerThirteen: Worker(13, "Worker Thirteen", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 20 seconds")
         delay(20000)
@@ -151,10 +115,6 @@ class WorkerThirteen: Worker(13, "Worker Thirteen", true){
 
 
 class WorkerTwelve: Worker(12, "Worker Twelve", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 30 seconds")
         delay(30000)
@@ -164,45 +124,16 @@ class WorkerTwelve: Worker(12, "Worker Twelve", true){
 
 
 class WorkerEleven: Worker(11, "Worker Eleven", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 5 seconds")
         delay(5000)
     }
 }
 class WorkerTen: Worker(10,"Worker Ten", true) {
-
-    override val receiver: WorkReceiver?
-        get() = null
-
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 10 seconds")
         for(i in 1..10)
             delay(1000)
-    }
-}
-
-class WorkerNine: Worker(9,"Worker Nine", true){
-
-    override val receiver: WorkReceiver?
-        get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
-                //LockManager.lockScreen(ctx!!, intent)
-            }
-        }
-
-    override suspend fun doWork(ctx: Context) {
-        val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        while(true){
-            Log.d(tag, "Working for 25 seconds")
-            delay(25000)
-            /*        if (powerMgr.isInteractive)
-                        ctx.sendBroadcast(intent)*/
-        }
     }
 }
 

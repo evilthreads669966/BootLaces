@@ -46,7 +46,6 @@ class LauncherActivity: AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         scheduler.use {
-            WorkerNine().schedulePersistent()
             WorkerSix().scheduleQuarterHour(true, true)
             WorkerFive().scheduleHalfHour()
         }

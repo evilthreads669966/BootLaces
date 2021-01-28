@@ -48,7 +48,7 @@ import android.content.IntentFilter
 abstract class Worker(val id: Int, val description: String, var withNotification: Boolean = false){
      val tag = this::class.java.name
 
-     abstract val receiver: WorkReceiver?
+     open val receiver: WorkReceiver? = null
 
      suspend abstract fun doWork(ctx: Context)
 
