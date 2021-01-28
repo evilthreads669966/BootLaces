@@ -16,7 +16,6 @@ package com.candroid.bootlaces
 import android.app.AlarmManager
 import android.app.Service
 import android.content.*
-import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.ServiceCompat
@@ -149,7 +148,7 @@ class WorkService: Service(), ComponentCallbacks2 {
                 it.filterIsInstance<PersistentWorker>()
                     .forEach { worker ->
                         scheduler.use {
-                            worker.scheduleFuture()
+                            worker.scheduleAfterReboot()
                         }
                     }
             }
