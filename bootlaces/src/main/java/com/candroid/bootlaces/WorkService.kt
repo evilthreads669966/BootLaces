@@ -100,7 +100,7 @@ class WorkService: Service(), ComponentCallbacks2 {
         workCoroutineScope.launch { startAction(intent) }
         super.onStartCommand(intent, flags, startId)
         this.startId = startId
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     private suspend fun startAction(intent: Intent?){
