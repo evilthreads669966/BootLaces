@@ -25,11 +25,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.properties.Delegates
 
 /*
@@ -67,9 +65,10 @@ class WorkService: Service(), ComponentCallbacks2 {
     @Inject internal lateinit var workers: MutableCollection<Worker>
     @Inject internal lateinit var intentFactory: IntentFactory
     @Inject internal lateinit var scheduler: WorkScheduler
+    @Inject internal lateinit var workDispatcher: ExecutorCoroutineDispatcher
     private lateinit var foreground: ForegroundActivator
+    private lateinit var workCoroutineScope: CoroutineScope
     private var startId: Int? = null
-    private lateinit var workerScope: CoroutineScope
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
         if(newValue == 0) stopWorkService()
     }
@@ -94,34 +93,35 @@ class WorkService: Service(), ComponentCallbacks2 {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(foregroundProvider.get().build(),ForegroundEntryPoint::class.java).getForeground()
-        workerScope = CoroutineScope(GlobalScope.newCoroutineContext(EmptyCoroutineContext + Dispatchers.Default))
+        workCoroutineScope = CoroutineScope(workDispatcher)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startAction(intent)
+        workCoroutineScope.launch { startAction(intent) }
         super.onStartCommand(intent, flags, startId)
         this.startId = startId
         return START_NOT_STICKY
     }
 
-    private fun startAction(intent: Intent?){
-        val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: throw Exception()
-        when(intent.action ?: throw Exception()){
-            Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workerScope.launch(Dispatchers.IO) {
+    private suspend fun startAction(intent: Intent?){
+        val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return
+        when(intent.action ?: return){
+            Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> {
                 database.insert(work)
                 scheduleWorkBeforeAfterReboot()
             }
-            Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workerScope.launch { scheduleWorkBeforeAfterReboot() }
-            Actions.ACTION_EXPIRED_WORK.action -> workerScope.launch { processExpiredWork(Worker.createFromWork(work)) }
-            else -> throw Exception()
+            Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> scheduleWorkBeforeAfterReboot()
+            Actions.ACTION_EXPIRED_WORK.action -> processExpiredWork(Worker.createFromWork(work))
+            else -> return
         }
     }
 
     override fun onDestroy() {
         Log.d("WorkService", "onDestroy()")
-        workerScope.coroutineContext.cancelChildren()
-        workerScope.cancel()
         startId = 0
+        workCoroutineScope.cancel()
+        workDispatcher.cancel()
+        workDispatcher.close()
         workers.forEach { worker -> worker.unregisterReceiver(this) }
         runBlocking {
             mutex.withLock {
@@ -137,7 +137,7 @@ class WorkService: Service(), ComponentCallbacks2 {
 
     override fun onBind(intent: Intent?) = null
 
-    private suspend fun Flow<List<Work>>.scheduleBeforeAndAfterReboot(){
+    private suspend fun Flow<List<Work>>.scheduleBeforeAndAfterReboot() = supervisorScope{
         filterNotNull()
             .flatMapMerge(DEFAULT_CONCURRENCY) {
                 flow {
@@ -151,34 +151,33 @@ class WorkService: Service(), ComponentCallbacks2 {
                             worker.scheduleAfterReboot()
                         }
                     }
-            }
-            .launchIn(workerScope)
+            }.flowOn(currentCoroutineContext())
+            .launchIn(this)
     }
 
-    private suspend fun scheduleWorkBeforeAfterReboot() = workerScope.launch { withContext(Dispatchers.IO){ database.getPersistentWork().scheduleBeforeAndAfterReboot() } }
+    private suspend fun scheduleWorkBeforeAfterReboot() = database.getPersistentWork().scheduleBeforeAndAfterReboot()
 
-    private suspend fun processExpiredWork(worker: Worker) {
-        if(workers.contains(worker)) return
+
+    private suspend fun processExpiredWork(worker: Worker) = supervisorScope{
+        if(workers.contains(worker)) return@supervisorScope
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             if(!state.equals(ServiceState.FOREGROUND))
                 foreground.activate()
-        workerScope.launch{
-            with(worker){
-                mutex.withLock {
-                    workers.add(this)
-                    workerCount++
-                }
-                val intent = intentFactory.createWorkNotificationIntent(this)
-                if(withNotification == true)
-                    NotificatonService.enqueue(this@WorkService, intent)
-                registerReceiver(this@WorkService)
-                doWork(this@WorkService)
-                unregisterReceiver(this@WorkService)
-                if(withNotification == true)
-                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
+        with(worker){
+            mutex.withLock {
+                workers.add(this)
+                workerCount++
             }
-            mutex.withLock { workerCount-- }
+            val intent = intentFactory.createWorkNotificationIntent(this)
+            if(withNotification == true)
+                NotificatonService.enqueue(this@WorkService, intent)
+            registerReceiver(this@WorkService)
+            doWork(this@WorkService)
+            unregisterReceiver(this@WorkService)
+            if(withNotification == true)
+                NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
         }
+        mutex.withLock { workerCount-- }
     }
 
     override fun onTrimMemory(level: Int) {

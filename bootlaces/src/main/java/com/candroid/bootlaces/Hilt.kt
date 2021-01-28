@@ -27,10 +27,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.sync.Mutex
+import java.util.concurrent.Executors
 
 /*
             (   (                ) (             (     (
@@ -80,6 +79,8 @@ internal object BackgroundModule{
     fun providesMutex() = Mutex()
     @Provides
     fun provideWorkers(): MutableCollection<Worker> = mutableSetOf()
+    @Provides
+    fun provideExecutor() = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1).asCoroutineDispatcher()
 }
 
 @InstallIn(ServiceComponent::class)

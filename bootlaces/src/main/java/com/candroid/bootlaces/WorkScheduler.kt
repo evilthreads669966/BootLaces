@@ -123,7 +123,6 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     }
 
     private fun PersistentWorker.scheduleBeforeReboot(){
-
         val work = Work(this)
         val intent = factory.createWorkIntent(work, Actions.ACTION_SCHEDULE_BEFORE_REBOOT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
