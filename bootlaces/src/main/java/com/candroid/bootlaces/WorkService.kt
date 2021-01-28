@@ -149,7 +149,7 @@ class WorkService: Service(), ComponentCallbacks2 {
                 it.filterIsInstance<PersistentWorker>()
                     .forEach { worker ->
                         scheduler.use {
-                            worker.scheduleFuture(worker.interval, worker.repeating, worker.wakeIfIdle, worker.precisionTiming)
+                            worker.scheduleFuture()
                         }
                     }
             }
