@@ -135,7 +135,7 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
     }
 }
 
-class WorkerFourteen: WorkerHourly(14, "Worker Fourteen", true){
+class WorkerFourteen: WorkerHourly(14, "survives reboot and performs every hour", true){
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
