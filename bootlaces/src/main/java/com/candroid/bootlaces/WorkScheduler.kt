@@ -57,11 +57,11 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
 
     fun PersistentWorker.scheduleBeforeAfterReboot() = scheduleBeforeReboot()
 
-    internal fun PersistentWorker.scheduleAfterReboot() = scheduleAfterReboot(interval, repeating, wakeIfIdle, precisionTiming)
+    internal fun PersistentWorker.scheduleAfterReboot() = scheduleFuture(interval, repeating, wakeIfIdle, precisionTiming)
 
-    fun Worker.scheduleNow(): Boolean = scheduleAfterReboot(0L, false, false, false)
+    fun Worker.scheduleNow(): Boolean = scheduleFuture(0L, false, false, false)
 
-    fun Worker.scheduleAfterReboot(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
+    fun Worker.scheduleFuture(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
         schedule(delay, repeating, wakeupIfIdle, precision)
 
     fun Worker.scheduleHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
