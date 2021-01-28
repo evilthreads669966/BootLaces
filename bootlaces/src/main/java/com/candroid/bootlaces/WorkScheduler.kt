@@ -102,7 +102,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     fun Worker.scheduleYearly(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
         schedule(AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle, precision)
 
-    internal fun Worker.schedule(interval: Long, repeating: Boolean, wakeupIfIdle: Boolean, precision: Boolean): Boolean{
+    private fun Worker.schedule(interval: Long, repeating: Boolean, wakeupIfIdle: Boolean, precision: Boolean): Boolean{
         val work = Work(this)
         val pendingIntent = factory.createPendingIntent(work) ?: return false
         var alarmTimeType: Int = AlarmManager.RTC
