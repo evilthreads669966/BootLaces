@@ -27,8 +27,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.sync.Mutex
 
 /*
@@ -75,10 +76,6 @@ internal interface ForegroundEntryPoint{
 @InstallIn(ServiceComponent::class)
 @Module
 internal object BackgroundModule{
-    @Provides
-    fun provideChannel() = Channel<Work>()
-    @Provides
-    fun provideSupervisor(): CompletableJob = SupervisorJob()
     @Provides
     fun providesMutex() = Mutex()
     @Provides

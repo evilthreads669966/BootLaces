@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
+import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import kotlin.coroutines.CoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -44,9 +46,12 @@ import android.content.IntentFilter
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
  **/
-
-abstract class Worker(val id: Int, val description: String, var withNotification: Boolean = false){
+abstract class Worker(val id: Int, val description: String, val withNotification: Boolean){
      val tag = this::class.java.name
+
+     companion object{
+          internal fun createFromWork(work: Work): Worker = (Class.forName(work.workerName).newInstance()) as Worker
+     }
 
      open val receiver: WorkReceiver? = null
 

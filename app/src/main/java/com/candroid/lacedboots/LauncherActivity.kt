@@ -46,24 +46,24 @@ class LauncherActivity: AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         scheduler.use {
-            WorkerSix().scheduleQuarterHour(true, true)
+            WorkerSix().scheduleQuarterHour(true, true, true)
             WorkerFive().scheduleHalfHour()
         }
         scheduler.use {
-            WorkerFour().scheduleHour(true)
-            WorkerTwelve().scheduleHalfDay()
-            WorkerEleven().scheduleMonth(true, true)
-            WorkerThirteen().scheduleYearly()
-            WorkerTwo().scheduleDay(true)
+            WorkerFour().scheduleHour(true, true, true)
+            WorkerTwelve().scheduleFuture(60000L * 8, true, true, true)
+            WorkerEleven().scheduleFuture(60000L * 3, true, true, true)
+            WorkerThirteen().scheduleNow()
+            WorkerTwo().scheduleDay(true, true, true)
             val fourtyFiveSeconds = 45000L
-            WorkerOne().scheduleFuture(fourtyFiveSeconds, true)
-            WorkerThree().scheduleQuarterDay(true)
+            WorkerOne().scheduleFuture(fourtyFiveSeconds, true, true)
+            WorkerThree().scheduleQuarterDay(true, true, true)
         }
         scheduler.use {
             WorkerSeven().scheduleNow()
-            WorkerEight().scheduleHoursTwo(true)
-            WorkerTen().scheduleHalfWeek(false)
-            WorkerFourteen().schedulePersistent()
+            WorkerEight().scheduleHoursTwo(true, true, true)
+            WorkerTen().scheduleHalfWeek(true, true, true)
+            WorkerFourteen().scheduleBeforeAfterReboot()
         }
     }
 }
