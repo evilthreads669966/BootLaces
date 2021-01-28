@@ -20,17 +20,17 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.app.ServiceCompat
-import com.evilthreads.wakescopelib.suspendedWakeScope
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.properties.Delegates
 
 /*
@@ -58,72 +58,71 @@ import kotlin.properties.Delegates
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * activates [Worker]
  * */
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineScope> {
+class WorkService: Service(), ComponentCallbacks2 {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject internal lateinit var alarmMgr: AlarmManager
     @Inject internal lateinit var database: WorkDao
-    @Inject internal lateinit var channel: Channel<Work>
-    @Inject internal lateinit var supervisor: CompletableJob
     @Inject internal lateinit var mutex: Mutex
     @Inject internal lateinit var workers: MutableCollection<Worker>
     @Inject internal lateinit var intentFactory: IntentFactory
-    private var startId: Int = -1
-    private lateinit var scope: CoroutineScope
+    @Inject internal lateinit var scheduler: WorkScheduler
     private lateinit var foreground: ForegroundActivator
+    private var startId: Int? = null
+    private lateinit var workerScope: CoroutineScope
     private var workerCount: Int by Delegates.observable(0){_, _, newValue ->
-        if(newValue == 0){
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                foreground.deactivate()
-            if(startId == -1) stopSelf()
-            else if(!stopSelfResult(startId))
-                stopSelf()
-        }
+        if(newValue == 0) stopWorkService()
     }
 
     companion object{
         internal var state: ServiceState = ServiceState.STOPPED
 
         internal fun isStarted() = !state.equals(ServiceState.STOPPED)
+    }
 
-        internal fun persist(ctx: Context){
-            val componentName = ComponentName(ctx, BootReceiver::class.java)
-            val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-            if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-                ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-        }
+    private fun stopWorkService(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if(state == ServiceState.FOREGROUND)
+                foreground.deactivate()
+        if(startId != null)
+            stopSelfResult(startId!!)
+        else
+            stopSelf()
     }
 
     override fun onCreate() {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(foregroundProvider.get().build(),ForegroundEntryPoint::class.java).getForeground()
-        scope = CoroutineScope(Dispatchers.Default + supervisor)
-        scope.launch { suspendedWakeScope { handleWork() } }
+        workerScope = CoroutineScope(GlobalScope.newCoroutineContext(EmptyCoroutineContext + Dispatchers.Default))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        runBlocking {
-            scope.launch {
-                val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: return@launch
-                when(intent.action ?: return@launch){
-                    Actions.ACTION_WORK_PERSISTENT.action -> { withContext(Dispatchers.IO){ database.insert(work) } }
-                    Actions.ACTION_WORK_NON_PERSISTENT.action -> { channel.send(work) }
-                    else -> return@launch
-                }
-            }.join()
-        }
+        startAction(intent)
+        super.onStartCommand(intent, flags, startId)
         this.startId = startId
-        super.onStartCommand(intent, flags, this.startId)
-        return START_REDELIVER_INTENT
+        return START_NOT_STICKY
+    }
+
+    private fun startAction(intent: Intent?){
+        val work = intent?.getParcelableExtra<Work>(Work.KEY_PARCEL) ?: throw Exception()
+        when(intent.action ?: throw Exception()){
+            Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workerScope.launch(Dispatchers.IO) {
+                database.insert(work)
+                scheduleWorkBeforeAfterReboot()
+            }
+            Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workerScope.launch { scheduleWorkBeforeAfterReboot() }
+            Actions.ACTION_EXPIRED_WORK.action -> workerScope.launch { processExpiredWork(Worker.createFromWork(work)) }
+            else -> throw Exception()
+        }
     }
 
     override fun onDestroy() {
         Log.d("WorkService", "onDestroy()")
-        supervisor.also { it.cancelChildren() }.cancel()
-        channel.close()
+        workerScope.coroutineContext.cancelChildren()
+        workerScope.cancel()
+        startId = 0
         workers.forEach { worker -> worker.unregisterReceiver(this) }
         runBlocking {
             mutex.withLock {
@@ -139,41 +138,32 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
 
     override fun onBind(intent: Intent?) = null
 
-    private suspend fun Flow<Work>.processWorkNonPersistent(){
+    private suspend fun Flow<List<Work>>.scheduleBeforeAndAfterReboot(){
         filterNotNull()
-            .map { work -> work.toWorker() }
-            .onEach { worker -> scope.assignWork(worker) }
-            .flowOn(Dispatchers.Default)
-            .launchIn(scope)
-    }
-
-    private suspend fun Flow<List<Work>>.processWorkPersistent(){
-        val scope = CoroutineScope(this@WorkService.scope.coroutineContext + Dispatchers.IO)
-        filterNotNull()
-            .flatMapMerge(DEFAULT_CONCURRENCY) { work ->
-                flow{
-                    work.forEach { emit(it.toWorker()) }
+            .flatMapMerge(DEFAULT_CONCURRENCY) {
+                flow {
+                    emit(it.map { Worker.createFromWork(it) })
                 }
             }
-            .flowOn(Dispatchers.Default)
-            .onEach { worker ->
-                this@WorkService.scope.assignWork(worker)
+            .onEach {
+                it.filterIsInstance<PersistentWorker>()
+                    .forEach { worker ->
+                        scheduler.use {
+                            worker.scheduleFuture(worker.interval, worker.repeating, worker.wakeIfIdle, worker.precisionTiming)
+                        }
+                    }
             }
-            .launchIn(scope)
+            .launchIn(workerScope)
     }
 
-    override suspend fun CoroutineScope.handleWork(){
-        database.getPersistentWork().processWorkPersistent()
-        channel.consumeAsFlow().processWorkNonPersistent()
+    private suspend fun scheduleWorkBeforeAfterReboot() = workerScope.launch { withContext(Dispatchers.IO){ database.getPersistentWork().scheduleBeforeAndAfterReboot() } }
 
-    }
-
-    override suspend fun CoroutineScope.assignWork(worker: Worker) {
+    private suspend fun processExpiredWork(worker: Worker) {
         if(workers.contains(worker)) return
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             if(!state.equals(ServiceState.FOREGROUND))
                 foreground.activate()
-        launch{
+        workerScope.launch{
             with(worker){
                 mutex.withLock {
                     workers.add(this)
@@ -186,8 +176,7 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
                 doWork(this@WorkService)
                 unregisterReceiver(this@WorkService)
                 if(withNotification == true)
-                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(
-                        Actions.ACTION_FINISH.action) })
+                    NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
             }
             mutex.withLock { workerCount-- }
         }
@@ -198,9 +187,4 @@ class WorkService: Service(), ComponentCallbacks2,IWorkHandler<Worker,CoroutineS
         if(level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
             System.gc()
     }
-}
-
-internal interface IWorkHandler<in T,in R>{
-   suspend fun R.handleWork()
-    suspend fun R.assignWork(worker: T)
 }

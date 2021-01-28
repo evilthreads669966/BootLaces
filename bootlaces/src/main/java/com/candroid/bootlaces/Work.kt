@@ -26,12 +26,15 @@ import kotlinx.android.parcel.Parcelize
 */
 /**
  * @author Chris Basinger
- * @email evilthreads669966@gmail.com
+ * @email evilthreads669966@gmail.com~
  * @date 10/18/20
  **/
 @Parcelize
 @Entity
-data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val job: String):Parcelable{
+data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val workerName: String):Parcelable{
+
+    internal constructor(worker: Worker): this(worker.id, worker.javaClass.name)
+
     companion object{
        internal const val KEY_PARCEL = "KEY_PARCEL"
     }

@@ -20,6 +20,7 @@ import android.os.PowerManager
 import android.text.format.DateUtils
 import android.util.Log
 import com.candroid.bootlaces.Worker
+import com.candroid.bootlaces.WorkerHourly
 import kotlinx.coroutines.delay
 
 /*
@@ -49,86 +50,83 @@ import kotlinx.coroutines.delay
  *
  **/
 
-class WorkerEight: Worker(8, "Worker Eight", true){
+class WorkerEight: Worker(8, "working for 2 hours", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 2 hours")
+        Log.d(tag, description)
         delay(AlarmManager.INTERVAL_HOUR * 2)
     }
 }
 
-class WorkerOne: Worker(1, "Worker One", true){
+class WorkerOne: Worker(1, "working for 2 minutes", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 2 minutes")
+        Log.d(tag, description)
         delay(120000)
     }
 }
 
-class WorkerTwo: Worker(2, "Worker Two", true){
+class WorkerTwo: Worker(2, "working for 15 minutes", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 15 minutes")
+        Log.d(tag, description)
         delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
     }
 }
 
-class WorkerThree: Worker(3, "Worker Three", true){
+class WorkerThree: Worker(3, "working for 1 minute", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 1 minute")
+        Log.d(tag, description)
         delay(60000)
     }
 }
 
-class WorkerFour: Worker(4, "Worker Four", true){
+class WorkerFour: Worker(4, "working for 5 minutes", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 5 minutes")
+        Log.d(tag, description)
         delay(60000 * 5)
     }
 }
 
-class WorkerFive: Worker(5, "Worker Five", true){
+class WorkerFive: Worker(5, "working for 45 seconds", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 45 seconds")
+        Log.d(tag, description)
         delay(45000)
     }
 }
 
-class WorkerSix: Worker(6, "Worker Six", true){
+class WorkerSix: Worker(6, "working for 1 minute", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 1 minute")
+        Log.d(tag, description)
         delay(60000)
     }
 }
 
-class WorkerSeven: Worker(7, "Worker Seven", true){
+class WorkerSeven: Worker(7, "working for a minute and a half", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for a minute and a half")
+        Log.d(tag, description)
         delay(90000L)
     }
 }
 
-class WorkerThirteen: Worker(13, "Worker Thirteen", true){
+class WorkerThirteen: Worker(13, "working for 20 seconds", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 20 seconds")
+        Log.d(tag, description)
         delay(20000)
     }
 }
 
-
-
-class WorkerTwelve: Worker(12, "Worker Twelve", true){
+class WorkerTwelve: Worker(12, "working for 30 seconds", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 30 seconds")
+        Log.d(tag, description)
         delay(30000)
     }
 }
 
-
-
-class WorkerEleven: Worker(11, "Worker Eleven", true){
+class WorkerEleven: Worker(11, "working for 5 seconds", true){
     override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 5 seconds")
+        Log.d(tag, description)
         delay(5000)
     }
 }
+
 class WorkerTen: Worker(10,"Worker Ten", true) {
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, "working for 10 seconds")
@@ -137,7 +135,7 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
     }
 }
 
-class WorkerFourteen: Worker(14,"Worker Fourteen", true){
+class WorkerFourteen: WorkerHourly(14, "Worker Fourteen", true){
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
@@ -148,7 +146,6 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
                     Log.d(this.tag, date ?: "null")
                 }
             }
-        
         }
 
     override suspend fun doWork(ctx: Context) {
