@@ -46,10 +46,10 @@ import kotlinx.coroutines.flow.Flow
  *
  **/
 @Dao
-internal interface WorkDao{
+interface WorkDao{
     @Query("SELECT * FROM work")
     fun getPersistentWork(): Flow<List<Work>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(worker: Work)
+    fun insert(worker: Work)
 }

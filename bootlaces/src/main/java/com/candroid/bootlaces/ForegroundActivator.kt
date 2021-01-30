@@ -17,6 +17,7 @@ import android.app.Service
 import android.os.Build
 import androidx.core.app.ServiceCompat
 import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.FOREGROUND_ID
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
 /*
@@ -47,6 +48,7 @@ import javax.inject.Inject
  * activates foreground in [WorkService]
  **/
 
+@FlowPreview
 internal class ForegroundActivator @Inject constructor(private val ctx: Service){
      @Inject internal lateinit var factory: NotificationFactory
      private fun notifyForeground() {
