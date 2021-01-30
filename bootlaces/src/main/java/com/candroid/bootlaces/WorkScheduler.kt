@@ -1,18 +1,5 @@
-/*Copyright 2019 Chris Basinger
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.*/
 package com.candroid.bootlaces
-
 import android.app.AlarmManager
 import android.content.Context
 import android.os.Build
@@ -61,7 +48,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
 
     fun Worker.scheduleNow(): Boolean = scheduleFuture(0L, false, false, false)
 
-    fun Worker.scheduleFuture(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
+    fun Worker. scheduleFuture(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
         schedule(delay, repeating, wakeupIfIdle, precision)
 
     fun Worker.scheduleHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
@@ -101,6 +88,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     // TODO: 1/22/21 perhaps calculate remaining days left in the year...not really sure which to choose from as it would be a year from the day scheduled
     fun Worker.scheduleYearly(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
         schedule(AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle, precision)
+
 
     private fun Worker.schedule(interval: Long, repeating: Boolean, wakeupIfIdle: Boolean, precision: Boolean): Boolean{
         val work = Work(this)

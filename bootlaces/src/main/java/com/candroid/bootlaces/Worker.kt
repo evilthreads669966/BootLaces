@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -49,10 +48,9 @@ import kotlin.coroutines.CoroutineContext
 abstract class Worker(val id: Int, val description: String, val withNotification: Boolean){
      val tag = this::class.java.name
 
-     companion object{
-          internal fun createFromWork(work: Work): Worker = (Class.forName(work.workerName).newInstance()) as Worker
+     companion object {
+          internal fun createFromWork(work: Work): Worker = Class.forName(work.workerName).newInstance() as Worker
      }
-
      open val receiver: WorkReceiver? = null
 
      suspend abstract fun doWork(ctx: Context)

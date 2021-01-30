@@ -19,6 +19,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
@@ -27,9 +28,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
-import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -72,15 +73,27 @@ internal interface ForegroundEntryPoint{
     fun getForeground(): ForegroundActivator
 }
 
+@FlowPreview
+@InstallIn(ServiceComponent::class)
+@Module
+abstract class BindingsBackgroundModule{
+    @Binds
+    abstract fun bindWorkManager(workMgr: WorkManager): IWorkManager<Worker>
+}
+@ObsoleteCoroutinesApi
 @InstallIn(ServiceComponent::class)
 @Module
 internal object BackgroundModule{
     @Provides
+    fun provideCoroutineContext(): CoroutineContext = Dispatchers.IO + Job()
+    @Provides
+    fun provideCoroutineScope():  CoroutineScope = CoroutineScope(GlobalScope.coroutineContext + SupervisorJob())
+    @Provides
     fun providesMutex() = Mutex()
     @Provides
     fun provideWorkers(): MutableCollection<Worker> = mutableSetOf()
-    @Provides
-    fun provideExecutor() = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1).asCoroutineDispatcher()
+/*    @Provides
+    fun provideDispatcher(): ExecutorCoroutineDispatcher = newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors() + 1, "worktthreadpool")*/
 }
 
 @InstallIn(ServiceComponent::class)
