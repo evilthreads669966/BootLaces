@@ -73,7 +73,7 @@ class BootReceiver : HiltBugReceiver(){
         super.onReceive(ctx, intent)
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             intent?.setClass(ctx ?: return, WorkService::class.java)
-            intent?.setAction(null)?.setAction(Actions.ACTION_SCHEDULE_AFTER_REBOOT.action)
+            intent?.setAction(null)?.setAction(Actions.ACTION_SCHEDULE_REBOOT.action)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 ctx?.startForegroundService(intent)
             else

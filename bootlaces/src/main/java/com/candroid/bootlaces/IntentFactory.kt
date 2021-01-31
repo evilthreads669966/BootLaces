@@ -72,7 +72,7 @@ class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Con
     }
 
     private fun createAlarmIntent(work: Work): Intent?{
-        val intent = createWorkIntent(work, Actions.ACTION_EXPIRED_WORK)
+        val intent = createWorkIntent(work, Actions.ACTION_EXECUTE_WORKER)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             if(PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
                 return null

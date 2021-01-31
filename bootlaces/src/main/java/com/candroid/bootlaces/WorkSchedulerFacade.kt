@@ -15,9 +15,9 @@ class WorkShedulerFacade @Inject constructor(
     val factory: IntentFactory
 ): ISchedulerFacade<Worker> {
 
-    suspend fun scheduleBeforeReboot(dao: WorkDao, work: Work, scope: CoroutineScope){
+    suspend fun scheduleWorkForReboot(dao: WorkDao, work: Work?, scope: CoroutineScope){
             withContext(Dispatchers.IO){
-                dao.insert(work)
+                if(work != null) dao.insert(work)
                 getSavedWorkAndSchedule(dao.getPersistentWork(),scope)
             }
     }
@@ -34,12 +34,6 @@ class WorkShedulerFacade @Inject constructor(
                     .forEach { worker -> scheduler.use { worker.scheduleAfterReboot() } }
             }.flowOn(Dispatchers.Default)
             .launchIn(scope)
-    }
-
-    suspend fun scheduleAfterReboot(dao: WorkDao, scope: CoroutineScope){
-        withContext(Dispatchers.IO){
-            getSavedWorkAndSchedule(dao.getPersistentWork(), scope)
-        }
     }
 }
 

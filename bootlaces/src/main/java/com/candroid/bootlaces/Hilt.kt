@@ -15,6 +15,7 @@ package com.candroid.bootlaces
 
 import android.app.AlarmManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -85,15 +86,9 @@ internal abstract class BindingsBackgroundModule{
 @Module
 internal object BackgroundModule{
     @Provides
-    fun provideCoroutineContext(): CoroutineContext = Dispatchers.IO + Job()
-    @Provides
-    fun provideCoroutineScope():  CoroutineScope = CoroutineScope(GlobalScope.coroutineContext + SupervisorJob())
-    @Provides
     fun providesMutex() = Mutex()
     @Provides
-    fun provideWorkers(): MutableCollection<Worker> = mutableSetOf()
-/*    @Provides
-    fun provideDispatcher(): ExecutorCoroutineDispatcher = newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors() + 1, "worktthreadpool")*/
+    fun provideReceivers() = mutableListOf<BroadcastReceiver>()
 }
 
 @InstallIn(ServiceComponent::class)
