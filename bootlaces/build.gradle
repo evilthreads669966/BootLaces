@@ -46,7 +46,6 @@ dependencies {
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
 
-
     //WAKESCOPE
     implementation 'com.github.evilthreads669966:wakescope:2.0'
 
