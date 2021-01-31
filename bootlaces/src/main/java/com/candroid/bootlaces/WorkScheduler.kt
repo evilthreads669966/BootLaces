@@ -47,7 +47,8 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
             val work = Work(this@schedulePersistent)
             if (dao.insert(work).toInt() != work.id)
                 return@async false
-            BootReceiver.enableReboot(ctx)
+            if(!BootReceiver.isRebootEnabled(ctx))
+                BootReceiver.enableReboot(ctx)
             return@async this@schedulePersistent.scheduleFuture()
         }
         return@coroutineScope result
