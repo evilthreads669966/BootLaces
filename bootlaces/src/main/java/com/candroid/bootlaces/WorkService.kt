@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -56,15 +58,15 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2 {
+class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject internal lateinit var alarmMgr: AlarmManager
     @Inject internal lateinit var database: WorkDao
     @Inject internal lateinit var intentFactory: IntentFactory
     @Inject lateinit var workMgr: WorkManager
     private lateinit var foreground: ForegroundActivator
+    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
     private var startId: Int? = null
-    internal val serviceCoroutineScope: CoroutineScope = CoroutineScope(GlobalScope.coroutineContext + SupervisorJob())
     companion object{
         internal var state: ServiceState = ServiceState.STOPPED
         internal fun isStarted() = !state.equals(ServiceState.STOPPED)
@@ -84,33 +86,36 @@ class WorkService: Service(), ComponentCallbacks2 {
         super.onCreate()
         state = ServiceState.BACKGROUND
         foreground = EntryPoints.get(foregroundProvider.get().build(),ForegroundEntryPoint::class.java).getForeground()
+        foreground.activate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        runBlocking { startAction(intent) }
+        this.launch { this.startAction(intent) }
         super.onStartCommand(intent, flags, startId)
         this.startId = startId
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
-    private suspend fun startAction(intent: Intent?){
-        var work: Work? = null
-        if(intent?.hasExtra(Work.KEY_PARCEL) == true)
-            work = intent.getParcelableExtra(Work.KEY_PARCEL) ?: return
-        serviceCoroutineScope.launch {
-            when (intent?.action ?: return@launch) {
-                Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workMgr.scheduleBeforeReboot(database, work!!)
-                Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workMgr.scheduleAfterReboot(database)
-                Actions.ACTION_EXPIRED_WORK.action -> workMgr.processExpiredWork(Worker.createFromWork(work!!), foreground, intentFactory)
-                else -> return@launch
+    private suspend fun CoroutineScope.startAction(intent: Intent?){
+            val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
+            when (intent?.action ?: return) {
+                Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workMgr.saveWorkAndScheduleBeforeReboot(database, work!!, this)
+                Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workMgr.scheduleWorkAfterReboot(database, this)
+                Actions.ACTION_EXPIRED_WORK.action ->{
+                    val worker = Worker.createFromWork(work!!)
+                    workMgr.processExpiredWork(worker, foreground, intentFactory, this)
+                }
+                Actions.ACTION_SHUTDOWN_SERVICE.action -> stopWorkService()
+                else -> return
             }
         }
-    }
 
     override fun onDestroy() {
         Log.d("WorkService", "onDestroy()")
+        this.coroutineContext.cancelChildren()
+        this.cancel()
         startId = 0
-        (workMgr as WorkManager).releaseResources(this)
+        workMgr.releaseResources(this)
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
@@ -125,4 +130,3 @@ class WorkService: Service(), ComponentCallbacks2 {
             System.gc()
     }
 }
-
