@@ -78,7 +78,7 @@ internal interface ForegroundEntryPoint{
 @Module
 internal abstract class BindingsBackgroundModule{
     @Binds
-    abstract fun bindWorkManager(workMgr: WorkManager): IWorkManager<Worker>
+    abstract fun bindWorkManager(workMgr: WorkShedulerFacade): ISchedulerFacade<Worker>
 }
 @ObsoleteCoroutinesApi
 @InstallIn(ServiceComponent::class)
