@@ -17,11 +17,11 @@ class WorkShedulerFacade @Inject constructor(
     suspend fun scheduleWorkForReboot(work: Work?, scope: CoroutineScope){
         withContext(Dispatchers.IO){
             if(work != null) dao.insert(work)
-            scheduleWorkFromDatabase(dao.getPersistentWork(),scope)
+            scheduleWorkFromDatabase(dao.getPersistentWork(),scope, work)
         }
     }
 
-    private suspend fun scheduleWorkFromDatabase(flow: Flow<List<Work>>, scope: CoroutineScope){
+    private suspend fun scheduleWorkFromDatabase(flow: Flow<List<Work>>, scope: CoroutineScope, work: Work?){
         flow.filterNotNull()
             .flatMapMerge(DEFAULT_CONCURRENCY){
                 flow {
@@ -29,8 +29,11 @@ class WorkShedulerFacade @Inject constructor(
                 }
             }
             .onEach {
-                it.filterIsInstance<PersistentWorker>()
-                    .forEach { worker -> scheduler.use { worker.scheduleAfterReboot() } }
+                if(work != null)
+                    it.find { it.id == work.id }?.let { scheduler.use { (it as PersistentWorker).scheduleAfterReboot() } }
+                else
+                    it.filterIsInstance<PersistentWorker>()
+                        .forEach { worker -> scheduler.use { worker.scheduleAfterReboot() } }
             }.flowOn(Dispatchers.Default)
             .launchIn(scope)
     }

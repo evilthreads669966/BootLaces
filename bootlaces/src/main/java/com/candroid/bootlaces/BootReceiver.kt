@@ -71,6 +71,10 @@ class BootReceiver : HiltBugReceiver(){
 
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
+        rescheduleWork(ctx!!, intent)
+    }
+
+    private fun rescheduleWork(ctx: Context, intent: Intent?){
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             intent?.setClass(ctx ?: return, WorkService::class.java)
             intent?.setAction(null)?.setAction(Actions.ACTION_SCHEDULE_REBOOT.action)
