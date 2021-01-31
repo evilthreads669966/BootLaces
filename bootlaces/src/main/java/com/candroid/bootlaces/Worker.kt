@@ -18,7 +18,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import kotlin.coroutines.CoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -48,8 +47,8 @@ import kotlin.coroutines.CoroutineContext
 abstract class Worker(val id: Int, val description: String, val withNotification: Boolean){
      val tag = this::class.java.name
 
-     companion object {
-          internal fun createFromWork(work: Work): Worker = Class.forName(work.workerName).newInstance() as Worker
+     internal companion object {
+          fun createFromWork(work: Work): Worker = Class.forName(work.workerName).newInstance() as Worker
      }
      open val receiver: WorkReceiver? = null
 

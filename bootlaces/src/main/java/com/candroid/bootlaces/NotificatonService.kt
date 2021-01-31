@@ -50,11 +50,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class NotificatonService: JobIntentService(){
     @Inject internal lateinit var factory: NotificationFactory
-    companion object{
-        internal fun enqueue(ctx: Context, intent: Intent) = enqueueWork(ctx, NotificatonService::class.java, ID_JOB, intent)
+    internal companion object{
+        fun enqueue(ctx: Context, intent: Intent) = enqueueWork(ctx, NotificatonService::class.java, ID_JOB, intent)
         private const val ID_JOB = 666
-        internal const val KEY_DESCRIPTION = "KEY_DESCRIPTION"
-        internal const val KEY_ID = "KEY_ID"
+        const val KEY_DESCRIPTION = "KEY_DESCRIPTION"
+        const val KEY_ID = "KEY_ID"
     }
 
     override fun onHandleWork(intent: Intent) {

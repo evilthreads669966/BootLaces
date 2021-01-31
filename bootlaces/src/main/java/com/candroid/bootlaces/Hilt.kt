@@ -62,7 +62,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  **/
 @Module
 @InstallIn(SingletonComponent::class)
-object GlobalModule {
+internal object GlobalModule {
     /*I'm getting a wierd error using a provider for Room database so this is a hack to get a singleton working*/
     @Provides
     fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = WorkDatabase.getInstance(ctx).workerDao()
