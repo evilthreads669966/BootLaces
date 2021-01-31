@@ -16,7 +16,6 @@ package com.candroid.bootlaces
 import android.app.Service
 import android.content.*
 import android.os.Build
-import android.util.Log
 import androidx.core.app.ServiceCompat
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,7 +24,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 /*
@@ -104,7 +102,7 @@ class WorkService: Service(), ComponentCallbacks2 {
     private suspend fun handleRequest(intent: Intent?) = coroutineScope{
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
             when (intent?.action ?: return@coroutineScope ) {
-                Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(work!!, this)
+                Actions.ACTION_RESCHEDULE_AFTER_REBOOT.action -> workSchedulerFacade.rescheduleWorkAfterReboot(this, work)
                 Actions.ACTION_EXECUTE_WORKER.action -> work?.executeWorker()
                 else -> return@coroutineScope
             }

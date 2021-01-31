@@ -17,6 +17,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /*
@@ -63,7 +66,9 @@ class LauncherActivity: AppCompatActivity(){
             WorkerSeven().scheduleNow()
             WorkerEight().scheduleHoursTwo(true, true, true)
             WorkerTen().scheduleHalfWeek(true, true, true)
-            WorkerFourteen().scheduleBeforeAfterReboot()
+            runBlocking {
+                GlobalScope.launch { WorkerFourteen().schedulePersistent().await() }
+            }
         }
     }
 }

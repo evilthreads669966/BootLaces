@@ -2,8 +2,8 @@
 package com.candroid.bootlaces
 import android.app.AlarmManager
 import android.content.Context
-import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,7 +34,7 @@ import javax.inject.Singleton
  *
  **/
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val alarmMgr: AlarmManager, private val factory: IntentFactory) {
+class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val alarmMgr: AlarmManager, private val factory: IntentFactory, private val dao: WorkDao) {
     /*use this scoping function to schedule workers
     * ie: scheduler.use { MyWorker().scheduleHour() }
     * */
@@ -42,9 +42,19 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
         init()
     }
 
-    fun PersistentWorker.scheduleBeforeAfterReboot() = scheduleBeforeReboot()
+    suspend fun PersistentWorker.schedulePersistent(): Deferred<Boolean>{
+        val result = MainScope().async {
+            withContext(Dispatchers.IO){
+                val work = Work(this@schedulePersistent)
+                dao.insert(work)
+                BootReceiver.enableReboot(ctx)
+                this@schedulePersistent.scheduleFuture()
+            }
+        }
+        return result
+    }
 
-    internal fun PersistentWorker.scheduleAfterReboot() = scheduleFuture(interval, repeating, allowWhileIdle, precisionTiming)
+    internal fun PersistentWorker.scheduleFuture() = scheduleFuture(interval, repeating, allowWhileIdle, precisionTiming)
 
     fun Worker.scheduleNow(): Boolean = scheduleFuture(0L, false, false, false)
 
@@ -108,15 +118,5 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
         else
             alarmMgr.set(alarmTimeType, triggerTime, pendingIntent)
         return true
-    }
-
-    private fun PersistentWorker.scheduleBeforeReboot(){
-        val work = Work(this)
-        val intent = factory.createWorkIntent(work, Actions.ACTION_SCHEDULE_REBOOT)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            ctx.startForegroundService(intent)
-        else
-            ctx.startService(intent)
-        BootReceiver.enableReboot(ctx)
     }
 }

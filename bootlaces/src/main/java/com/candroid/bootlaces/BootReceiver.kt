@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 
 /*
@@ -77,11 +76,11 @@ class BootReceiver : HiltBugReceiver(){
     private fun rescheduleWork(ctx: Context, intent: Intent?){
         if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
             intent?.setClass(ctx ?: return, WorkService::class.java)
-            intent?.setAction(null)?.setAction(Actions.ACTION_SCHEDULE_REBOOT.action)
+            intent?.setAction(null)?.setAction(Actions.ACTION_RESCHEDULE_AFTER_REBOOT.action)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                ctx?.startForegroundService(intent)
+                ctx.startForegroundService(intent)
             else
-                ctx?.startService(intent)
+                ctx.startService(intent)
         }
     }
 }
