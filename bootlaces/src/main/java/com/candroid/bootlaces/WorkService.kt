@@ -105,7 +105,7 @@ class WorkService: Service(), ComponentCallbacks2 {
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
             when (intent?.action ?: return@coroutineScope ) {
                 Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(work!!, this)
-                Actions.ACTION_EXECUTE_WORKER.action -> work?.executeWorker(this)
+                Actions.ACTION_EXECUTE_WORKER.action -> work?.executeWorker()
                 else -> return@coroutineScope
             }
         }
@@ -127,7 +127,7 @@ class WorkService: Service(), ComponentCallbacks2 {
         super.onDestroy()
     }
 
-    private suspend fun Work.executeWorker(scope: CoroutineScope){
+    private suspend fun Work.executeWorker(){
         val worker = Worker.createFromWork(this)
         mutex.withLock {
             worker.receiver?.let { receivers.add(it) }
