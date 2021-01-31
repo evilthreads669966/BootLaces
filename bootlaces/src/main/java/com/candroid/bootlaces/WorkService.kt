@@ -22,12 +22,12 @@ import androidx.core.app.ServiceCompat
 import dagger.hilt.EntryPoints
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import java.util.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.properties.Delegates
 
 /*
             (   (                ) (             (     (
@@ -63,10 +63,19 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     @Inject internal lateinit var alarmMgr: AlarmManager
     @Inject internal lateinit var database: WorkDao
     @Inject internal lateinit var intentFactory: IntentFactory
-    @Inject lateinit var workMgr: WorkManager
+    @Inject lateinit var workSchedulerFacade: WorkShedulerFacade
+    @Inject lateinit var mutex: Mutex
+    @Inject lateinit var workers: MutableCollection<Worker>
     private lateinit var foreground: ForegroundActivator
+
     override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
     private var startId: Int? = null
+
+    var workerCount: Int by Delegates.observable(0) { _, _, newValue ->
+        if (newValue == 0)
+            stopWorkService()
+    }
+
     companion object{
         internal var state: ServiceState = ServiceState.STOPPED
         internal fun isStarted() = !state.equals(ServiceState.STOPPED)
@@ -99,13 +108,12 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     private suspend fun CoroutineScope.startAction(intent: Intent?){
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
             when (intent?.action ?: return) {
-                Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workMgr.saveWorkAndScheduleBeforeReboot(database, work!!, this)
-                Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workMgr.scheduleWorkAfterReboot(database, this)
+                Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workSchedulerFacade.scheduleBeforeReboot(database, work!!, this)
+                Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workSchedulerFacade.scheduleAfterReboot(database, this)
                 Actions.ACTION_EXPIRED_WORK.action ->{
                     val worker = Worker.createFromWork(work!!)
-                    workMgr.processExpiredWork(worker, foreground, intentFactory, this)
+                    processExpiredWork(worker, this)
                 }
-                Actions.ACTION_SHUTDOWN_SERVICE.action -> stopWorkService()
                 else -> return
             }
         }
@@ -115,11 +123,35 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
         this.coroutineContext.cancelChildren()
         this.cancel()
         startId = 0
-        workMgr.releaseResources(this)
+        runBlocking {
+            mutex.withLock {
+                workers.clear()
+                workerCount = 0
+            }
+        }
+        workers.forEach { worker -> worker.unregisterReceiver(this) }
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
         super.onDestroy()
+    }
+
+    /*this particullar fuunction is up next for my attention*/
+    internal suspend fun processExpiredWork(worker: Worker, scope: CoroutineScope){
+        if(workers.contains(worker)) return
+        mutex.withLock {
+            workers.add(worker)
+            workerCount++
+        }
+        val intent = intentFactory.createWorkNotificationIntent(worker)
+        if(worker.withNotification == true)
+            NotificatonService.enqueue(this, intent)
+        worker.registerReceiver(this)
+        scope.launch { worker.doWork(this@WorkService) }.join()
+        worker.unregisterReceiver(this)
+        if(worker.withNotification == true)
+            NotificatonService.enqueue(this, intent.apply { setAction(Actions.ACTION_FINISH.action) })
+        mutex.withLock { workerCount-- }
     }
 
     override fun onBind(intent: Intent?) = null
