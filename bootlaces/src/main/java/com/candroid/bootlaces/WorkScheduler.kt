@@ -44,66 +44,66 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
 
     fun PersistentWorker.scheduleBeforeAfterReboot() = scheduleBeforeReboot()
 
-    internal fun PersistentWorker.scheduleAfterReboot() = scheduleFuture(interval, repeating, wakeIfIdle, precisionTiming)
+    internal fun PersistentWorker.scheduleAfterReboot() = scheduleFuture(interval, repeating, allowWhileIdle, precisionTiming)
 
     fun Worker.scheduleNow(): Boolean = scheduleFuture(0L, false, false, false)
 
-    fun Worker. scheduleFuture(delay: Long, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(delay, repeating, wakeupIfIdle, precision)
+    fun Worker. scheduleFuture(delay: Long, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(delay, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_HOUR, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleHour(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_HOUR, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleQuarterDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_HOUR * 6, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleQuarterDay(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_HOUR * 6, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleHoursTwo(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_HOUR * 2, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleHoursTwo(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_HOUR * 2, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleHoursThree(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_HOUR * 3, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleHoursThree(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_HOUR * 3, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_DAY, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleDay(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_DAY, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleWeek(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_DAY * 7, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleWeek(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_DAY * 7, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleHalfWeek(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule((AlarmManager.INTERVAL_DAY * 3) + AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleHalfWeek(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule((AlarmManager.INTERVAL_DAY * 3) + AlarmManager.INTERVAL_HALF_DAY, repeating, allowWhileIdle, precision)
 
-    fun Worker.scheduleHalfDay(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_HALF_DAY, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleHalfDay(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_HALF_DAY, repeating, allowWhileIdle, precision)
 
     fun Worker.scheduleHalfHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
         schedule(AlarmManager.INTERVAL_HALF_HOUR, repeating, wakeupIfIdle, precision)
 
-    fun Worker.scheduleQuarterHour(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_FIFTEEN_MINUTES, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleQuarterHour(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_FIFTEEN_MINUTES, repeating, allowWhileIdle, precision)
 
     // TODO: 1/22/21 need to handle months with 28 days..don't remember what month(s) that is but this could cause a bug
-    fun Worker.scheduleMonth(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_DAY * 31, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleMonth(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_DAY * 31, repeating, allowWhileIdle, precision)
 
     // TODO: 1/22/21 perhaps calculate remaining days left in the year...not really sure which to choose from as it would be a year from the day scheduled
-    fun Worker.scheduleYearly(repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Boolean =
-        schedule(AlarmManager.INTERVAL_DAY * 365, repeating, wakeupIfIdle, precision)
+    fun Worker.scheduleYearly(repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Boolean =
+        schedule(AlarmManager.INTERVAL_DAY * 365, repeating, allowWhileIdle, precision)
 
 
-    private fun Worker.schedule(interval: Long, repeating: Boolean, wakeupIfIdle: Boolean, precision: Boolean): Boolean{
+    private fun Worker.schedule(interval: Long, repeating: Boolean, allowWhileIdle: Boolean, precision: Boolean): Boolean{
         val work = Work(this)
         val pendingIntent = factory.createPendingIntent(work) ?: return false
         var alarmTimeType: Int = AlarmManager.RTC
         val triggerTime = System.currentTimeMillis() + interval
-        if(wakeupIfIdle)
+        if(allowWhileIdle)
             alarmTimeType = AlarmManager.RTC_WAKEUP
         if(repeating)
             alarmMgr.setRepeating(alarmTimeType, triggerTime, interval, pendingIntent)
-        else if(wakeupIfIdle && precision)
+        else if(allowWhileIdle && precision)
             alarmMgr.setExactAndAllowWhileIdle(alarmTimeType, triggerTime, pendingIntent)
-        else if(!wakeupIfIdle && precision)
+        else if(!allowWhileIdle && precision)
             alarmMgr.setExact(alarmTimeType, triggerTime, pendingIntent)
-        else if(wakeupIfIdle && !precision)
+        else if(allowWhileIdle && !precision)
             alarmMgr.setAndAllowWhileIdle(alarmTimeType, triggerTime, pendingIntent)
         else
             alarmMgr.set(alarmTimeType, triggerTime, pendingIntent)
@@ -117,6 +117,6 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
             ctx.startForegroundService(intent)
         else
             ctx.startService(intent)
-        if(!BootReceiver.isRebootEnabled(ctx)) BootReceiver.enableReboot(ctx)
+        BootReceiver.enableReboot(ctx)
     }
 }

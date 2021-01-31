@@ -33,7 +33,7 @@ abstract class PersistentWorker(
     withNotification: Boolean = false,
     description: String,
     open val interval: Long,
-    val wakeIfIdle: Boolean = false,
+    val allowWhileIdle: Boolean = false,
     val precisionTiming: Boolean = false,
     open val repeating: Boolean,
 ): Worker(id, description, withNotification)

@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'kotlin-parcelize'
 
-apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 30
     buildToolsVersion = '30.0.2'
@@ -22,11 +22,8 @@ android {
     buildFeatures {
         viewBinding true
     }
-    androidExtensions {
-        experimental = true
-    }
-}
 
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -56,11 +53,10 @@ dependencies {
     //HILT
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
-    androidTestImplementation  "com.google.dagger:hilt-android-testing:$hilt_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
     // For instrumentation tests
-
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     // For local unit tests
     testImplementation "org.robolectric:robolectric:4.4"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
 }

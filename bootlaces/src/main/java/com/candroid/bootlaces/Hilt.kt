@@ -76,7 +76,7 @@ internal interface ForegroundEntryPoint{
 @FlowPreview
 @InstallIn(ServiceComponent::class)
 @Module
-abstract class BindingsBackgroundModule{
+internal abstract class BindingsBackgroundModule{
     @Binds
     abstract fun bindWorkManager(workMgr: WorkManager): IWorkManager<Worker>
 }
