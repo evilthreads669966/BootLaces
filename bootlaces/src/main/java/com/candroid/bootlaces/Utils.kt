@@ -4,13 +4,13 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 
-private fun <T> Class<T>.isRebootEnabled(ctx: Context): Boolean{
+private fun <T> Class<T>.isComponentEnabled(ctx: Context): Boolean{
     val componentName = ComponentName(ctx, this)
     val state = ctx.packageManager.getComponentEnabledSetting(componentName)
     return (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
 }
 
-private fun <T> Class<T>.enableReboot(ctx: Context){
+private fun <T> Class<T>.enableComponent(ctx: Context){
     val componentName = ComponentName(ctx, this)
     val state = ctx.packageManager.getComponentEnabledSetting(componentName)
     if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
@@ -18,6 +18,6 @@ private fun <T> Class<T>.enableReboot(ctx: Context){
 }
 
 internal object Utils{
-    fun isRebootEnabled(ctx: Context) = BootReceiver::class.java.isRebootEnabled(ctx)
-    fun enableReboot(ctx: Context) = BootReceiver::class.java.enableReboot(ctx)
+    fun isRebootEnabled(ctx: Context) = BootReceiver::class.java.isComponentEnabled(ctx)
+    fun enableReboot(ctx: Context) = BootReceiver::class.java.enableComponent(ctx)
 }
