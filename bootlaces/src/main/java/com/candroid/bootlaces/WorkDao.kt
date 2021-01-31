@@ -51,5 +51,5 @@ interface WorkDao{
     fun getPersistentWork(): Flow<List<Work>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(worker: Work)
+    fun insert(worker: Work): Long
 }
