@@ -65,11 +65,10 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     @Inject internal lateinit var intentFactory: IntentFactory
     @Inject lateinit var workSchedulerFacade: WorkShedulerFacade
     @Inject lateinit var mutex: Mutex
-    @Inject lateinit var workers: MutableCollection<Worker>
     private lateinit var foreground: ForegroundActivator
-
     override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
     private var startId: Int? = null
+    private val receivers = mutableListOf<BroadcastReceiver>()
 
     var workerCount: Int by Delegates.observable(0) { _, _, newValue ->
         if (newValue == 0)
@@ -108,12 +107,8 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     private suspend fun CoroutineScope.startAction(intent: Intent?){
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
             when (intent?.action ?: return) {
-                Actions.ACTION_SCHEDULE_BEFORE_REBOOT.action -> workSchedulerFacade.scheduleBeforeReboot(database, work!!, this)
-                Actions.ACTION_SCHEDULE_AFTER_REBOOT.action -> workSchedulerFacade.scheduleAfterReboot(database, this)
-                Actions.ACTION_EXPIRED_WORK.action ->{
-                    val worker = Worker.createFromWork(work!!)
-                    processExpiredWork(worker, this)
-                }
+                Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(database, work!!, this)
+                Actions.ACTION_EXECUTE_WORKER.action -> work?.executeWorker(this)
                 else -> return
             }
         }
@@ -125,11 +120,11 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
         startId = 0
         runBlocking {
             mutex.withLock {
-                workers.clear()
+                receivers.clear()
                 workerCount = 0
             }
         }
-        workers.forEach { worker -> worker.unregisterReceiver(this) }
+        receivers.forEach { unregisterReceiver(it) }
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
@@ -137,20 +132,20 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     }
 
     /*this particullar fuunction is up next for my attention*/
-    internal suspend fun processExpiredWork(worker: Worker, scope: CoroutineScope){
-        if(workers.contains(worker)) return
+    internal suspend fun Work.executeWorker(scope: CoroutineScope){
+        val worker = Worker.createFromWork(this)
         mutex.withLock {
-            workers.add(worker)
+            worker.receiver?.let { receivers.add(it) }
             workerCount++
         }
         val intent = intentFactory.createWorkNotificationIntent(worker)
         if(worker.withNotification == true)
-            NotificatonService.enqueue(this, intent)
-        worker.registerReceiver(this)
-        scope.launch { worker.doWork(this@WorkService) }.join()
-        worker.unregisterReceiver(this)
+            NotificatonService.enqueue(this@WorkService, intent)
+        worker.registerReceiver(this@WorkService)
+        worker.doWork(this@WorkService)
+        worker.unregisterReceiver(this@WorkService)
         if(worker.withNotification == true)
-            NotificatonService.enqueue(this, intent.apply { setAction(Actions.ACTION_FINISH.action) })
+            NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
         mutex.withLock { workerCount-- }
     }
 
