@@ -42,16 +42,15 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
         init()
     }
 
-    suspend fun PersistentWorker.schedulePersistent(scope: CoroutineScope): Deferred<Boolean>{
-        val result = scope.async {
-            withContext(Dispatchers.IO){
-                val work = Work(this@schedulePersistent)
-                dao.insert(work)
-                BootReceiver.enableReboot(ctx)
-                this@schedulePersistent.scheduleFuture()
-            }
+    suspend fun PersistentWorker.schedulePersistent(): Deferred<Boolean> = coroutineScope{
+        val result = async(Dispatchers.IO) {
+            val work = Work(this@schedulePersistent)
+            if (dao.insert(work).toInt() != work.id)
+                return@async false
+            BootReceiver.enableReboot(ctx)
+            return@async this@schedulePersistent.scheduleFuture()
         }
-        return result
+        return@coroutineScope result
     }
 
     internal fun PersistentWorker.scheduleFuture() = scheduleFuture(interval, repeating, allowWhileIdle, precisionTiming)

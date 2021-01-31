@@ -49,12 +49,11 @@ class LauncherActivity: AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val scope = MainScope()
-        scheduler.use(scope) {
+        scheduler.use() {
             WorkerSix().scheduleQuarterHour(true, true, true)
             WorkerFive().scheduleHalfHour()
         }
-        scheduler.use(scope) {
+        scheduler.use() {
             WorkerFour().scheduleHour(true, true, true)
             WorkerTwelve().scheduleFuture(60000L * 8, true, true, true)
             WorkerEleven().scheduleFuture(60000L * 3, true, true, true)
@@ -64,12 +63,12 @@ class LauncherActivity: AppCompatActivity(){
             WorkerOne().scheduleFuture(fourtyFiveSeconds, true, true)
             WorkerThree().scheduleQuarterDay(true, true, true)
         }
-        scheduler.use(scope) {
+        scheduler.use() {
             WorkerSeven().scheduleNow()
             WorkerEight().scheduleHoursTwo(true, true, true)
             WorkerTen().scheduleHalfWeek(true, true, true)
             runBlocking {
-                GlobalScope.launch { WorkerFourteen().schedulePersistent().await() }
+                WorkerFourteen().schedulePersistent().await()
             }
         }
     }
