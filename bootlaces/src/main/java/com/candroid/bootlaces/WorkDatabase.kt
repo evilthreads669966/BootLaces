@@ -48,7 +48,7 @@ import androidx.room.RoomDatabase
 abstract class WorkDatabase: RoomDatabase(){
 
     companion object{
-        var INSTANCE: WorkDatabase? = null
+        private var INSTANCE: WorkDatabase? = null
 
         fun getInstance(ctx: Context): WorkDatabase{
             if(INSTANCE == null)
