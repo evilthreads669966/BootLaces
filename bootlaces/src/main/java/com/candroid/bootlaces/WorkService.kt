@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 package com.candroid.bootlaces
 
-import android.app.AlarmManager
 import android.app.Service
 import android.content.*
 import android.os.Build
@@ -58,19 +57,17 @@ import kotlin.properties.Delegates
 @ExperimentalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
+class WorkService: Service(), ComponentCallbacks2 {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
-    @Inject internal lateinit var alarmMgr: AlarmManager
-    @Inject internal lateinit var database: WorkDao
     @Inject internal lateinit var intentFactory: IntentFactory
-    @Inject lateinit var workSchedulerFacade: WorkShedulerFacade
-    @Inject lateinit var mutex: Mutex
+    @Inject internal lateinit var workSchedulerFacade: WorkShedulerFacade
+    @Inject internal lateinit var mutex: Mutex
+    @Inject internal lateinit var supervisor: CoroutineScope
     private lateinit var foreground: ForegroundActivator
-    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob()
     private var startId: Int? = null
     private val receivers = mutableListOf<BroadcastReceiver>()
 
-    var workerCount: Int by Delegates.observable(0) { _, _, newValue ->
+    private var workerCount: Int by Delegates.observable(0) { _, _, newValue ->
         if (newValue == 0)
             stopWorkService()
     }
@@ -98,25 +95,24 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        this.launch { this.startAction(intent) }
+        supervisor.launch { handleRequest(intent) }
         super.onStartCommand(intent, flags, startId)
         this.startId = startId
         return START_NOT_STICKY
     }
 
-       private suspend fun CoroutineScope.startAction(intent: Intent?){
+    private suspend fun handleRequest(intent: Intent?) = coroutineScope{
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
-            when (intent?.action ?: return) {
-                Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(database, work!!, this)
+            when (intent?.action ?: return@coroutineScope ) {
+                Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(work!!, this)
                 Actions.ACTION_EXECUTE_WORKER.action -> work?.executeWorker(this)
-                else -> return
+                else -> return@coroutineScope
             }
         }
 
     override fun onDestroy() {
-        Log.d("WorkService", "onDestroy()")
-        this.coroutineContext.cancelChildren()
-        this.cancel()
+        supervisor.coroutineContext.cancelChildren()
+        supervisor.cancel()
         startId = 0
         runBlocking {
             mutex.withLock {
@@ -131,8 +127,7 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
         super.onDestroy()
     }
 
-    /*this particullar fuunction is up next for my attention*/
-    internal suspend fun Work.executeWorker(scope: CoroutineScope){
+    private suspend fun Work.executeWorker(scope: CoroutineScope){
         val worker = Worker.createFromWork(this)
         mutex.withLock {
             worker.receiver?.let { receivers.add(it) }

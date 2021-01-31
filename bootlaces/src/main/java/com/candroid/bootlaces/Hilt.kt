@@ -15,12 +15,10 @@ package com.candroid.bootlaces
 
 import android.app.AlarmManager
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
@@ -29,9 +27,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.sync.Mutex
-import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -74,13 +75,6 @@ internal interface ForegroundEntryPoint{
     fun getForeground(): ForegroundActivator
 }
 
-@FlowPreview
-@InstallIn(ServiceComponent::class)
-@Module
-internal abstract class BindingsBackgroundModule{
-    @Binds
-    abstract fun bindWorkManager(workMgr: WorkShedulerFacade): ISchedulerFacade<Worker>
-}
 @ObsoleteCoroutinesApi
 @InstallIn(ServiceComponent::class)
 @Module
@@ -88,7 +82,7 @@ internal object BackgroundModule{
     @Provides
     fun providesMutex() = Mutex()
     @Provides
-    fun provideReceivers() = mutableListOf<BroadcastReceiver>()
+    fun provideCoroutineScope() = CoroutineScope( EmptyCoroutineContext + Dispatchers.Default + SupervisorJob())
 }
 
 @InstallIn(ServiceComponent::class)

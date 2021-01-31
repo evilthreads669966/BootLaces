@@ -1,28 +1,27 @@
 package com.candroid.bootlaces
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ServiceScoped
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @FlowPreview
-@ServiceScoped
+@Singleton
 class WorkShedulerFacade @Inject constructor(
-    @ApplicationContext override val ctx: Context,
-    override val scheduler: WorkScheduler,
-    val factory: IntentFactory
-): ISchedulerFacade<Worker> {
-
-    suspend fun scheduleWorkForReboot(dao: WorkDao, work: Work?, scope: CoroutineScope){
-            withContext(Dispatchers.IO){
-                if(work != null) dao.insert(work)
-                getSavedWorkAndSchedule(dao.getPersistentWork(),scope)
-            }
+    private val scheduler: WorkScheduler,
+    private val dao: WorkDao,
+){
+    suspend fun scheduleWorkForReboot(work: Work?, scope: CoroutineScope){
+        withContext(Dispatchers.IO){
+            if(work != null) dao.insert(work)
+            scheduleWorkFromDatabase(dao.getPersistentWork(),scope)
+        }
     }
 
-    private suspend fun getSavedWorkAndSchedule(flow: Flow<List<Work>>, scope: CoroutineScope){
+    private suspend fun scheduleWorkFromDatabase(flow: Flow<List<Work>>, scope: CoroutineScope){
         flow.filterNotNull()
             .flatMapMerge(DEFAULT_CONCURRENCY){
                 flow {
@@ -35,9 +34,4 @@ class WorkShedulerFacade @Inject constructor(
             }.flowOn(Dispatchers.Default)
             .launchIn(scope)
     }
-}
-
-internal interface ISchedulerFacade<T>{
-    val ctx: Context
-    val scheduler: WorkScheduler
 }
