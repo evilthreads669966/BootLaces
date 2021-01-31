@@ -104,7 +104,7 @@ class WorkService: Service(), ComponentCallbacks2, CoroutineScope {
         return START_NOT_STICKY
     }
 
-    private suspend fun CoroutineScope.startAction(intent: Intent?){
+       private suspend fun CoroutineScope.startAction(intent: Intent?){
             val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
             when (intent?.action ?: return) {
                 Actions.ACTION_SCHEDULE_REBOOT.action -> workSchedulerFacade.scheduleWorkForReboot(database, work!!, this)
