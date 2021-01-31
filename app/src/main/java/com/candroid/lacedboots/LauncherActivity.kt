@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -48,11 +49,12 @@ class LauncherActivity: AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduler.use {
+        val scope = MainScope()
+        scheduler.use(scope) {
             WorkerSix().scheduleQuarterHour(true, true, true)
             WorkerFive().scheduleHalfHour()
         }
-        scheduler.use {
+        scheduler.use(scope) {
             WorkerFour().scheduleHour(true, true, true)
             WorkerTwelve().scheduleFuture(60000L * 8, true, true, true)
             WorkerEleven().scheduleFuture(60000L * 3, true, true, true)
@@ -62,7 +64,7 @@ class LauncherActivity: AppCompatActivity(){
             WorkerOne().scheduleFuture(fourtyFiveSeconds, true, true)
             WorkerThree().scheduleQuarterDay(true, true, true)
         }
-        scheduler.use {
+        scheduler.use(scope) {
             WorkerSeven().scheduleNow()
             WorkerEight().scheduleHoursTwo(true, true, true)
             WorkerTen().scheduleHalfWeek(true, true, true)

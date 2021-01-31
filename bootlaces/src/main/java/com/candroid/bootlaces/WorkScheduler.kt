@@ -38,8 +38,8 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     /*use this scoping function to schedule workers
     * ie: scheduler.use { MyWorker().scheduleHour() }
     * */
-    fun use(init: WorkScheduler.() -> Unit){
-        init()
+    fun use(scope: CoroutineScope, init: WorkScheduler.(CoroutineScope) -> Unit){
+        init(scope)
     }
 
     suspend fun PersistentWorker.schedulePersistent(): Deferred<Boolean>{
