@@ -52,22 +52,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
-
-    companion object{
-        internal fun isRebootEnabled(ctx: Context): Boolean{
-            val componentName = ComponentName(ctx, BootReceiver::class.java)
-            val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-            return (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
-        }
-
-        internal fun enableReboot(ctx: Context){
-            val componentName = ComponentName(ctx, BootReceiver::class.java)
-            val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-            if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
-                ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-        }
-    }
-
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         rescheduleWork(ctx!!, intent)

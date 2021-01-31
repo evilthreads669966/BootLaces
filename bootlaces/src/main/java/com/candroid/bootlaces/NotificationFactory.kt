@@ -62,7 +62,7 @@ import javax.inject.Singleton
  **/
 @Singleton
 internal class NotificationFactory @Inject constructor(@ApplicationContext private val ctx: Context, internal val mgr: NotificationManagerCompat, private val builder: NotificationCompat.Builder){
-    internal fun createStartedNotification(description: String?): Notification{
+    fun createStartedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
         return builder.apply {
             extend(TEMPLATE_START)
@@ -71,7 +71,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
         }.build()
     }
 
-    internal fun createFinishedNotification(description: String?): Notification{
+    fun createFinishedNotification(description: String?): Notification{
         createBackgroundChannel(ctx, mgr)
         return builder.apply {
             extend(TEMPLATE_FINISH)
@@ -79,7 +79,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
         }.build()
     }
 
-    internal fun createForegroundNotification(): Notification{
+    fun createForegroundNotification(): Notification{
         ForegroundNotification.createForegroundChannel(ctx, mgr)
         return builder.apply {
             extend(NOTIFICATION_TEMPLATE_FOREGROUND).build()
@@ -232,7 +232,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
             it.setTimeoutAfter(15000)
         }
 
-        internal fun createBackgroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
+        fun createBackgroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 var channel: NotificationChannel? =
                     mgr.getNotificationChannel(BACKGROUND_CHANNEL_ID)

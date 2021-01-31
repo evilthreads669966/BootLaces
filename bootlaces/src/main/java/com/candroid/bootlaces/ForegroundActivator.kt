@@ -60,7 +60,7 @@ internal class ForegroundActivator @Inject constructor(private val ctx: Service)
      }
 
      @Throws(SecurityException::class)
-     internal fun activate() {
+     fun activate() {
           if(WorkService.state.equals(ServiceState.FOREGROUND)) return
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                WorkService.state = ServiceState.FOREGROUND
@@ -68,7 +68,7 @@ internal class ForegroundActivator @Inject constructor(private val ctx: Service)
           }
      }
 
-     internal fun deactivate() {
+     fun deactivate() {
           ServiceCompat.stopForeground(ctx, ServiceCompat.STOP_FOREGROUND_REMOVE)
           WorkService.state = ServiceState.BACKGROUND
      }
