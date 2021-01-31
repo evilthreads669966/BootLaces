@@ -18,20 +18,20 @@ import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.DefineComponent
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.sync.Mutex
+import javax.inject.Singleton
 import kotlin.coroutines.EmptyCoroutineContext
 
 /*
@@ -61,12 +61,20 @@ import kotlin.coroutines.EmptyCoroutineContext
  *
  **/
 @Module
-@InstallIn(ApplicationComponent::class)
-internal object GlobalModule {
+@InstallIn(SingletonComponent::class)
+object GlobalModule {
+    /*I'm getting a wierd error using a provider for Room database so this is a hack to get a singleton working*/
     @Provides
-    fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = Room.databaseBuilder(ctx, WorkDatabase::class.java, "worker_database").build().workerDao()
+    fun provideWorkDao(@ApplicationContext ctx: Context): WorkDao = WorkDatabase.getInstance(ctx).workerDao()
     @Provides
+    @Singleton
     fun provideAlarmMgr(@ApplicationContext ctx: Context) = ctx.getSystemService(Service.ALARM_SERVICE) as AlarmManager
+    @Provides
+    @Singleton
+    fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
+    @Provides
+    @Singleton
+    fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
 @EntryPoint
@@ -83,15 +91,6 @@ internal object BackgroundModule{
     fun providesMutex() = Mutex()
     @Provides
     fun provideCoroutineScope() = CoroutineScope( EmptyCoroutineContext + Dispatchers.Default + SupervisorJob())
-}
-
-@InstallIn(ServiceComponent::class)
-@Module
-internal object ForegroundModule{
-    @Provides
-    fun provideNotificationBuilder(@ApplicationContext ctx: Context) = NotificationCompat.Builder(ctx)
-    @Provides
-    fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
 }
 
 @DefineComponent(parent = ServiceComponent::class)
