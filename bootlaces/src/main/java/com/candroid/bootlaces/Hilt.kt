@@ -75,6 +75,9 @@ internal object GlobalModule {
     @Provides
     @Singleton
     fun provideNotificationMgr(@ApplicationContext ctx: Context) = NotificationManagerCompat.from(ctx)
+    @Singleton
+    @Provides
+    fun provideCoroutineScope() = CoroutineScope( EmptyCoroutineContext + Dispatchers.Default + SupervisorJob())
 }
 
 @EntryPoint
@@ -89,8 +92,7 @@ internal interface ForegroundEntryPoint{
 internal object BackgroundModule{
     @Provides
     fun providesMutex() = Mutex()
-    @Provides
-    fun provideCoroutineScope() = CoroutineScope( EmptyCoroutineContext + Dispatchers.Default + SupervisorJob())
+
 }
 
 @DefineComponent(parent = ServiceComponent::class)
