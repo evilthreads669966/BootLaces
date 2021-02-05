@@ -69,6 +69,7 @@ class LauncherActivity: AppCompatActivity(){
             WorkerTen().scheduleHalfWeek(true, true, true)
             runBlocking {
                 WorkerFourteen().schedulePersistent().await()
+                ReceiverAtReboot().schedulePersistent().await()
             }
         }
     }

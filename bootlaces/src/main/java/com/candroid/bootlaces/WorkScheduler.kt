@@ -44,8 +44,6 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
         init()
     }
 
-    suspend fun PersistentReceiver.schedule(): Deferred<Boolean> = this.schedulePersistent()
-
     suspend fun PersistentWorker.schedulePersistent(): Deferred<Boolean> = coroutineScope{
         val result = async(Dispatchers.IO) {
             val work = Work(this@schedulePersistent)
