@@ -78,21 +78,15 @@ internal object GlobalModule {
     @Singleton
     @Provides
     fun provideCoroutineScope() = CoroutineScope( EmptyCoroutineContext + Dispatchers.Default + SupervisorJob())
+    @Singleton
+    @Provides
+    fun providesMutex() = Mutex()
 }
 
 @EntryPoint
 @InstallIn(ForegroundComponent::class)
 internal interface ForegroundEntryPoint{
     fun getForeground(): ForegroundActivator
-}
-
-@ObsoleteCoroutinesApi
-@InstallIn(ServiceComponent::class)
-@Module
-internal object BackgroundModule{
-    @Provides
-    fun providesMutex() = Mutex()
-
 }
 
 @DefineComponent(parent = ServiceComponent::class)
