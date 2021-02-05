@@ -20,7 +20,6 @@ import android.text.format.DateUtils
 import android.util.Log
 import com.candroid.bootlaces.PersistentReceiver
 import com.candroid.bootlaces.Worker
-import com.candroid.bootlaces.PersistentWorkerHourly
 import kotlinx.coroutines.delay
 
    /*
@@ -135,7 +134,7 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
     }
 }
 
-class WorkerFourteen: PersistentWorkerHourly(14, "survives reboot and performs every hour", true){
+class WorkerFourteen: Worker(14, "survives reboot and performs every hour", true){
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
@@ -156,7 +155,7 @@ class WorkerFourteen: PersistentWorkerHourly(14, "survives reboot and performs e
     }
 }
 
-   class ReceiverAtReboot(): PersistentReceiver(18){
+   class ReceiverAtReboot: PersistentReceiver(18){
        override val receiver: WorkReceiver?
            get() = object : WorkReceiver(Intent.ACTION_BATTERY_LOW){
                override fun onReceive(ctx: Context?, intent: Intent?) {
