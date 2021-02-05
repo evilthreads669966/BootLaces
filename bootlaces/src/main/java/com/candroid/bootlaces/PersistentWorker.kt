@@ -38,16 +38,25 @@ abstract class PersistentWorker(
     open val repeating: Boolean,
 ): Worker(id, description, withNotification)
 
-abstract class WorkerDaily : PersistentWorker{
+abstract class PersistentWorkerDaily : PersistentWorker{
     constructor(id: Int, description: String, withNotification: Boolean = false)
             : super(id, withNotification, description, AlarmManager.INTERVAL_HOUR*24, true, true, true)
 }
 
-abstract class WorkerHourly(id: Int, description: String, withNotification: Boolean = false)
+abstract class PersistentWorkerHourly(id: Int, description: String, withNotification: Boolean = false)
     : PersistentWorker(id, true, description, AlarmManager.INTERVAL_HOUR, true, true, true)
 
-abstract class WorkerHalfDay(id: Int, description: String, withNotification: Boolean = false)
+abstract class PersistentWorkerHalfDay(id: Int, description: String, withNotification: Boolean = false)
     : PersistentWorker(id, true, description, AlarmManager.INTERVAL_DAY/2, true, true, true)
 
-abstract class WorkerQuarterHourly(id: Int, description: String, withNotification: Boolean = false)
+abstract class PersistentWorkerQuarterHourly(id: Int, description: String, withNotification: Boolean = false)
     : PersistentWorker(id, true, description, AlarmManager.INTERVAL_HOUR/4, true, true, true)
+
+abstract class PersistentWorkerHalfHourly(id: Int, description: String, withNotification: Boolean = false)
+    : PersistentWorker(id, true, description, AlarmManager.INTERVAL_HOUR/2, true, true, true)
+
+abstract class PersistentWorkerWeekly(id: Int, description: String, withNotification: Boolean = false)
+    : PersistentWorker(id, true, description, AlarmManager.INTERVAL_DAY * 7, true, true, true)
+
+abstract class PersistentWorkerYearly(id: Int, description: String, withNotification: Boolean = false)
+    : PersistentWorker(id, true, description, AlarmManager.INTERVAL_DAY * 365, true, true, true)
