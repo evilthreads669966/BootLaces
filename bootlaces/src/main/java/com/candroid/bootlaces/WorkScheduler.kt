@@ -1,7 +1,9 @@
 
 package com.candroid.bootlaces
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -34,13 +36,15 @@ import javax.inject.Singleton
  *
  **/
 @Singleton
-class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val alarmMgr: AlarmManager, private val factory: IntentFactory, private val dao: WorkDao) {
+class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Context,private val intentFactory: IntentFactory, private val alarmMgr: AlarmManager, private val factory: IntentFactory, private val dao: WorkDao) {
     /*use this scoping function to schedule workers
     * ie: scheduler.use { MyWorker().scheduleHour() }
     * */
     fun use(init: WorkScheduler.() -> Unit){
         init()
     }
+
+    suspend fun PersistentReceiver.schedule(): Deferred<Boolean> = this.schedulePersistent()
 
     suspend fun PersistentWorker.schedulePersistent(): Deferred<Boolean> = coroutineScope{
         val result = async(Dispatchers.IO) {
@@ -53,6 +57,27 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
         }
         return@coroutineScope result
     }
+
+/*
+    suspend fun cancel(worker: Worker): Deferred<Boolean> = coroutineScope{
+        async {
+            val workerFound = WorkerCache.findWorkerById(worker.id)?.apply {
+                this.cancel("cancelled by scheduler")
+                val work = Work(this)
+                val intent = intentFactory.createWorkIntent(work, Actions.ACTION_EXECUTE_WORKER)
+                var pendingIntent: PendingIntent? = null
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    pendingIntent = PendingIntent.getForegroundService(ctx, this.id, intent, PendingIntent.FLAG_IMMUTABLE)
+                else
+                    pendingIntent = PendingIntent.getService(ctx, this.id, intent, PendingIntent.FLAG_IMMUTABLE)
+                alarmMgr.cancel(pendingIntent)
+                if(this is PersistentWorker)
+                    dao.delete(work)
+            }
+            return@async workerFound != null
+        }
+    }
+*/
 
     internal fun PersistentWorker.scheduleFuture() = scheduleFuture(interval, repeating, allowWhileIdle, precisionTiming)
 

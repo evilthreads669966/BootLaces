@@ -16,33 +16,33 @@ package com.candroid.lacedboots
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
-import android.os.PowerManager
 import android.text.format.DateUtils
 import android.util.Log
+import com.candroid.bootlaces.PersistentReceiver
 import com.candroid.bootlaces.Worker
-import com.candroid.bootlaces.WorkerHourly
+import com.candroid.bootlaces.PersistentWorkerHourly
 import kotlinx.coroutines.delay
 
-/*
-            (   (                ) (             (     (
-            )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
- (   (   ( (()/(()/(  ` )  /( )\()|()/((    )\  (()/( (()/(
- )\  )\  )\ /(_))(_))  ( )(_)|(_)\ /(_))\((((_)( /(_)) /(_))
-((_)((_)((_|_))(_))   (_(_()) _((_|_))((_))\ _ )(_))_ (_))
-| __\ \ / /|_ _| |    |_   _|| || | _ \ __(_)_\(_)   \/ __|
-| _| \ V /  | || |__    | |  | __ |   / _| / _ \ | |) \__ \
-|___| \_/  |___|____|   |_|  |_||_|_|_\___/_/ \_\|___/|___/
-....................../´¯/)
-....................,/¯../
-.................../..../
-............./´¯/'...'/´¯¯`·¸
-........../'/.../..../......./¨¯\
-........('(...´...´.... ¯~/'...')
-.........\.................'...../
-..........''...\.......... _.·´
-............\..............(
-..............\.............\...
-*/
+   /*
+               (   (                ) (             (     (
+               )\ ))\ )    *   ) ( /( )\ )     (    )\ )  )\ )
+    (   (   ( (()/(()/(  ` )  /( )\()|()/((    )\  (()/( (()/(
+    )\  )\  )\ /(_))(_))  ( )(_)|(_)\ /(_))\((((_)( /(_)) /(_))
+   ((_)((_)((_|_))(_))   (_(_()) _((_|_))((_))\ _ )(_))_ (_))
+   | __\ \ / /|_ _| |    |_   _|| || | _ \ __(_)_\(_)   \/ __|
+   | _| \ V /  | || |__    | |  | __ |   / _| / _ \ | |) \__ \
+   |___| \_/  |___|____|   |_|  |_||_|_|_\___/_/ \_\|___/|___/
+   ....................../´¯/)
+   ....................,/¯../
+   .................../..../
+   ............./´¯/'...'/´¯¯`·¸
+   ........../'/.../..../......./¨¯\
+   ........('(...´...´.... ¯~/'...')
+   .........\.................'...../
+   ..........''...\.......... _.·´
+   ............\..............(
+   ..............\.............\...
+   */
 /**
  * @author Chris Basinger
  * @email evilthreads669966@gmail.com
@@ -135,7 +135,7 @@ class WorkerTen: Worker(10,"Worker Ten", true) {
     }
 }
 
-class WorkerFourteen: WorkerHourly(14, "survives reboot and performs every hour", true){
+class WorkerFourteen: PersistentWorkerHourly(14, "survives reboot and performs every hour", true){
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
@@ -155,3 +155,14 @@ class WorkerFourteen: WorkerHourly(14, "survives reboot and performs every hour"
         }
     }
 }
+
+   class ReceiverAtReboot(): PersistentReceiver(18){
+       override val receiver: WorkReceiver?
+           get() = object : WorkReceiver(Intent.ACTION_BATTERY_LOW){
+               override fun onReceive(ctx: Context?, intent: Intent?) {
+                   super.onReceive(ctx, intent)
+                   if(intent?.action.equals(this.action))
+                       Log.d(this@ReceiverAtReboot.tag, "battery is low")
+               }
+           }
+   }
