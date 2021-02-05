@@ -18,6 +18,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 /*
             (   (                ) (             (     (
@@ -44,8 +49,9 @@ import android.content.IntentFilter
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
  **/
-abstract class Worker(val id: Int, val description: String, val withNotification: Boolean){
+abstract class Worker(val id: Int, val description: String, val withNotification: Boolean): CoroutineScope{
      val tag = this::class.java.name
+     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
      internal companion object {
           fun createFromWork(work: Work): Worker = Class.forName(work.workerName).newInstance() as Worker
