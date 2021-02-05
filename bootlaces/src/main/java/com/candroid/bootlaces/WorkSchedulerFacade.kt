@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 /*
@@ -40,18 +41,16 @@ class WorkShedulerFacade @Inject constructor(
 ){
     internal suspend fun rescheduleWorkAfterReboot(scope: CoroutineScope, work: Work?){
         dao.getPersistentWork().filterNotNull()
-            .flatMapMerge(DEFAULT_CONCURRENCY){
-                flow {
-                    emit(it.map { Worker.createFromWork(it)} )
-                }
-            }
             .onEach {
-                if(work != null)
-                    it.find { it.id == work.id }?.let { scheduler.use { (it as PersistentWorker).scheduleFuture() } }
-                else
-                    it.filterIsInstance<PersistentWorker>()
-                        .forEach { worker -> scheduler.use { worker.scheduleFuture() } }
-            }.flowOn(Dispatchers.Default)
+                it.forEach {
+                    val worker = Worker.createFromWork(it)
+                    scheduler.use {
+                        runBlocking {
+                            worker.scheduleFuture(it.interval!!, false, it.repeating, it.allowWhileIdle, it.precision)
+                        }
+                    }
+                }
+            }.flowOn(Dispatchers.IO)
             .launchIn(scope)
     }
 }

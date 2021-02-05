@@ -31,11 +31,18 @@ import kotlinx.android.parcel.Parcelize
  **/
 @Parcelize
 @Entity
-data class Work(@PrimaryKey(autoGenerate = false) val id: Int, val workerName: String):Parcelable{
-
-    internal constructor(worker: Worker): this(worker.id, worker.javaClass.name)
+data class Work(
+    @PrimaryKey(autoGenerate = false) val id: Int,
+    val workerName: String,
+    val interval: Long? = null,
+    val repeating: Boolean = false,
+    val allowWhileIdle: Boolean = false,
+    val precision: Boolean = false
+) :Parcelable{
+    internal constructor(worker: Worker, interval: Long? = null, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false):
+            this(worker.id, worker.javaClass.name, interval, repeating, allowWhileIdle, precision)
 
     companion object{
-       internal const val KEY_PARCEL = "KEY_PARCEL"
+        internal const val KEY_PARCEL = "KEY_PARCEL"
     }
 }

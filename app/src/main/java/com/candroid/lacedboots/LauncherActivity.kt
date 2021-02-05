@@ -17,9 +17,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
@@ -49,27 +46,31 @@ class LauncherActivity: AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduler.use() {
-            WorkerSix().scheduleQuarterHour(true, true, true)
-            WorkerFive().scheduleHalfHour()
-        }
-        scheduler.use() {
-            WorkerFour().scheduleHour(true, true, true)
-            WorkerTwelve().scheduleFuture(60000L * 8, true, true, true)
-            WorkerEleven().scheduleFuture(60000L * 3, true, true, true)
-            WorkerThirteen().scheduleNow()
-            WorkerTwo().scheduleDay(true, true, true)
-            val fourtyFiveSeconds = 45000L
-            WorkerOne().scheduleFuture(fourtyFiveSeconds, true, true)
-            WorkerThree().scheduleQuarterDay(true, true, true)
-        }
-        scheduler.use() {
-            WorkerSeven().scheduleNow()
-            WorkerEight().scheduleHoursTwo(true, true, true)
-            WorkerTen().scheduleHalfWeek(true, true, true)
+        scheduler.use {
             runBlocking {
-                WorkerFourteen().schedulePersistent().await()
-                ReceiverAtReboot().schedulePersistent().await()
+                WorkerSix().scheduleQuarterHour(repeating =  true, allowWhileIdle = true, precision = true).await()
+                WorkerFive().scheduleHalfHour().await()
+            }
+        }
+        scheduler.use {
+            runBlocking {
+                WorkerFour().scheduleHour(repeating =  true, allowWhileIdle = true, precision = true).await()
+                WorkerTwelve().scheduleFuture(60000L * 8, repeating = true, allowWhileIdle = true, precision = true).await()
+                WorkerEleven().scheduleFuture(60000L * 3, repeating = true, allowWhileIdle = true, precision = true).await()
+                WorkerThirteen().scheduleNow().await()
+                WorkerTwo().scheduleDay(repeating =  true, allowWhileIdle = true, precision = true).await()
+                val fourtyFiveSeconds = 45000L
+                WorkerOne().scheduleFuture(fourtyFiveSeconds, repeating = true, allowWhileIdle = true).await()
+                WorkerThree().scheduleQuarterDay(repeating =  true, allowWhileIdle = true, precision = true).await()
+            }
+        }
+        scheduler.use {
+            runBlocking {
+                WorkerSeven().scheduleNow().await()
+                WorkerEight().scheduleHoursTwo(repeating =  true, allowWhileIdle = true, precision = true).await()
+                WorkerTen().scheduleHalfWeek(repeating =  true, allowWhileIdle = true, precision = true).await()
+                WorkerFourteen().scheduleHour(persistent = true, repeating = true, allowWhileIdle = true, precision = true).await()
+                ReceiverAtReboot().scheduleReceiver().await()
             }
         }
     }
