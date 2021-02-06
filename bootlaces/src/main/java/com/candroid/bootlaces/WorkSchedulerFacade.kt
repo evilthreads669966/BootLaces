@@ -46,7 +46,7 @@ class WorkShedulerFacade @Inject constructor(
                     val worker = Worker.createFromWork(it)
                     scheduler.use {
                         runBlocking {
-                            worker.scheduleFuture(it.interval!!, false, it.repeating, it.allowWhileIdle, it.precision)
+                            worker.scheduleFuture(it.interval!!, false, it.repeating!!, it.allowWhileIdle!!, it.precision!!)
                         }
                     }
                 }

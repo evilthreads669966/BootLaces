@@ -35,11 +35,11 @@ data class Work(
     @PrimaryKey(autoGenerate = false) val id: Int,
     val workerName: String,
     val interval: Long? = null,
-    val repeating: Boolean = false,
-    val allowWhileIdle: Boolean = false,
-    val precision: Boolean = false
+    val repeating: Boolean? = null,
+    val allowWhileIdle: Boolean? = null,
+    val precision: Boolean? = null
 ) :Parcelable{
-    internal constructor(worker: Worker, interval: Long? = null, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false):
+    internal constructor(worker: Worker, interval: Long? = null, repeating: Boolean? = null, allowWhileIdle: Boolean? = null, precision: Boolean? = null):
             this(worker.id, worker.javaClass.name, interval, repeating, allowWhileIdle, precision)
 
     companion object{
