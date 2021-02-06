@@ -20,6 +20,7 @@ import android.text.format.DateUtils
 import android.util.Log
 import com.candroid.bootlaces.PersistentReceiver
 import com.candroid.bootlaces.Worker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 
    /*
@@ -56,14 +57,14 @@ class WorkerEight: Worker(8, "working for 2 hours", true){
     }
 }
 
-class WorkerOne: Worker(1, "working for 2 minutes", true){
+class WorkerOne: Worker(1, "performing database transactions for 2 minutes", true, Dispatchers.IO){
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, description)
         delay(120000)
     }
 }
 
-class WorkerTwo: Worker(2, "working for 15 minutes", true){
+class WorkerTwo: Worker(2, "performing operations on files for 15 minutes", true, Dispatchers.IO){
     override suspend fun doWork(ctx: Context) {
         Log.d(tag, description)
         delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
