@@ -125,7 +125,7 @@ class WorkService: Service(), ComponentCallbacks2 {
         super.onDestroy()
     }
 
-    private suspend fun Work.execute() = supervisorScope{
+    private suspend fun Work.execute() = coroutineScope{
         val worker = Worker.createFromWork(this@execute)
         mutex.withLock {
             worker.receiver?.let { receivers.add(it) }
@@ -135,7 +135,7 @@ class WorkService: Service(), ComponentCallbacks2 {
         if(worker.withNotification == true)
             NotificatonService.enqueue(this@WorkService, intent)
         worker.registerReceiver(this@WorkService)
-        worker.launch(this.coroutineContext + Job()) { worker.doWork(this@WorkService) }.join()
+        worker.launch(currentCoroutineContext()) { worker.doWork(this@WorkService) }.join()
         worker.unregisterReceiver(this@WorkService)
         if(worker.withNotification == true)
             NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
