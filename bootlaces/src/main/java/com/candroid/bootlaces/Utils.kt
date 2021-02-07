@@ -38,7 +38,7 @@ private fun Class<*>.isComponentEnabled(ctx: Context): Boolean{
 private fun Class<*>.enableComponent(ctx: Context): Boolean{
     val componentName = ComponentName(ctx, this)
     val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED){
+    if(state != PackageManager.COMPONENT_ENABLED_STATE_ENABLED){
         ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         return true
     }
