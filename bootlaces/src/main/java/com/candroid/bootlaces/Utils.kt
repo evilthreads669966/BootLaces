@@ -29,17 +29,20 @@ import android.content.pm.PackageManager
  * @date 02/05/20
  *
  **/
-private fun <T> Class<T>.isComponentEnabled(ctx: Context): Boolean{
+private fun Class<*>.isComponentEnabled(ctx: Context): Boolean{
     val componentName = ComponentName(ctx, this)
     val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-    return (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+    return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 }
 
-private fun <T> Class<T>.enableComponent(ctx: Context){
+private fun Class<*>.enableComponent(ctx: Context): Boolean{
     val componentName = ComponentName(ctx, this)
     val state = ctx.packageManager.getComponentEnabledSetting(componentName)
-    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+    if(state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT || state == PackageManager.COMPONENT_ENABLED_STATE_DISABLED){
         ctx.packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
+        return true
+    }
+    return false
 }
 
 internal object Utils{
