@@ -69,7 +69,7 @@ class LauncherActivity: AppCompatActivity(){
                 WorkerSeven().scheduleNow().await()
                 WorkerEight().scheduleHoursTwo(repeating =  true, allowWhileIdle = true, precision = true).await()
                 WorkerTen().scheduleHalfWeek(repeating =  true, allowWhileIdle = true, precision = true).await()
-                WorkerFourteen().scheduleHour(persistent = true, repeating = true, allowWhileIdle = true, precision = true).await()
+                WorkerFourteen().scheduleHour(surviveReboot = true, repeating = true, allowWhileIdle = true, precision = true).await()
                 ReceiverAtReboot().scheduleReceiver().await()
             }
         }
