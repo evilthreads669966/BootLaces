@@ -35,11 +35,11 @@ import javax.inject.Singleton
  **/
 @FlowPreview
 @Singleton
-class WorkShedulerFacade @Inject constructor(
+class WorkRescheduler @Inject constructor(
     private val scheduler: WorkScheduler,
     private val dao: WorkDao,
 ){
-    internal suspend fun rescheduleWorkAfterReboot(scope: CoroutineScope, work: Work?){
+    internal suspend fun reschedule(scope: CoroutineScope, work: Work?){
         dao.getPersistentWork().filterNotNull()
             .onEach {
                 it.forEach {
