@@ -49,8 +49,8 @@ import javax.inject.Inject
  **/
 @AndroidEntryPoint
 internal class NotificatonService: JobIntentService(){
-    @Inject internal lateinit var factory: NotificationFactory
-    internal companion object{
+    @Inject lateinit var factory: NotificationFactory
+    companion object{
         fun enqueue(ctx: Context, intent: Intent) = enqueueWork(ctx, NotificatonService::class.java, ID_JOB, intent)
         private const val ID_JOB = 666
         const val KEY_DESCRIPTION = "KEY_DESCRIPTION"

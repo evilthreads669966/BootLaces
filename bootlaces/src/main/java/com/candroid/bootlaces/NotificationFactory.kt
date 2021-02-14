@@ -94,7 +94,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
         setContentIntent(PendingIntent.getActivity(ctx, 0, intent, 0))
     }
 
-    internal object ForegroundNotification{
+    object ForegroundNotification{
         const val FOREGROUND_CHANNEL_DESCRIPTION = "Foreground Work"
         const val FOREGROUND_CHANNEL_GROUP_DESCRIPTION = "For temporary tasks"
         const val FOREGROUND_CHANNEL_GROUP_NAME = "Foreground Processing"
@@ -134,7 +134,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
                 setDefaults(NotificationCompat.DEFAULT_ALL)
             }
         }
-        internal fun createForegroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
+        fun createForegroundChannel(ctx: Context, mgr: NotificationManagerCompat): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 var channel: NotificationChannel? = mgr.getNotificationChannel(FOREGROUND_CHANNEL_ID)
                 if (channel == null) {
@@ -184,7 +184,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
         }
     }
 
-    internal object WorkNotification {
+    object WorkNotification {
         const val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
         const val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
         const val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download
