@@ -55,20 +55,21 @@ class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Con
         setAction(Actions.ACTION_RESCHEDULE.action)
         setClass(ctx, WorkService::class.java)
     }
+
     internal fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
     }
 
-    internal fun createWorkIntent(work: Work, actions: Actions) = Intent().apply {
+    private fun createExecuteWorkIntent(work: Work) = Intent().apply {
         setClass(ctx, WorkService::class.java)
-        setAction(actions.action)
+        setAction(Actions.ACTION_EXECUTE_WORKER.action)
         putExtra(Work.KEY_PARCEL, work)
     }
 
     private fun createAlarmIntent(work: Work): Intent?{
-        val intent = createWorkIntent(work, Actions.ACTION_EXECUTE_WORKER)
+        val intent = createExecuteWorkIntent(work)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             if(PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_NO_CREATE) != null)
                 return null
