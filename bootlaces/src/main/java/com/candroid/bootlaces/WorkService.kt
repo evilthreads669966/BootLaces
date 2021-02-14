@@ -55,7 +55,7 @@ import kotlin.properties.Delegates
 @ExperimentalCoroutinesApi
 @FlowPreview
 @AndroidEntryPoint
-class WorkService: Service(), ComponentCallbacks2 {
+internal class WorkService: Service(), ComponentCallbacks2 {
     @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject internal lateinit var intentFactory: IntentFactory
     @Inject internal lateinit var workRescheduling: WorkRescheduling
@@ -75,7 +75,7 @@ class WorkService: Service(), ComponentCallbacks2 {
         fun isStarted() = !state.equals(ServiceState.STOPPED)
     }
 
-    internal fun stopWorkService(){
+    private fun stopWorkService(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             if(state == ServiceState.FOREGROUND)
                 foreground.deactivate()

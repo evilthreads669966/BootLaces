@@ -19,6 +19,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
 /*
@@ -49,6 +51,8 @@ import javax.inject.Inject
  * Activates [WorkService]
  **/
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 internal class BootReceiver : HiltBugReceiver(){
     @Inject lateinit var intentFactory: IntentFactory

@@ -18,6 +18,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,6 +50,8 @@ import javax.inject.Singleton
  *
  * creates intents
  **/
+@FlowPreview
+@ExperimentalCoroutinesApi
 @Singleton
 class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Context){
 
