@@ -59,7 +59,7 @@ internal class ReschedulingReceiver : HiltBugReceiver(){
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(ctx != null && intent != null && intent.action != null)
-            if(!WorkService.isStarted() && intent.action!!.contains("BOOT"))
+            if(intent.action!!.contains("BOOT"))
                 goAsync().apply {
                     runBlocking {
                         coroutineScope.launch(Dispatchers.IO) {

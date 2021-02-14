@@ -71,7 +71,6 @@ internal class WorkService: Service(), ComponentCallbacks2 {
 
     companion object{
         var state: ServiceState = ServiceState.STOPPED
-        fun isStarted() = !state.equals(ServiceState.STOPPED)
     }
 
     private fun stopWorkService(){
