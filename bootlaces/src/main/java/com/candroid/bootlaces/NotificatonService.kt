@@ -48,7 +48,7 @@ import javax.inject.Inject
  *
  **/
 @AndroidEntryPoint
-class NotificatonService: JobIntentService(){
+internal class NotificatonService: JobIntentService(){
     @Inject internal lateinit var factory: NotificationFactory
     internal companion object{
         fun enqueue(ctx: Context, intent: Intent) = enqueueWork(ctx, NotificatonService::class.java, ID_JOB, intent)
