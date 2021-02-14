@@ -147,7 +147,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
                         description = FOREGROUND_CHANNEL_DESCRIPTION
                         lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
                         setShowBadge(false)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+                        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q)
                             setAllowBubbles(false)
                         enableLights(false)
                         enableVibration(false)
