@@ -55,11 +55,6 @@ import javax.inject.Singleton
 @Singleton
 class IntentFactory @Inject internal constructor(@ApplicationContext private val ctx: Context){
 
-    fun createRescheduleIntent() = Intent().apply{
-        setAction(Actions.ACTION_RESCHEDULE.action)
-        setClass(ctx, WorkService::class.java)
-    }
-
     fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)

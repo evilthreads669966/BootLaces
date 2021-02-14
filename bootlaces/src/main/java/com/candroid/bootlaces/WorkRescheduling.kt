@@ -39,7 +39,7 @@ internal class WorkRescheduling @Inject constructor(
     private val scheduler: WorkScheduler,
     private val dao: WorkDao,
 ){
-    suspend fun reschedule(scope: CoroutineScope, work: Work?){
+    suspend fun reschedule(scope: CoroutineScope){
         dao.getPersistentWork().filterNotNull()
             .onEach {
                 it.forEach {

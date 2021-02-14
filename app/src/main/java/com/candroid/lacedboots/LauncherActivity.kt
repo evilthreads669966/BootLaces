@@ -15,6 +15,7 @@ package com.candroid.lacedboots
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.candroid.bootlaces.IntentFactory
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking

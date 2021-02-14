@@ -58,7 +58,6 @@ import kotlin.properties.Delegates
 internal class WorkService: Service(), ComponentCallbacks2 {
     @Inject lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
     @Inject lateinit var intentFactory: IntentFactory
-    @Inject lateinit var workRescheduling: WorkRescheduling
     @Inject lateinit var mutex: Mutex
     @Inject lateinit var supervisor: CoroutineScope
     private lateinit var foreground: ForegroundActivator
@@ -102,7 +101,6 @@ internal class WorkService: Service(), ComponentCallbacks2 {
     private suspend fun handleRequest(intent: Intent?) = coroutineScope{
         val work: Work? = intent?.getParcelableExtra(Work.KEY_PARCEL)
         when (intent?.action ?: return@coroutineScope ) {
-            Actions.ACTION_RESCHEDULE.action -> workRescheduling.reschedule(this, work)
             Actions.ACTION_EXECUTE_WORKER.action -> work?.execute()
             else -> return@coroutineScope
         }
