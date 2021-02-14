@@ -15,12 +15,11 @@ limitations under the License.*/
 package com.candroid.bootlaces
 
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /*
             (   (                ) (             (     (
@@ -52,20 +51,21 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class BootReceiver : HiltBugReceiver(){
+    @Inject lateinit var intentFactory: IntentFactory
+
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
-        rescheduleWork(ctx!!, intent)
+        if(ctx != null && intent != null && intent.action != null)
+            if(!WorkService.isStarted() && intent.action!!.contains("BOOT"))
+                startServiceForRescheduling(ctx)
     }
 
-    private fun rescheduleWork(ctx: Context, intent: Intent?){
-        if(!WorkService.isStarted() && intent?.action?.contains("BOOT") ?: false) {
-            intent?.setClass(ctx ?: return, WorkService::class.java)
-            intent?.setAction(null)?.setAction(Actions.ACTION_RESCHEDULE_AFTER_REBOOT.action)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                ctx.startForegroundService(intent)
-            else
-                ctx.startService(intent)
-        }
+    private fun startServiceForRescheduling(ctx: Context){
+        val intent = intentFactory.createRescheduleIntent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            ctx.startForegroundService(intent)
+        else
+            ctx.startService(intent)
     }
 }
 /*fixes bug in Hilt*/
