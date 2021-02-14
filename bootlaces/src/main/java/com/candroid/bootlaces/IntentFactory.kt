@@ -53,14 +53,14 @@ import javax.inject.Singleton
 @FlowPreview
 @ExperimentalCoroutinesApi
 @Singleton
-class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Context){
+class IntentFactory @Inject internal constructor(@ApplicationContext private val ctx: Context){
 
-    internal fun createRescheduleIntent() = Intent().apply{
+    fun createRescheduleIntent() = Intent().apply{
         setAction(Actions.ACTION_RESCHEDULE.action)
         setClass(ctx, WorkService::class.java)
     }
 
-    internal fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
+    fun createWorkNotificationIntent(worker: Worker) = Intent().apply {
         setAction(Actions.ACTION_START.action)
         putExtra(NotificatonService.KEY_ID, worker.id)
         putExtra(NotificatonService.KEY_DESCRIPTION, worker.description)
@@ -85,7 +85,7 @@ class IntentFactory @Inject constructor(@ApplicationContext private val ctx: Con
         return intent
     }
     
-    internal fun createPendingIntent(work: Work): PendingIntent? {
+    fun createPendingIntent(work: Work): PendingIntent? {
         val intent = createAlarmIntent(work) ?: return null
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             return PendingIntent.getForegroundService(ctx, work.id, intent, PendingIntent.FLAG_IMMUTABLE)
