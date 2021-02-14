@@ -42,7 +42,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
 
     suspend fun PersistentReceiver.scheduleReceiver(): Deferred<Boolean> = schedule(0L, true, false, true, true)
 
-    suspend fun Worker.scheduleNow(surviveReboot: Boolean = false): Deferred<Boolean> = schedule(0L, false, false, true, true)
+    suspend fun Worker.scheduleNow(): Deferred<Boolean> = schedule(0L, false, false, true, true)
 
     suspend fun Worker. scheduleFuture(delay: Long, surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
         schedule(delay, surviveReboot, repeating, allowWhileIdle, precision)
