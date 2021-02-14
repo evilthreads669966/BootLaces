@@ -46,6 +46,6 @@ private fun Class<*>.enableComponent(ctx: Context): Boolean{
 }
 
 internal object Utils{
-    fun isRebootEnabled(ctx: Context) = BootReceiver::class.java.isComponentEnabled(ctx)
-    fun enableReboot(ctx: Context) = BootReceiver::class.java.enableComponent(ctx)
+    fun isRebootEnabled(ctx: Context) = ReschedulingReceiver::class.java.isComponentEnabled(ctx)
+    fun enableReboot(ctx: Context) = ReschedulingReceiver::class.java.enableComponent(ctx)
 }

@@ -19,8 +19,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /*
@@ -48,28 +47,26 @@ import javax.inject.Inject
  * @email evilthreads669966@gmail.com
  * @date 10/09/20
  *
- * Activates [WorkService]
+ * Handles rescheduling for work that survives reboot
  **/
 
 @FlowPreview
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-internal class BootReceiver : HiltBugReceiver(){
-    @Inject lateinit var intentFactory: IntentFactory
-
+internal class ReschedulingReceiver : HiltBugReceiver(){
+    @Inject lateinit var workRescheduling: WorkRescheduling
+    @Inject lateinit var coroutineScope: CoroutineScope
     override fun onReceive(ctx: Context?, intent: Intent?){
         super.onReceive(ctx, intent)
         if(ctx != null && intent != null && intent.action != null)
             if(!WorkService.isStarted() && intent.action!!.contains("BOOT"))
-                startServiceForRescheduling(ctx)
-    }
-
-    private fun startServiceForRescheduling(ctx: Context){
-        val intent = intentFactory.createRescheduleIntent()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            ctx.startForegroundService(intent)
-        else
-            ctx.startService(intent)
+                goAsync().apply {
+                    runBlocking {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            workRescheduling.reschedule(this)
+                        }
+                    }
+                }.finish()
     }
 }
 
