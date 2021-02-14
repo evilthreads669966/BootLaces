@@ -24,12 +24,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.candroid.bootlaces.NotificationFactory.ForegroundNotification.NOTIFICATION_TEMPLATE_FOREGROUND
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.BACKGROUND_FINISHED_DEFAULT_TITLE
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.BACKGROUND_STARTED_DEFAULT_CONTENT
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.BACKGROUND_STARTED_DEFAULT_TITLE
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.TEMPLATE_FINISH
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.TEMPLATE_START
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.createBackgroundChannel
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.BACKGROUND_FINISHED_DEFAULT_TITLE
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.BACKGROUND_STARTED_DEFAULT_CONTENT
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.BACKGROUND_STARTED_DEFAULT_TITLE
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.TEMPLATE_FINISH
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.TEMPLATE_START
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.createBackgroundChannel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -184,7 +184,7 @@ internal class NotificationFactory @Inject constructor(@ApplicationContext priva
         }
     }
 
-    object WorkNotification {
+    object BackgroundNotification {
         const val BACKGROUND_STARTED_DEFAULT_TITLE = "Background Service Running"
         const val BACKGROUND_STARTED_DEFAULT_CONTENT = "Working in the background"
         const val BACKGROUND_STARTED_DEFAULT_SMALL_ICON = android.R.drawable.stat_sys_download

@@ -17,7 +17,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.core.app.JobIntentService
-import com.candroid.bootlaces.NotificationFactory.WorkNotification.BACKGROUND_CHANNEL_ID
+import com.candroid.bootlaces.NotificationFactory.BackgroundNotification.BACKGROUND_CHANNEL_ID
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
