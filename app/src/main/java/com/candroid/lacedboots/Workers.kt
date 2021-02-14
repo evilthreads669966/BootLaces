@@ -22,7 +22,6 @@ import com.candroid.bootlaces.PersistentReceiver
 import com.candroid.bootlaces.Worker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlin.coroutines.CoroutineContext
 
    /*
                (   (                ) (             (     (
@@ -163,15 +162,12 @@ class WorkerFourteen: Worker(14, "survives reboot and performs every hour", true
                override fun onReceive(ctx: Context?, intent: Intent?) {
                    super.onReceive(ctx, intent)
                    goAsync().apply {
-                       if(intent?.action.equals(Intent.ACTION_BATTERY_CHANGED))
-                           Log.d(this@ReceiverAtReboot.tag, "battery level changed")
-                       else if(intent?.action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED))
-                           Log.d(this@ReceiverAtReboot.tag, "airplane mode changed")
-                       else
-                           Log.d(this@ReceiverAtReboot.tag, "action not found")
+                       when(intent?.action){
+                           Intent.ACTION_BATTERY_CHANGED -> Log.d(this@ReceiverAtReboot.tag, "battery level changed")
+                           Intent.ACTION_AIRPLANE_MODE_CHANGED -> Log.d(this@ReceiverAtReboot.tag, "airplane mode changed")
+                           else -> Log.d(this@ReceiverAtReboot.tag, "action not found")
+                       }
                    }.finish()
-
-
                }
            }
    }
