@@ -50,7 +50,7 @@ import javax.inject.Inject
  **/
 
 @AndroidEntryPoint
-class BootReceiver : HiltBugReceiver(){
+internal class BootReceiver : HiltBugReceiver(){
     @Inject lateinit var intentFactory: IntentFactory
 
     override fun onReceive(ctx: Context?, intent: Intent?){
@@ -68,7 +68,8 @@ class BootReceiver : HiltBugReceiver(){
             ctx.startService(intent)
     }
 }
+
 /*fixes bug in Hilt*/
-open class HiltBugReceiver : BroadcastReceiver(){
+internal open class HiltBugReceiver : BroadcastReceiver(){
     override fun onReceive(ctx: Context?, intent: Intent?) {}
 }
