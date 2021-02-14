@@ -31,7 +31,7 @@ import kotlinx.android.parcel.Parcelize
  **/
 @Parcelize
 @Entity
-data class Work(
+data class Work internal constructor(
     @PrimaryKey(autoGenerate = false) val id: Int,
     val workerName: String,
     val interval: Long? = null,
@@ -39,10 +39,10 @@ data class Work(
     val allowWhileIdle: Boolean? = null,
     val precision: Boolean? = null
 ) :Parcelable{
-    internal constructor(worker: Worker, interval: Long? = null, repeating: Boolean? = null, allowWhileIdle: Boolean? = null, precision: Boolean? = null):
+   internal constructor(worker: Worker, interval: Long? = null, repeating: Boolean? = null, allowWhileIdle: Boolean? = null, precision: Boolean? = null):
             this(worker.id, worker.javaClass.name, interval, repeating, allowWhileIdle, precision)
 
-    companion object{
-        internal const val KEY_PARCEL = "KEY_PARCEL"
+    internal companion object{
+        const val KEY_PARCEL = "KEY_PARCEL"
     }
 }
