@@ -35,7 +35,7 @@ import javax.inject.Singleton
  **/
 @FlowPreview
 @Singleton
-class WorkRescheduler @Inject constructor(
+class WorkRescheduling @Inject constructor(
     private val scheduler: WorkScheduler,
     private val dao: WorkDao,
 ){
