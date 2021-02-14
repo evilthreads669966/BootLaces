@@ -118,7 +118,7 @@ internal class WorkService: Service(), ComponentCallbacks2 {
                 workerCount = 0
             }
         }
-        receivers.forEach { unregisterReceiver(it) }
+        receivers.forEach { receiver -> unregisterReceiver(receiver) }
         if(state.equals(ServiceState.FOREGROUND))
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         state = ServiceState.STOPPED
@@ -134,12 +134,21 @@ internal class WorkService: Service(), ComponentCallbacks2 {
         val intent = intentFactory.createWorkNotificationIntent(worker)
         if(worker.withNotification == true)
             NotificatonService.enqueue(this@WorkService, intent)
-        worker.registerReceiver(this@WorkService)
+        worker.receiver?.let { receiver -> registerWorkReceiver(receiver) }
         worker.launch(currentCoroutineContext()) { worker.doWork(this@WorkService) }.join()
-        worker.unregisterReceiver(this@WorkService)
+        worker.receiver?.let { receiver -> unregisterReceiver(receiver) }
         if(worker.withNotification == true)
-            NotificatonService.enqueue(this@WorkService, intent.apply { setAction(Actions.ACTION_FINISH.action) })
+            NotificatonService.enqueue(this@WorkService, intent.apply { action = Actions.ACTION_FINISH.action })
         mutex.withLock { workerCount-- }
+    }
+
+    private fun registerWorkReceiver(receiver: Worker.WorkReceiver){
+        val filter = IntentFilter().apply {
+            receiver.action.forEach { action ->
+                addAction(action)
+            }
+        }
+        registerReceiver(receiver, filter)
     }
 
     override fun onBind(intent: Intent?) = null
