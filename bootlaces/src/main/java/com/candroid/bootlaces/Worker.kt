@@ -50,46 +50,44 @@ import kotlin.coroutines.CoroutineContext
  * @email evilthreads669966@gmail.com
  * @date 10/18/20
  **/
-abstract class Worker(val id: Int, val description: String, val withNotification: Boolean, dispatcher: CoroutineDispatcher = Dispatchers.Default): CoroutineWorker(dispatcher){
+abstract class Worker(val id: Int, val description: String, val withNotification: Boolean, dispatcher: CoroutineDispatcher = Dispatchers.Default): CoroutineWorker(dispatcher) {
      val tag = this::class.java.name
 
      internal companion object {
-          fun createFromWork(work: Work): Worker = Class.forName(work.workerName).newInstance() as Worker
+          fun createFromWork(work: Work): Worker =
+               Class.forName(work.workerName).newInstance() as Worker
      }
+
      open val receiver: WorkReceiver? = null
 
      suspend abstract fun doWork(ctx: Context)
 
      override fun equals(other: Any?): Boolean {
-          if(this === other) return true
-          if(other !is Worker) return false
-          if(this.id == other.id && this.description.equals(other.description))
+          if (this === other) return true
+          if (other !is Worker) return false
+          if (this.id == other.id && this.description.equals(other.description))
                return true
           return false
      }
 
      override fun hashCode(): Int = id.hashCode()
 
-     open class WorkReceiver(val action: String): BroadcastReceiver(){
+     open class WorkReceiver(vararg val action: String) : BroadcastReceiver() {
           val tag = this::class.java.name
 
-          override fun onReceive(ctx: Context?, intent: Intent?){}
+          override fun onReceive(ctx: Context?, intent: Intent?) {}
 
           override fun hashCode() = action.hashCode()
 
           override fun equals(other: Any?): Boolean {
-               if(this === other) return true
-               if(other !is WorkReceiver) return false
-               if(this.action.equals(other.action)) return true
+               if (this === other) return true
+               if (other !is WorkReceiver) return false
+               if (this.action.contentEquals(other.action)) return true
                return false
           }
      }
 
      internal fun hasReceiver(): Boolean = receiver != null
-
-     internal fun unregisterReceiver(ctx: Context): Boolean = receiver?.apply { ctx.unregisterReceiver(this) } != null
-
-     internal fun registerReceiver(ctx: Context): Boolean = receiver?.apply { ctx.registerReceiver(this, IntentFilter(action)) } != null
 }
 
 sealed class CoroutineWorker(dispatcher: CoroutineDispatcher): CoroutineScope{

@@ -159,11 +159,19 @@ class WorkerFourteen: Worker(14, "survives reboot and performs every hour", true
 
    class ReceiverAtReboot: PersistentReceiver(18){
        override val receiver: WorkReceiver?
-           get() = object : WorkReceiver(Intent.ACTION_BATTERY_LOW){
+           get() = object : WorkReceiver(Intent.ACTION_AIRPLANE_MODE_CHANGED, Intent.ACTION_BATTERY_CHANGED){
                override fun onReceive(ctx: Context?, intent: Intent?) {
                    super.onReceive(ctx, intent)
-                   if(intent?.action.equals(this.action))
-                       Log.d(this@ReceiverAtReboot.tag, "battery is low")
+                   goAsync().apply {
+                       if(intent?.action.equals(Intent.ACTION_BATTERY_CHANGED))
+                           Log.d(this@ReceiverAtReboot.tag, "battery level changed")
+                       else if(intent?.action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED))
+                           Log.d(this@ReceiverAtReboot.tag, "airplane mode changed")
+                       else
+                           Log.d(this@ReceiverAtReboot.tag, "action not found")
+                   }.finish()
+
+
                }
            }
    }
