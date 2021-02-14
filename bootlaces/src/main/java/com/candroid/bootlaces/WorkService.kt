@@ -56,11 +56,11 @@ import kotlin.properties.Delegates
 @FlowPreview
 @AndroidEntryPoint
 internal class WorkService: Service(), ComponentCallbacks2 {
-    @Inject internal lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
-    @Inject internal lateinit var intentFactory: IntentFactory
-    @Inject internal lateinit var workRescheduling: WorkRescheduling
-    @Inject internal lateinit var mutex: Mutex
-    @Inject internal lateinit var supervisor: CoroutineScope
+    @Inject lateinit var foregroundProvider: Provider<ForegroundComponent.Builder>
+    @Inject lateinit var intentFactory: IntentFactory
+    @Inject lateinit var workRescheduling: WorkRescheduling
+    @Inject lateinit var mutex: Mutex
+    @Inject lateinit var supervisor: CoroutineScope
     private lateinit var foreground: ForegroundActivator
     private var startId: Int? = null
     private val receivers = mutableListOf<BroadcastReceiver>()
@@ -70,7 +70,7 @@ internal class WorkService: Service(), ComponentCallbacks2 {
             stopWorkService()
     }
 
-    internal companion object{
+    companion object{
         var state: ServiceState = ServiceState.STOPPED
         fun isStarted() = !state.equals(ServiceState.STOPPED)
     }
