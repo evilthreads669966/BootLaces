@@ -19,7 +19,7 @@ apply plugin: 'dagger.hilt.android.plugin'
 3. Add the dependencies for boot laces & hilt to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:9.0'
+        implementation 'com.github.evilthreads669966:bootlaces:10.0'
         implementation "com.google.dagger:hilt-android:2.29.1-alpha"
         kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
 }
@@ -53,15 +53,100 @@ class App: Application()
     - you can broadcast to this BroadcastReceiver from within your doWork function or anywhere else in your app
     - for now the WorkReceiver is only registered and subscribing to broadcast while you are performing work. Everytime doWork executes it registers the receiver & unregisters it after doWork completes
 ```kotlin
-class WorkerFourteen: Worker(14,"Worker Fourteen", true){
+class WorkerEight: Worker(8, "working for 2 hours", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(AlarmManager.INTERVAL_HOUR * 2)
+    }
+}
+
+class WorkerOne: Worker(1, "performing database transactions for 2 minutes", true, Dispatchers.IO){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(120000)
+    }
+}
+
+class WorkerTwo: Worker(2, "performing operations on files for 15 minutes", true, Dispatchers.IO){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
+    }
+}
+
+class WorkerThree: Worker(3, "working for 1 minute", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(60000)
+    }
+}
+
+class WorkerFour: Worker(4, "working for 5 minutes", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(60000 * 5)
+    }
+}
+
+class WorkerFive: Worker(5, "working for 45 seconds", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(45000)
+    }
+}
+
+class WorkerSix: Worker(6, "working for 1 minute", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(60000)
+    }
+}
+
+class WorkerSeven: Worker(7, "working for a minute and a half", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(90000L)
+    }
+}
+
+class WorkerThirteen: Worker(13, "working for 20 seconds", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(20000)
+    }
+}
+
+class WorkerTwelve: Worker(12, "working for 30 seconds", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(30000)
+    }
+}
+
+class WorkerEleven: Worker(11, "working for 5 seconds", true){
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, description)
+        delay(5000)
+    }
+}
+
+class WorkerTen: Worker(10,"Worker Ten", true) {
+    override suspend fun doWork(ctx: Context) {
+        Log.d(tag, "working for 10 seconds")
+        for(i in 1..10)
+            delay(1000)
+    }
+}
+
+class WorkerFourteen: Worker(14, "survives reboot and performs every hour", true){
 
     override val receiver: WorkReceiver?
         get() = object : WorkReceiver(Intent.ACTION_TIME_TICK) {
-	    
+
             override fun onReceive(ctx: Context?, intent: Intent?) {
                 if(intent?.action?.equals(action) ?: false){
                     val date = DateUtils.formatDateTime(ctx, System.currentTimeMillis(),0)
-                    Log.d(this.tag, date ?: "null") //just prints out the current month name and calendar day
+                    Log.d(this.tag, date ?: "null")
                 }
             }
         }
@@ -70,165 +155,25 @@ class WorkerFourteen: Worker(14,"Worker Fourteen", true){
         while(true){
             Log.d(tag, "working for three minutes")
             delay(60000L * 3)
-            
         }
     }
 }
 
-class WorkerEight: Worker(8, "Worker Eight", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 2 hours")
-        delay(AlarmManager.INTERVAL_HOUR * 2)
-    }
+class ReceiverAtReboot: PersistentReceiver(18){
+   override val receiver: WorkReceiver?
+       get() = object : WorkReceiver(Intent.ACTION_AIRPLANE_MODE_CHANGED, Intent.ACTION_BATTERY_CHANGED){
+           override fun onReceive(ctx: Context?, intent: Intent?) {
+               super.onReceive(ctx, intent)
+               goAsync().apply {
+                   when(intent?.action){
+                       Intent.ACTION_BATTERY_CHANGED -> Log.d(this@ReceiverAtReboot.tag, "battery level changed")
+                       Intent.ACTION_AIRPLANE_MODE_CHANGED -> Log.d(this@ReceiverAtReboot.tag, "airplane mode changed")
+                       else -> Log.d(this@ReceiverAtReboot.tag, "action not found")
+                   }
+               }.finish()
+           }
+       }
 }
-
-class WorkerOne: Worker(1, "Worker One", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 2 minutes")
-        delay(120000)
-    }
-}
-
-class WorkerTwo: Worker(2, "Worker Two", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 15 minutes")
-        delay(AlarmManager.INTERVAL_FIFTEEN_MINUTES)
-    }
-}
-
-class WorkerThree: Worker(3, "Worker Three", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 1 minute")
-        delay(60000)
-    }
-}
-
-class WorkerFour: Worker(4, "Worker Four", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 5 minutes")
-        delay(60000 * 5)
-    }
-}
-
-class WorkerFive: Worker(5, "Worker Five", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 45 seconds")
-        delay(45000)
-    }
-}
-
-class WorkerSix: Worker(6, "Worker Six", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 1 minute")
-        delay(60000)
-    }
-}
-
-class WorkerSeven: Worker(7, "Worker Seven", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for a minute and a half")
-        delay(90000L)
-    }
-}
-
-class WorkerThirteen: Worker(13, "Worker Thirteen", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 20 seconds")
-        delay(20000)
-    }
-}
-
-class WorkerTwelve: Worker(12, "Worker Twelve", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 30 seconds")
-        delay(30000)
-    }
-}
-
-class WorkerEleven: Worker(11, "Worker Eleven", true){
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 5 seconds")
-        delay(5000)
-    }
-}
-
-class WorkerTen: Worker(10,"Worker Ten", true) {
-
-    override val receiver: WorkReceiver?
-        get() = null
-
-    override suspend fun doWork(ctx: Context) {
-        Log.d(tag, "working for 10 seconds")
-        for(i in 1..10)
-            delay(1000)
-    }
-}
-
-class WorkerNine: Worker(9,"Worker Nine", true){
-
-    override val receiver: WorkReceiver?
-        get() = object : WorkReceiver(Intent.ACTION_CLOSE_SYSTEM_DIALOGS) {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
-                //LockManager.lockScreen(ctx!!, intent)
-            }
-        }
-
-    override suspend fun doWork(ctx: Context) {
-        val powerMgr = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val intent = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        while(true){
-            Log.d(tag, "Working for 25 seconds")
-            delay(25000)
-            /*        if (powerMgr.isInteractive)
-                        ctx.sendBroadcast(intent)*/
-        }
-    }
-}
-
 ```
 8. Inject your WorkScheduler inside of an Android context
 ```kotlin
@@ -239,7 +184,12 @@ class WorkerNine: Worker(9,"Worker Nine", true){
   - within WorkScheduler.use scope you have access to scheduling functions that have a receiver type of Worker
     - This allows you to use your worker(s) instance(s) to call schedule<TIME> on your worker
 9. Schedule your worker inside of WorkScheduler.use scope
-  - you can pass two arguments to your worker's many available KTX schedule functions
+  - you can pass four arguments to your worker's many available KTX schedule functions
+    - surviveReboot
+      - allows the worker to survive the phone rebooting
+    - precision
+      - ensures the worker executes at the exact time scheduled.
+        - not using precision allows for the operating system to only execute the worker when there are not too many workers in the background.
     - repeating
       - sets whether the worker should be scheduled to repeat everytime the specified time passes
 	- it's default value is false so you don't have to opt out of repeating
@@ -253,27 +203,34 @@ class LauncherActivity: AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduler.use {
-            WorkerNine().schedulePersistent()
-            WorkerSix().scheduleQuarterHour(true, true)
-            WorkerFive().scheduleHalfHour()
-        }
-        scheduler.use {
-            WorkerFour().scheduleHour(true)
-            WorkerTwelve().scheduleHalfDay()
-            WorkerEleven().scheduleMonth(true, true)
-            WorkerThirteen().scheduleYearly()
-            WorkerTwo().scheduleDay(true)
-            val fourtyFiveSeconds = 45000L
-            WorkerOne().scheduleFuture(fourtyFiveSeconds, true)
-            WorkerThree().scheduleQuarterDay(true)
-        }
-        scheduler.use {
-            WorkerSeven().scheduleNow()
-            WorkerEight().scheduleHoursTwo(true)
-            WorkerTen().scheduleHalfWeek(false)
-	    WorkerFourteen().schedulePersistent()
-        }
+              scheduler.use {
+                   runBlocking {
+                       WorkerSix().scheduleQuarterHour(surviveReboot = true, repeating =  true, allowWhileIdle = true, precision = true).await()
+                       WorkerFive().scheduleHalfHour().await()
+                   }
+               }
+               scheduler.use {
+                   runBlocking {
+                       WorkerFour().scheduleHour(surviveReboot = true, repeating =  true, allowWhileIdle = true, precision = true).await()
+                       WorkerTwelve().scheduleFuture(60000L * 8, repeating = true, allowWhileIdle = true, precision = true).await()
+                       WorkerEleven().scheduleFuture(60000L * 3, repeating = true, allowWhileIdle = true, precision = true).await()
+                       WorkerThirteen().scheduleNow().await()
+                       WorkerTwo().scheduleDay(surviveReboot = true, repeating =  true, allowWhileIdle = true, precision = true).await()
+                       val fourtyFiveSeconds = 45000L
+                       WorkerOne().scheduleFuture(fourtyFiveSeconds, repeating = true, allowWhileIdle = true).await()
+                       WorkerThree().scheduleQuarterDay(repeating =  true, allowWhileIdle = true, precision = true).await()
+                   }
+               }
+               scheduler.use {
+                   runBlocking {
+                       WorkerSeven().scheduleNow().await()
+                       WorkerEight().scheduleHoursTwo(repeating =  true, allowWhileIdle = true, precision = true).await()
+                       WorkerTen().scheduleHalfWeek(repeating =  true, allowWhileIdle = true, precision = true).await()
+                       WorkerFourteen().scheduleHour(surviveReboot = true, repeating = true, allowWhileIdle = true, precision = true).await()
+                       ReceiverAtReboot().scheduleReceiver().await()
+                   }
+               }
+           }
     }
 }
 ```
