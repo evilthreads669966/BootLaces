@@ -3,7 +3,12 @@ package com.candroid.bootlaces
 import android.app.AlarmManager
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import java.time.Month
+import java.time.MonthDay
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,51 +45,74 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     * */
     fun use(init: WorkScheduler.() -> Unit) = init()
 
-    suspend fun PersistentReceiver.scheduleReceiver(): Deferred<Boolean> = schedule(0L, true, false, true, true)
+    suspend fun PersistentReceiver.scheduleReceiver(): Deferred<Boolean> = schedule(0L, null, true, false, true, true)
 
-    suspend fun Worker.scheduleNow(): Deferred<Boolean> = schedule(0L, false, false, true, true)
+    suspend fun Worker.scheduleNow(): Deferred<Boolean> = schedule(0L, null, false, false, true, true)
 
     suspend fun Worker. scheduleFuture(delay: Long, surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(delay, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(delay, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHour(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_HOUR, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_HOUR, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleQuarterDay(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_DAY / 4, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_DAY / 4, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHoursTwo(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_HOUR * 2, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_HOUR * 2, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHoursThree(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_HOUR * 3, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_HOUR * 3, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleDay(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_DAY, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_DAY, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleWeek(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_DAY * 7, surviveReboot,repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_DAY * 7, null, surviveReboot,repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHalfWeek(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(((AlarmManager.INTERVAL_DAY * 3.5)).toLong() + AlarmManager.INTERVAL_HALF_DAY, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(((AlarmManager.INTERVAL_DAY * 3.5)).toLong() + AlarmManager.INTERVAL_HALF_DAY, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHalfDay(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_HALF_DAY, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_HALF_DAY, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleHalfHour(surviveReboot: Boolean = false, repeating: Boolean = false, wakeupIfIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_HALF_HOUR, surviveReboot, repeating, wakeupIfIdle, precision)
+        schedule(AlarmManager.INTERVAL_HALF_HOUR, null, surviveReboot, repeating, wakeupIfIdle, precision)
 
     suspend fun Worker.scheduleQuarterHour(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_FIFTEEN_MINUTES, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_FIFTEEN_MINUTES, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleMonth(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_DAY * 31, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_DAY * 31, null, surviveReboot, repeating, allowWhileIdle, precision)
 
     suspend fun Worker.scheduleYear(surviveReboot: Boolean = false, repeating: Boolean = false, allowWhileIdle: Boolean = false, precision: Boolean = false): Deferred<Boolean> =
-        schedule(AlarmManager.INTERVAL_DAY * 365, surviveReboot, repeating, allowWhileIdle, precision)
+        schedule(AlarmManager.INTERVAL_DAY * 365, null, surviveReboot, repeating, allowWhileIdle, precision)
 
+ /*   suspend fun Worker.scheduleByHourOfToday(hourOfDay: Int, minuteOfHour: Int , allowWhileIdle: Boolean, precision: Boolean): Deferred<Boolean>{
+        val millis = Calendar.getInstance(TimeZone.getDefault()).run {
+            set(get(Calendar.YEAR), get(Calendar.MONTH), get(Calendar.DATE), hourOfDay, minuteOfHour)
+            timeInMillis
+        }
+        return schedule(millis, surviveReboot = true, repeating = false, allowWhileIdle = allowWhileIdle, precision = precision)
+    }
 
-    private suspend fun Worker.schedule(interval: Long, surviveReboot: Boolean, repeating: Boolean, allowWhileIdle: Boolean, precision: Boolean): Deferred<Boolean> = coroutineScope{
+    suspend fun Worker.scheduleByDayOfWeek( weekOfYear: Int? = null, dayOfWeek: Int, hourOfDay: Int, minuteOfHour: Int, allowWhileIdle: Boolean, precision: Boolean): Deferred<Boolean>{
+        val millis = Calendar.getInstance(TimeZone.getDefault()).run {
+            setWeekDate(get(Calendar.YEAR), weekOfYear ?: get(Calendar.WEEK_OF_YEAR), dayOfWeek)
+            timeInMillis + (hourOfDay * 60 * 1000 + minuteOfHour * 1000 )
+        }
+        return schedule(millis, surviveReboot = true, repeating = false, allowWhileIdle = allowWhileIdle, precision = precision)
+    }
+
+    suspend fun Worker.scheduleByDate(year: Int? = null, month: Int? = null, dayOfMonth: Int, hourOfDay: Int? = null, minuteOfHour: Int? = null, allowWhileIdle: Boolean, precision: Boolean): Deferred<Boolean>{
+        val millis = Calendar.getInstance(TimeZone.getDefault()).run {
+            set(year ?: get(Calendar.YEAR), month ?: get(Calendar.MONTH), dayOfMonth, hourOfDay ?: 0, minuteOfHour ?: 0)
+            timeInMillis
+        }
+        return schedule(millis, dayOfMonth, surviveReboot = true, repeating = false, allowWhileIdle = allowWhileIdle, precision = precision)
+    }*/
+
+    private suspend fun Worker.schedule(interval: Long, dayOfMonth: Int? = null, surviveReboot: Boolean, repeating: Boolean, allowWhileIdle: Boolean, precision: Boolean): Deferred<Boolean> = coroutineScope{
         async {
             lateinit var work: Work
             if(surviveReboot){
