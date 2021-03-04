@@ -52,6 +52,8 @@ class App: Application()
     - a WorkReceiver is created by passing in an action for it to subscribe to.
     - you can broadcast to this BroadcastReceiver from within your doWork function or anywhere else in your app
     - for now the WorkReceiver is only registered and subscribing to broadcast while you are performing work. Everytime doWork executes it registers the receiver & unregisters it after doWork completes
+  - If you do not need a worker and just a BroadcastReceiver then you can use PersistentReceiver
+    - PersistentReceivers only have a WorkReceiver and you don't need to override doWork function
 ```kotlin
 class WorkerEight: Worker(8, "working for 2 hours", true){
     override suspend fun doWork(ctx: Context) {
