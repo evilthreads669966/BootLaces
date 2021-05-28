@@ -6,7 +6,7 @@ apply plugin: 'kotlin-parcelize'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion = '30.0.2'
+    buildToolsVersion = '30.0.3'
 
     defaultConfig {
         minSdkVersion 24
@@ -34,8 +34,6 @@ dependencies {
 
     //JETPACK KTX
     implementation "androidx.core:core-ktx:$core_ktx_version"
-
-    def room_version = "2.2.6"
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
