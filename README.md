@@ -19,9 +19,9 @@ apply plugin: 'dagger.hilt.android.plugin'
 3. Add the dependencies for boot laces & hilt to your app's build.gradle
 ```gradle
 dependencies {
-        implementation 'com.github.evilthreads669966:bootlaces:10.0.1'
-        implementation "com.google.dagger:hilt-android:2.29.1-alpha"
-        kapt "com.google.dagger:hilt-android-compiler:2.29.1-alpha"
+        implementation 'com.github.evilthreads669966:bootlaces:10.0.2'
+        implementation "com.google.dagger:hilt-android:2.36"
+        kapt "com.google.dagger:hilt-android-compiler:2.36"
 }
 ```
 
@@ -29,7 +29,7 @@ dependencies {
 ```gradle
 dependencies {
     ...
-    classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+    classpath "com.google.dagger:hilt-android-gradle-plugin:2.36"
 }
 ```
 5. Annotate your subclass of Application class
