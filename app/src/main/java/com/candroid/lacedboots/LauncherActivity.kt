@@ -15,7 +15,6 @@ package com.candroid.lacedboots
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.candroid.bootlaces.IntentFactory
 import com.candroid.bootlaces.WorkScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
@@ -71,7 +70,7 @@ class LauncherActivity: AppCompatActivity(){
                 WorkerEight().scheduleHoursTwo(repeating =  true, allowWhileIdle = true, precision = true).await()
                 WorkerTen().scheduleHalfWeek(repeating =  true, allowWhileIdle = true, precision = true).await()
                 WorkerFourteen().scheduleHour(surviveReboot = true, repeating = true, allowWhileIdle = true, precision = true).await()
-                ReceiverAtReboot().scheduleReceiver().await()
+                ReceiverAtReboot().scheduleNow(surviveReboot = true).await()
             }
         }
     }

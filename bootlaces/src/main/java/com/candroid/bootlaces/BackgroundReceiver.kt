@@ -27,7 +27,7 @@ import android.content.Context
  * @date 02/05/20
  *
  **/
-abstract class PersistentReceiver(id: Int) : Worker(id, "", false) {
+abstract class BackgroundReceiver(id: Int) : Worker(id, "", false) {
     override suspend fun doWork(ctx: Context) {
         while(true){ }
     }

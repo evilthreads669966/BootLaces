@@ -15,8 +15,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import java.time.Month
-import java.time.MonthDay
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -54,7 +52,7 @@ class WorkScheduler @Inject constructor(@ApplicationContext private val ctx: Con
     * */
     fun use(init: WorkScheduler.() -> Unit) = init()
 
-    suspend fun PersistentReceiver.scheduleReceiver(): Deferred<Boolean> = schedule(0L, null, true, false, true, true)
+    suspend fun BackgroundReceiver.scheduleNow(surviveReboot: Boolean = false): Deferred<Boolean> = schedule(0L, null, surviveReboot, false, true, true)
 
     suspend fun Worker.scheduleNow(surviveReboot: Boolean = false): Deferred<Boolean> = schedule(0L, null, surviveReboot, false, true, true)
 

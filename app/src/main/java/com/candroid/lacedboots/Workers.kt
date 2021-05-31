@@ -18,7 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.text.format.DateUtils
 import android.util.Log
-import com.candroid.bootlaces.PersistentReceiver
+import com.candroid.bootlaces.BackgroundReceiver
 import com.candroid.bootlaces.Worker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -156,7 +156,7 @@ class WorkerFourteen: Worker(14, "survives reboot and performs every hour", true
     }
 }
 
-   class ReceiverAtReboot: PersistentReceiver(18){
+   class ReceiverAtReboot: BackgroundReceiver(18){
        override val receiver: WorkReceiver?
            get() = object : WorkReceiver(Intent.ACTION_AIRPLANE_MODE_CHANGED, Intent.ACTION_BATTERY_CHANGED){
                override fun onReceive(ctx: Context?, intent: Intent?) {
